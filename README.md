@@ -20,6 +20,8 @@ require("neotest").setup({
         require("neotest-busted")({
             busted_command = "<path to a busted executable>",
             busted_args = { "--shuffle-files" }, -- Extra arguments to busted
+            busted_path = "", -- Custom semi-colon separated path to load in neovim before running busted
+            busted_cpath = "", -- Custom semi-colon separated cpath to load in neovim before running busted
         }),
     },
 })

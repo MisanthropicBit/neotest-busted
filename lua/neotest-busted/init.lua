@@ -15,18 +15,18 @@ end
 local config = {
     busted_command = nil,
     busted_args = { "" },
-    busted_path = "",
-    busted_cpath = "",
+    busted_path = nil,
+    busted_cpath = nil,
 }
 
 --- Find busted command and additional paths
----@return table<string, string>
+---@return table<string, string>?
 local function find_busted_command()
     if config.busted_command ~= nil then
         return {
             command = config.busted_command,
-            path = config.busted_path,
-            cpath = config.busted_cpath,
+            path = config.busted_path or "",
+            cpath = config.busted_cpath or "",
         }
     end
 
@@ -36,8 +36,9 @@ local function find_busted_command()
     if #globs > 0 then
         return {
             command = globs[1],
-            path = 'lua_modules/share/lua/5.1/?.lua;lua_modules/share/lua/5.1/?/init.lua;;',
-            cpath = 'lua_modules/lib/lua/5.1/?.so;;',
+            path = config.busted_path
+                or "lua_modules/share/lua/5.1/?.lua;lua_modules/share/lua/5.1/?/init.lua;;",
+            cpath = config.busted_cpath or "lua_modules/lib/lua/5.1/?.so;;",
         }
     end
 
@@ -45,8 +46,8 @@ local function find_busted_command()
     if vim.fn.executable("busted") == 1 then
         return {
             command = "busted",
-            path = "",
-            cpath = "",
+            path = config.busted_path or "",
+            cpath = config.busted_cpath or "",
         }
     end
 
