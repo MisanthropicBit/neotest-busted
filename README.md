@@ -1,6 +1,6 @@
 # neotest-busted
 
-Highly experimental `neotest` adapter for running tests using `busted`.
+Highly experimental [`neotest`](https://github.com/nvim-neotest/neotest) adapter for running tests using [`busted`](https://github.com/lunarmodules/busted/).
 
 ## Configuration
 
