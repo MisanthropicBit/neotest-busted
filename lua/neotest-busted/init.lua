@@ -76,6 +76,7 @@ local function create_busted_command(results_path, paths, filters)
         return
     end
 
+    -- stylua: ignore start
     local command = {
         vim.loop.exepath(),
         "--headless",
@@ -83,15 +84,22 @@ local function create_busted_command(results_path, paths, filters)
         "-n", -- no swapfile, always in-memory
         "-u", "NONE", -- no config file
     }
+    -- stylua: ignore end
 
     if busted.path and #busted.path > 0 then
         -- Add local paths to package.path
-        vim.list_extend(command, { "-c", ("\"lua package.path = '%s' .. package.path\""):format(busted.path) })
+        vim.list_extend(
+            command,
+            { "-c", ("\"lua package.path = '%s' .. package.path\""):format(busted.path) }
+        )
     end
 
     if busted.cpath and #busted.cpath > 0 then
         -- Add local cpaths to package.cpath
-        vim.list_extend(command, { "-c", ("\"lua package.cpath = '%s' .. package.cpath\""):format(busted.cpath) })
+        vim.list_extend(
+            command,
+            { "-c", ("\"lua package.cpath = '%s' .. package.cpath\""):format(busted.cpath) }
+        )
     end
 
     -- Create a busted command invocation string using neotest-busted's own output handler
@@ -102,14 +110,16 @@ local function create_busted_command(results_path, paths, filters)
     )
 
     -- Run busted in neovim ('-l' stops parsing arguments for neovim)
+    -- stylua: ignore start
     vim.list_extend(command, {
         "-l", busted_command,
         "--verbose",
     })
+    -- stylua: ignore end
 
     -- Add test filters
     for _, filter in ipairs(filters) do
-        table.insert(command, "--filter=" .. "\"" .. filter .. "\"")
+        table.insert(command, "--filter=" .. '"' .. filter .. '"')
     end
 
     -- Add test files
@@ -175,18 +185,17 @@ end
 local function extract_test_info(pos)
     local parts = vim.fn.split(pos.id, "::")
     local path = parts[1]
-    local stripped_pos_id = table.concat(vim.tbl_map(function(part)
-        return vim.fn.trim(part, "\"")
-    end, vim.list_slice(parts, 2)), " ")
+    local stripped_pos_id = table.concat(
+        vim.tbl_map(function(part)
+            return vim.fn.trim(part, '"')
+        end, vim.list_slice(parts, 2)),
+        " "
+    )
 
     -- Busted creates test names concatenated with spaces so we can't recreate the
     -- position id using "::". Instead create a key stripped of "::" like the one
     -- from busted along with the test line range to uniquely identify the test
-    local pos_id_key = create_pos_id_key(
-        path,
-        stripped_pos_id,
-        pos.range[1] + 1
-    )
+    local pos_id_key = create_pos_id_key(path, stripped_pos_id, pos.range[1] + 1)
 
     return path, stripped_pos_id, pos_id_key
 end

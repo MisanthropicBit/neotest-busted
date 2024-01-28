@@ -56,7 +56,7 @@ return function(options)
             successes = handler.successes,
             failures = handler.failures,
             errors = handler.errors,
-            duration = handler.getDuration()
+            duration = handler.getDuration(),
         }
 
         local ok, result = pcall(json.encode, test_results)
@@ -72,7 +72,7 @@ return function(options)
         return nil, true
     end
 
-    busted.subscribe({ 'suite', 'end' }, handler.suiteEnd)
+    busted.subscribe({ "suite", "end" }, handler.suiteEnd)
 
     return handler
 end
