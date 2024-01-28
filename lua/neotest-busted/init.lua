@@ -117,6 +117,10 @@ local function create_busted_command(results_path, paths, filters)
     })
     -- stylua: ignore end
 
+    if vim.tbl_islist(config.busted_args) and #config.busted_args > 0 then
+        vim.list_extend(command, config.busted_args)
+    end
+
     -- Add test filters
     for _, filter in ipairs(filters) do
         table.insert(command, "--filter=" .. '"' .. filter .. '"')
