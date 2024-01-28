@@ -1,5 +1,6 @@
 local async = require("neotest.async")
 local lib = require("neotest.lib")
+local logger = require("neotest.logging")
 local types = require("neotest.types")
 
 local function get_strategy_config(strategy)
@@ -51,7 +52,7 @@ local function find_busted_command()
         }
     end
 
-    error("Did not find a busted command")
+    return nil
 end
 
 local function script_path()
@@ -67,8 +68,14 @@ end
 ---@param results_path string
 ---@param paths string[]
 ---@param filters string[]
+---@return neotest-busted.BustedCommand?
 local function create_busted_command(results_path, paths, filters)
     local busted = find_busted_command()
+
+    if not busted then
+        return
+    end
+
     local command = {
         vim.loop.exepath(),
         "--headless",
@@ -229,6 +236,12 @@ function BustedNeotestAdapter.build_spec(args)
 
     local busted = create_busted_command(results_path, paths, filters)
 
+    if not busted then
+        logger.error("Could not find a busted executable (via config, directory-local, or global)")
+
+        return
+    end
+
     return {
         command = busted.command,
         context = {
@@ -298,16 +311,25 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
         _tree = tree
     end
 
-    -- TODO: Find out if this JSON option is supported in future
-    local ok, data = pcall(lib.files.read, spec.context.results_path)
-    local test_results ---@type neotest-busted.BustedResultObject
+    local results_path = spec.context.results_path
+    local ok, data = pcall(lib.files.read, results_path)
 
-    if ok then
-        ---@diagnostic disable-next-line: cast-local-type
-        test_results = vim.json.decode(data, { luanil = { object = true } })
-    else
-        test_results = { errors = {}, pendings = {}, successes = {} }
+    if not ok then
+        logger.error("Failed to read json test output file ", results_path)
+        return {}
     end
+
+    ---@diagnostic disable-next-line: cast-local-type
+    local json_ok, parsed = pcall(vim.json.decode, data, { luanil = { object = true } })
+
+    if not json_ok then
+        logger.error("Failed to parse json test output ", results_path)
+        return {}
+    end
+
+    ---@type neotest-busted.BustedResultObject
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    local test_results = parsed
 
     local results = {}
     local output = strategy_result.output
@@ -333,7 +355,13 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
                 is_error
             )
 
-            results[position_ids[pos_id_key]] = result
+            local pos_id = position_ids[pos_id_key]
+
+            if not pos_id then
+                logger.error("Failed to find matching position id for key ", pos_id_key)
+            else
+                results[position_ids[pos_id_key]] = result
+            end
         end
     end
 

@@ -2,6 +2,11 @@
 ---@field busted_command string?
 ---@field busted_args string[]
 
+---@class neotest-busted.BustedCommand
+---@field command string
+---@field path string
+---@field cpath string
+
 ---@class neotest-busted.BustedTrace
 ---@field what string
 ---@field short_src string
