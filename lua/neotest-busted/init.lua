@@ -204,28 +204,26 @@ function BustedNeotestAdapter.build_spec(args)
     local filters = {}
     local position_ids = {}
 
-    vim.print(pos)
     if pos.type == "namespace" or pos.type == "test" then
-        local parts = vim.fn.split(pos.id, "::")
-        local path = parts[1]
-        local stripped_pos_id = table.concat(vim.tbl_map(function(part)
-            return vim.fn.trim(part, "\"")
-        end, vim.list_slice(parts, 2)), " ")
+        local path, filter, pos_id_key = extract_test_info(pos)
 
-        table.insert(paths, parts[1])
-        table.insert(filters, stripped_pos_id)
-
-        -- Busted creates test names concatenated with spaces so we can't recreate the
-        -- position id using "::". Instead create a key stripped of "::" like the one
-        -- from busted along with the test line range to uniquely identify the test
-        local pos_id_key = create_pos_id_key(
-            path,
-            stripped_pos_id,
-            pos.range[1] + 1,
-            pos.range[3] + 1
-        )
-
+        table.insert(paths, path)
+        table.insert(filters, filter)
         position_ids[pos_id_key] = pos.id
+    elseif pos.type == "file" then
+        table.insert(paths, pos.id)
+
+        -- Iterate all tests in the file and generate position ids for them
+        for _, _tree in args.tree:iter_nodes() do
+            local _pos = _tree:data()
+
+            if _pos.type == "test" then
+                local _, filter, pos_id_key = extract_test_info(_pos)
+
+                table.insert(filters, filter)
+                position_ids[pos_id_key] = _pos.id
+            end
+        end
     end
 
     local busted = create_busted_command(results_path, paths, filters)
