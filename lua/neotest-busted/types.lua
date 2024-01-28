@@ -1,5 +1,5 @@
 ---@class neotest-busted.Config
----@field busted_command string
+---@field busted_command string?
 ---@field busted_args string[]
 
 ---@class neotest-busted.BustedTrace

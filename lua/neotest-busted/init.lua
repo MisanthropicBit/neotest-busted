@@ -2,10 +2,6 @@ local async = require("neotest.async")
 local lib = require("neotest.lib")
 local types = require("neotest.types")
 
--- Docs:
--- * https://mrcjkb.dev/posts/2023-06-06-luarocks-test.html
--- * https://lunarmodules.github.io/busted/#output-handlers
-
 local function get_strategy_config(strategy)
     local config = {
         dap = nil, -- TODO: Add dap config
@@ -17,8 +13,10 @@ end
 
 ---@type neotest-busted.Config
 local config = {
-    --busted_command =  "busted",
+    busted_command = nil,
     busted_args = { "" },
+    busted_path = "",
+    busted_cpath = "",
 }
 
 --- Find busted command and additional paths
@@ -28,7 +26,7 @@ local function find_busted_command()
         return {
             command = config.busted_command,
             path = config.busted_path,
-            cpath = config.busted_cpaths,
+            cpath = config.busted_cpath,
         }
     end
 
@@ -65,52 +63,41 @@ local function get_reporter_path()
     return table.concat({ script_path(), "output_handler.lua" })
 end
 
-local function join_results(base_result, update)
-    if not base_result or not update then
-        return base_result or update
-    end
-
-    local status = (base_result.status == "failed" or update.status == "failed") and "failed" or "passed"
-    local errors = (base_result.errors or update.errors)
-        and (vim.list_extend(base_result.errors or {}, update.errors or {}))
-        or nil
-
-    return {
-        status = status,
-        errors = errors,
-    }
-end
-
 ---@param results_path string
 ---@param paths string[]
 ---@param filters string[]
 local function create_busted_command(results_path, paths, filters)
-    local package_paths = [["lua package.path = 'lua_modules/share/lua/5.1/?.lua;lua_modules/share/lua/5.1/?/init.lua;' .. package.path"]]
-    local package_cpaths = [["lua package.cpath = 'lua_modules/lib/lua/5.1/?.so;' .. package.cpath"]]
-    -- local luarocks_loader = [[lua
--- local key, loader, _ = pcall(require, 'luarocks.loader')
--- _ = key and loader.add_context('busted', '$BUSTED_VERSION')]]
-
-    -- Create a busted command invocation string using neotest-busted's own output handler
     local busted = find_busted_command()
-    local busted_command = ("%s --output=%s -Xoutput=%s"):format(
-        busted.command,
-        get_reporter_path(),
-        results_path
-    )
-
     local command = {
         vim.loop.exepath(),
         "--headless",
         "-i", "NONE", -- no shada
         "-n", -- no swapfile, always in-memory
         "-u", "NONE", -- no config file
-        "-c", package_paths, -- Add local paths to package.path
-        "-c", package_cpaths, -- Add local paths to package.cpath
-        -- "-c", luarocks_loader, -- ???
-        "-l", busted_command, -- Run busted in neovim ('-l' stops parsing arguments for neovim)
-        "--verbose",
     }
+
+    if busted.path and #busted.path > 0 then
+        -- Add local paths to package.path
+        vim.list_extend(command, { "-c", ("\"lua package.path = '%s' .. package.path\""):format(busted.path) })
+    end
+
+    if busted.cpath and #busted.cpath > 0 then
+        -- Add local cpaths to package.cpath
+        vim.list_extend(command, { "-c", ("\"lua package.cpath = '%s' .. package.cpath\""):format(busted.cpath) })
+    end
+
+    -- Create a busted command invocation string using neotest-busted's own output handler
+    local busted_command = ("%s --output=%s -Xoutput=%s"):format(
+        busted.command,
+        get_reporter_path(),
+        results_path
+    )
+
+    -- Run busted in neovim ('-l' stops parsing arguments for neovim)
+    vim.list_extend(command, {
+        "-l", busted_command,
+        "--verbose",
+    })
 
     -- Add test filters
     for _, filter in ipairs(filters) do
@@ -140,8 +127,12 @@ function BustedNeotestAdapter.is_test_file(file_path)
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function BustedNeotestAdapter.filter_dir(name, rel_path, root)
-    return name ~= "lua_modules" and name ~= ".luarocks"
+function BustedNeotestAdapter.filter_dir(name)
+    return not vim.tbl_contains({
+        "lua_modules",
+        ".luarocks",
+        "doc",
+    }, name)
 end
 
 ---@async
@@ -177,12 +168,30 @@ end
 --- Create a unique key to identify a test
 ---@param stripped_pos_id string neotest position id stripped of "::"
 ---@param lnum_start integer
----@param lnum_end integer
 ---@return string
-local function create_pos_id_key(path, stripped_pos_id, lnum_start, lnum_end)
+local function create_pos_id_key(path, stripped_pos_id, lnum_start)
     return ("%s::%s::%d"):format(path, stripped_pos_id, lnum_start)
 end
-    
+
+local function extract_test_info(pos)
+    local parts = vim.fn.split(pos.id, "::")
+    local path = parts[1]
+    local stripped_pos_id = table.concat(vim.tbl_map(function(part)
+        return vim.fn.trim(part, "\"")
+    end, vim.list_slice(parts, 2)), " ")
+
+    -- Busted creates test names concatenated with spaces so we can't recreate the
+    -- position id using "::". Instead create a key stripped of "::" like the one
+    -- from busted along with the test line range to uniquely identify the test
+    local pos_id_key = create_pos_id_key(
+        path,
+        stripped_pos_id,
+        pos.range[1] + 1
+    )
+
+    return path, stripped_pos_id, pos_id_key
+end
+
 ---@param args neotest.RunArgs
 ---@return neotest.RunSpec | nil
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -240,29 +249,50 @@ function BustedNeotestAdapter.build_spec(args)
     }
 end
 
+local function create_error_info(test_result)
+    -- We have to extract the line number that the error occurred on from the message
+    -- since that information is not part of the json output
+    local match = test_result.message:match("_spec.lua:(%d+):")
+
+    if match then
+        return {
+            {
+                message = test_result.trace.message,
+                line = tonumber(match),
+            },
+        }
+    end
+
+    return nil
+end
+
 ---@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult
----@param status "passed" | "skipped" | "failed"
+---@param status neotest.ResultStatus
 ---@param output string
-local function test_result_to_neotest_result(test_result, status, output)
+---@param is_error boolean
+local function test_result_to_neotest_result(test_result, status, output, is_error)
     local pos_id = create_pos_id_key(
         test_result.element.trace.source:sub(2), -- Strip the "@" from the source path
         test_result.name,
-        test_result.element.trace.currentline,
-        test_result.element.trace.lastlinedefined - 1
+        test_result.element.trace.currentline
     )
 
-    return pos_id, {
+    local result = {
         status = status,
         short = ("%s: %s"):format(test_result.name, status),
         output = output,
     }
+
+    if is_error then
+        result.errors = create_error_info(test_result)
+    end
+
+    return pos_id, result
 end
 
 ---@async
 ---@param spec neotest.RunSpec
 ---@param strategy_result neotest.StrategyResult
----@param tree neotest.Tree
----@return table<string, neotest.Result>
 ---@diagnostic disable-next-line: duplicate-set-field
 function BustedNeotestAdapter.results(spec, strategy_result, tree)
     -- TODO: Use an output stream instead if possible
@@ -289,71 +319,33 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
         test_results = { errors = {}, pendings = {}, successes = {} }
     end
 
-    vim.print(vim.inspect(test_results))
-    vim.print(vim.inspect(spec.context.position_ids))
-
     local results = {}
     local output = strategy_result.output
     local position_ids = spec.context.position_ids
 
-    ---@cast test_results neotest-busted.BustedResultObject
-    for _, value in pairs(test_results.successes) do
-        local pos_id_key, result = test_result_to_neotest_result(
-            value,
-            types.ResultStatus.passed,
-            output
-        )
+    ---@type { [1]: string, [2]: neotest.ResultStatus, [3]: boolean }[]
+    local test_types = {
+        { "successes", types.ResultStatus.passed, false },
+        { "pendings", types.ResultStatus.skipped, false },
+        { "failures", types.ResultStatus.failed, true },
+        { "errors", types.ResultStatus.failed, true },
+    }
 
-        results[position_ids[pos_id_key]] = result
+    for _, test_type in ipairs(test_types) do
+        local test_key, result_status, is_error = test_type[1], test_type[2], test_type[3]
+
+        ---@cast test_results neotest-busted.BustedResultObject
+        for _, value in pairs(test_results[test_key]) do
+            local pos_id_key, result = test_result_to_neotest_result(
+                value,
+                result_status,
+                output,
+                is_error
+            )
+
+            results[position_ids[pos_id_key]] = result
+        end
     end
-
-    for _, value in pairs(test_results.failures) do
-        local pos_id_key, result = test_result_to_neotest_result(
-            value,
-            types.ResultStatus.failed,
-            output
-        )
-
-        -- result.errors = {
-        --     {
-        --         message = value.trace.message .. value.trace.traceback,
-        --         line = value.trace.currentline,
-        --     }
-        -- }
-
-        results[position_ids[pos_id_key]] = result
-    end
-
-    for _, value in pairs(test_results.errors) do
-        local pos_id_key, result = test_result_to_neotest_result(
-            value,
-            types.ResultStatus.failed,
-            output
-        )
-
-        -- result.errors = {
-        --     {
-        --         message = value.trace.message .. value.trace.traceback,
-        --         line = value.trace.currentline,
-        --     }
-        -- }
-
-        vim.print(pos_id_key)
-
-        results[position_ids[pos_id_key]] = result
-    end
-
-    for _, value in pairs(test_results.pendings) do
-        local pos_id_key, result = test_result_to_neotest_result(
-            value,
-            types.ResultStatus.skipped,
-            output
-        )
-
-        results[position_ids[pos_id_key]] = result
-    end
-
-    vim.print(vim.inspect(results))
 
     return results
 end
