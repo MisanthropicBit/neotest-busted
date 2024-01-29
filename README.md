@@ -1,6 +1,12 @@
 # neotest-busted
 
-Highly experimental [`neotest`](https://github.com/nvim-neotest/neotest) adapter for running tests using [`busted`](https://github.com/lunarmodules/busted/).
+🚧 Highly experimental 🚧 [`neotest`](https://github.com/nvim-neotest/neotest) adapter
+for running tests using [`busted`](https://github.com/lunarmodules/busted/) with
+neovim as the lua interpreter.
+
+## Requirements
+
+Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
 
 ## Configuration
 
