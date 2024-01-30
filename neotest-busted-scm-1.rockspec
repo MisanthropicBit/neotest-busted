@@ -21,7 +21,7 @@ dependencies = {
 }
 
 source = {
-   url = 'https://github.com/MisanthropicBit/neotest-busted.git',
+   url = 'git+https://github.com/MisanthropicBit/neotest-busted',
 }
 
 build = {
