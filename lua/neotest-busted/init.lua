@@ -24,6 +24,8 @@ local config = {
 ---@return table<string, string>?
 local function find_busted_command()
     if config.busted_command ~= nil then
+        logger.debug("Using busted command from config")
+
         return {
             command = config.busted_command,
             path = config.busted_path or "",
@@ -31,20 +33,38 @@ local function find_busted_command()
         }
     end
 
-    -- Try to find a directory-local busted command
-    local globs = vim.fn.split(vim.fn.glob("lua_modules/lib/**/bin/busted"), "\n")
+    -- Try to find a directory-local busted executable
+    local local_globs = vim.fn.split(vim.fn.glob("lua_modules/lib/**/bin/busted"), "\n")
 
-    if #globs > 0 then
+    if #local_globs > 0 then
+        logger.debug("Using project-local busted executable")
+
         return {
-            command = globs[1],
+            command = local_globs[1],
             path = config.busted_path
                 or "lua_modules/share/lua/5.1/?.lua;lua_modules/share/lua/5.1/?/init.lua;;",
             cpath = config.busted_cpath or "lua_modules/lib/lua/5.1/?.so;;",
         }
     end
 
+    -- Try to find a local (user home directory) busted executable
+    local user_globs = vim.fn.split(vim.fn.glob("~/.luarocks/lib/**/bin/busted"), "\n")
+
+    if #user_globs > 0 then
+        logger.debug("Using local (~/.luarocks) busted executable")
+
+        -- Paths should already be set up
+        return {
+            command = user_globs[1],
+            path = config.busted_path or "",
+            cpath = config.busted_cpath or ""
+        }
+    end
+
     -- Try to find busted in path
     if vim.fn.executable("busted") == 1 then
+        logger.debug("Using global busted executable")
+
         return {
             command = "busted",
             path = config.busted_path or "",
