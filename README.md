@@ -1,8 +1,29 @@
-# neotest-busted
+<div align="center">
+  <br />
+  <h1>neotest-busted</h1>
+  <p>🚧 Highly experimental 🚧</p>
+  <p>
+    <img src="https://img.shields.io/badge/version-0.1.0-blue?style=flat-square" />
+    <a href="https://luarocks.org/modules/misanthropicbit/neotest-busted">
+        <img src="https://img.shields.io/luarocks/v/misanthropicbit/neotest-busted?style=flat-square&logo=lua&logoColor=%2351a0cf&color=purple" />
+    </a>
+    <a href="/.github/workflows/tests.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/MisanthropicBit/neotest-busted/tests.yml?branch=master&style=flat-square" />
+    </a>
+    <a href="/LICENSE">
+        <img src="https://img.shields.io/github/license/MisanthropicBit/neotest-busted?style=flat-square" />
+    </a>
+  </p>
+  <br />
+</div>
 
-🚧 Highly experimental 🚧 [`neotest`](https://github.com/nvim-neotest/neotest) adapter
+[`Neotest`](https://github.com/nvim-neotest/neotest) adapter
 for running tests using [`busted`](https://github.com/lunarmodules/busted/) with
 neovim as the lua interpreter.
+
+![screenshot 1](https://github.com/MisanthropicBit/neotest-busted/assets/1846147/d2f81d89-9ce6-4c27-8a11-bf86072e9888)
+![screenshot 2](https://github.com/MisanthropicBit/neotest-busted/assets/1846147/45804359-1e88-4d48-8ad6-9a31da78145e)
+![screenshot 3](https://github.com/MisanthropicBit/neotest-busted/assets/1846147/cd947151-4008-47e5-89a4-42cc83094a0d)
 
 ## Requirements
 
@@ -20,14 +41,20 @@ have it find a directory-local executable by running the following commands.
 > luarocks install busted
 ```
 
+Setup with neotest. Leave values as `nil` to disable them.
+
 ```lua
 require("neotest").setup({
     adapters = {
         require("neotest-busted")({
+            -- Leave as nil to let neotest-busted automatically find busted
             busted_command = "<path to a busted executable>",
-            busted_args = { "--shuffle-files" }, -- Extra arguments to busted
-            busted_path = "", -- Custom semi-colon separated path to load in neovim before running busted
-            busted_cpath = "", -- Custom semi-colon separated cpath to load in neovim before running busted
+            -- Extra arguments to busted
+            busted_args = { "--shuffle-files" },
+            -- Custom semi-colon separated path to load in neovim before running busted
+            busted_path = "my/custom/path/?.lua;...",
+            -- Custom semi-colon separated cpath to load in neovim before running busted
+            busted_cpath = "my/custom/path/?.lua;...",
         }),
     },
 })
