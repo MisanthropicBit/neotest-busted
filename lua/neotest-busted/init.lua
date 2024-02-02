@@ -15,10 +15,15 @@ end
 ---@type neotest-busted.Config
 local config = {
     busted_command = nil,
-    busted_args = { "" },
+    busted_args = nil,
     busted_path = nil,
     busted_cpath = nil,
+    minimal_init = nil,
 }
+
+local function expand_and_create_path(...)
+    return table.concat(vim.tbl_map(vim.fn.expand, ...), ";")
+end
 
 --- Find busted command and additional paths
 ---@return table<string, string>?
@@ -34,30 +39,34 @@ local function find_busted_command()
     end
 
     -- Try to find a directory-local busted executable
-    local local_globs = vim.fn.split(vim.fn.glob("lua_modules/lib/**/bin/busted"), "\n")
+    local local_globs = vim.fn.split(vim.fn.glob("lua_modules/lib/luarocks/**/bin/busted"), "\n")
 
     if #local_globs > 0 then
         logger.debug("Using project-local busted executable")
 
         return {
             command = local_globs[1],
-            path = config.busted_path
-                or "lua_modules/share/lua/5.1/?.lua;lua_modules/share/lua/5.1/?/init.lua;;",
-            cpath = config.busted_cpath or "lua_modules/lib/lua/5.1/?.so;;",
+            path = config.busted_path or "./lua/?.lua;./lua_modules/share/lua/5.1/?.lua;./lua_modules/share/lua/5.1/?/init.lua;;",
+            cpath = config.busted_cpath or "./lua_modules/lib/lua/5.1/?.so;;",
         }
     end
 
     -- Try to find a local (user home directory) busted executable
-    local user_globs = vim.fn.split(vim.fn.glob("~/.luarocks/lib/**/bin/busted"), "\n")
+    local user_globs = vim.fn.split(vim.fn.glob("~/.luarocks/lib/luarocks/**/bin/busted"), "\n")
 
     if #user_globs > 0 then
         logger.debug("Using local (~/.luarocks) busted executable")
 
-        -- Paths should already be set up
         return {
             command = user_globs[1],
-            path = config.busted_path or "",
-            cpath = config.busted_cpath or ""
+            path = config.busted_path or expand_and_create_path({
+                "~/.luarocks/share/lua/5.1/?.lua",
+                "~/.luarocks/share/lua/5.1/?/init.lua",
+            }),
+            cpath = config.busted_cpath or expand_and_create_path({
+                "~/.luarocks/lib/lua/5.1/?.so",
+                "~/.luarocks/lib/lua/5.1/?/?.so",
+            }),
         }
     end
 
@@ -73,6 +82,24 @@ local function find_busted_command()
     end
 
     return nil
+end
+
+---@return string?
+local function find_minimal_init()
+    local minimal_init = config.minimal_init
+
+    if not minimal_init then
+        local glob_matches = vim.fn.split(
+            vim.fn.glob(("**%sminimal_init.lua"):format(lib.files.sep), true),
+            "\n"
+        )
+
+        if #glob_matches > 0 then
+            minimal_init = glob_matches[1]
+        end
+    end
+
+    return minimal_init
 end
 
 local function script_path()
@@ -102,7 +129,7 @@ local function create_busted_command(results_path, paths, filters)
         "--headless",
         "-i", "NONE", -- no shada
         "-n", -- no swapfile, always in-memory
-        "-u", "NONE", -- no config file
+        "-u", find_minimal_init() or "NONE",
     }
     -- stylua: ignore end
 
@@ -110,7 +137,7 @@ local function create_busted_command(results_path, paths, filters)
         -- Add local paths to package.path
         vim.list_extend(
             command,
-            { "-c", ("\"lua package.path = '%s' .. package.path\""):format(busted.path) }
+            { "-c", ("\"lua package.path = '%s;' .. package.path\""):format(busted.path) }
         )
     end
 
@@ -118,7 +145,7 @@ local function create_busted_command(results_path, paths, filters)
         -- Add local cpaths to package.cpath
         vim.list_extend(
             command,
-            { "-c", ("\"lua package.cpath = '%s' .. package.cpath\""):format(busted.cpath) }
+            { "-c", ("\"lua package.cpath = '%s;' .. package.cpath\""):format(busted.cpath) }
         )
     end
 
@@ -370,10 +397,10 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     ---@type { [1]: string, [2]: neotest.ResultStatus, [3]: boolean }[]
     local test_types = {
-        { "successes", types.ResultStatus.passed, false },
-        { "pendings", types.ResultStatus.skipped, false },
-        { "failures", types.ResultStatus.failed, true },
-        { "errors", types.ResultStatus.failed, true },
+        { "successes", types.ResultStatus.passed,  false },
+        { "pendings",  types.ResultStatus.skipped, false },
+        { "failures",  types.ResultStatus.failed,  true },
+        { "errors",    types.ResultStatus.failed,  true },
     }
 
     for _, test_type in ipairs(test_types) do
@@ -381,12 +408,8 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
         ---@cast test_results neotest-busted.BustedResultObject
         for _, value in pairs(test_results[test_key]) do
-            local pos_id_key, result = test_result_to_neotest_result(
-                value,
-                result_status,
-                output,
-                is_error
-            )
+            local pos_id_key, result =
+            test_result_to_neotest_result(value, result_status, output, is_error)
 
             local pos_id = position_ids[pos_id_key]
 
