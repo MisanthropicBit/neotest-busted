@@ -186,7 +186,8 @@ end
 ---@type neotest.Adapter
 local BustedNeotestAdapter = { name = "neotest-busted" }
 
-BustedNeotestAdapter.root = lib.files.match_root_pattern("*.lua")
+BustedNeotestAdapter.root =
+lib.files.match_root_pattern(".busted", ".luarocks", "lua_modules", "*.rockspec", ".git")
 
 ---@param file_path string
 ---@return boolean
