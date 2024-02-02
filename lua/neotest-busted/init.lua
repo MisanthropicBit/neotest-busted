@@ -298,7 +298,9 @@ function BustedNeotestAdapter.build_spec(args)
     local busted = create_busted_command(results_path, paths, filters)
 
     if not busted then
-        logger.error("Could not find a busted executable (via config, directory-local, or global)")
+        local message = "Could not find a busted executable"
+        logger.error(message)
+        vim.notify(message, vim.log.levels.ERROR)
 
         return
     end
