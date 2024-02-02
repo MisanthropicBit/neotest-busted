@@ -324,7 +324,7 @@ local function create_error_info(test_result)
         return {
             {
                 message = test_result.trace.message,
-                line = tonumber(match),
+                line = tonumber(match) - 1,
             },
         }
     end
