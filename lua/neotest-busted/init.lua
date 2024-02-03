@@ -366,7 +366,7 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     local ok, data = pcall(lib.files.read, results_path)
 
     if not ok then
-        logger.error("Failed to read json test output file ", results_path)
+        logger.error("Failed to read json test output file ", results_path, " with error: ", data)
         return {}
     end
 
@@ -374,7 +374,7 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     local json_ok, parsed = pcall(vim.json.decode, data, { luanil = { object = true } })
 
     if not json_ok then
-        logger.error("Failed to parse json test output ", results_path)
+        logger.error("Failed to parse json test output file ", results_path, " with error: ", parsed)
         return {}
     end
 
