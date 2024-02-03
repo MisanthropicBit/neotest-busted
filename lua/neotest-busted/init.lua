@@ -286,9 +286,8 @@ function BustedNeotestAdapter.build_spec(args)
             local _pos = _tree:data()
 
             if _pos.type == "test" then
-                local _, filter, pos_id_key = extract_test_info(_pos)
+                local _, _, pos_id_key = extract_test_info(_pos)
 
-                table.insert(filters, filter)
                 position_ids[pos_id_key] = _pos.id
             end
         end
