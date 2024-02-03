@@ -256,7 +256,6 @@ end
 ---@return neotest.RunSpec | nil
 ---@diagnostic disable-next-line: duplicate-set-field
 function BustedNeotestAdapter.build_spec(args)
-    local results_path = async.fn.tempname()
     local tree = args.tree
 
     if not tree then
@@ -295,6 +294,7 @@ function BustedNeotestAdapter.build_spec(args)
         end
     end
 
+    local results_path = async.fn.tempname()
     local busted = create_busted_command(results_path, paths, filters)
 
     if not busted then
@@ -359,21 +359,10 @@ end
 ---@async
 ---@param spec neotest.RunSpec
 ---@param strategy_result neotest.StrategyResult
----@diagnostic disable-next-line: duplicate-set-field
+---@param tree neotest.Tree
+---@diagnostic disable-next-line: duplicate-set-field, unused-local
 function BustedNeotestAdapter.results(spec, strategy_result, tree)
     -- TODO: Use an output stream instead if possible
-    local _tree
-
-    if tree:data().type == "file" and #tree:children() == 0 then
-        _tree = BustedNeotestAdapter.discover_positions(tree:data().path)
-
-        if _tree == nil then
-            _tree = tree
-        end
-    else
-        _tree = tree
-    end
-
     local results_path = spec.context.results_path
     local ok, data = pcall(lib.files.read, results_path)
 
