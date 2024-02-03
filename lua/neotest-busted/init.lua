@@ -417,16 +417,16 @@ end
 
 setmetatable(BustedNeotestAdapter, {
     ---@param user_config neotest-busted.Config?
-    __call = function(user_config)
-        user_config = user_config or {}
+    __call = function(_, user_config)
+        local _user_config = user_config or {}
 
-        if user_config.busted_command then
+        if _user_config.busted_command then
             if vim.fn.executable(config.busted_command) == 0 then
                 vim.notify("Busted command in configuration is not executable")
             end
         end
 
-        config = vim.tbl_extend("force", config, user_config)
+        config = vim.tbl_extend("force", config, _user_config)
 
         return BustedNeotestAdapter
     end,
