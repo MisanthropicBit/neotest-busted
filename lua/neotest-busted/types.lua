@@ -1,9 +1,9 @@
 ---@class neotest-busted.Config
----@field busted_command string?
----@field busted_args string[]?
----@field busted_path string?
----@field busted_cpath string?
----@field minimal_init string?
+---@field busted_command false | string?
+---@field busted_args false | string[]
+---@field busted_path false |string
+---@field busted_cpath false |string
+---@field minimal_init false |string
 
 ---@class neotest-busted.BustedCommand
 ---@field command string

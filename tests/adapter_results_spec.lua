@@ -151,8 +151,8 @@ describe("adapter.results", function()
 
         assert.are.same(neotest_results, {})
 
-        assert.spy(lib.files.read).was.called_with(spec.context.results_path)
-        assert.spy(logger.error).was.called_with("Failed to read json test output file ", "test_output.json", " with error: ", "Could not read file")
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was.called_with("Failed to read json test output file ", "test_output.json", " with error: ", "Could not read file")
     end)
 
     it("handles failure to decode json", function()

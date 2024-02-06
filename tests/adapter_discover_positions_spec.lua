@@ -1,4 +1,4 @@
-local async = require("nio").tests
+local async = require("neotest.async").tests
 local adapter = require("neotest-busted")()
 
 describe("adapter.discover_positions", function()
@@ -18,7 +18,7 @@ describe("adapter.discover_positions", function()
         end
     end
 
-    async.it("provides meaningful names from a basic spec", function()
+    async.it("discovers test positions", function()
         local positions = adapter.discover_positions("./test_files/test1_spec.lua"):to_list()
 
         local expected_positions = {

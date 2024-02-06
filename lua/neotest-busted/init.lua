@@ -14,12 +14,16 @@ end
 
 ---@type neotest-busted.Config
 local config = {
-    busted_command = nil,
-    busted_args = nil,
-    busted_path = nil,
-    busted_cpath = nil,
-    minimal_init = nil,
+    busted_command = false,
+    busted_args = false,
+    busted_path = false,
+    busted_cpath = false,
+    minimal_init = false,
 }
+
+local function config_enabled(value)
+    return (type(value) == "string" and #value > 0) or (type(value) == "boolean" and value)
+end
 
 local function expand_and_create_path(...)
     return table.concat(vim.tbl_map(vim.fn.expand, ...), ";")
@@ -28,7 +32,7 @@ end
 --- Find busted command and additional paths
 ---@return table<string, string>?
 local function find_busted_command()
-    if config.busted_command ~= nil then
+    if config_enabled(config.busted_command) then
         logger.debug("Using busted command from config")
 
         return {
@@ -420,9 +424,12 @@ setmetatable(BustedNeotestAdapter, {
     __call = function(_, user_config)
         local _user_config = user_config or {}
 
-        if _user_config.busted_command then
-            if vim.fn.executable(config.busted_command) == 0 then
-                vim.notify("Busted command in configuration is not executable")
+        if type(_user_config.busted_command) == "string" and #_user_config.busted_command > 0 then
+            if vim.fn.executable(_user_config.busted_command) == 0 then
+                vim.notify(
+                    ("Busted command in configuration is not executable: '%s'"):format(_user_config.busted_command),
+                    vim.log.levels.ERROR
+                )
             end
         end
 
