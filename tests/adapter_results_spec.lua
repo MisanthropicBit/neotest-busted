@@ -13,10 +13,14 @@ describe("adapter.results", function()
         context = {
             results_path = "test_output.json",
             position_ids = {
-                [test_path .. "::namespace tests a pending test::5"] = test_path .. '::"namespace"::"tests a pending test"',
-                [test_path .. "::namespace tests a passing test::6"] = test_path .. '::"namespace"::"tests a passing test"',
-                [test_path .. "::namespace tests a failing test::7"] = test_path .. '::"namespace"::"tests a failing test"',
-                [test_path .. "::namespace tests an erroneous test::10"] = test_path .. '::"namespace"::"tests an erroneous test"',
+                [test_path .. "::namespace tests a pending test::5"] = test_path
+                    .. '::"namespace"::"tests a pending test"',
+                [test_path .. "::namespace tests a passing test::6"] = test_path
+                    .. '::"namespace"::"tests a passing test"',
+                [test_path .. "::namespace tests a failing test::7"] = test_path
+                    .. '::"namespace"::"tests a failing test"',
+                [test_path .. "::namespace tests an erroneous test::10"] = test_path
+                    .. '::"namespace"::"tests an erroneous test"',
             },
         },
     }
@@ -122,8 +126,8 @@ describe("adapter.results", function()
                     {
                         message = "Assert failed",
                         line = 7,
-                    }
-                }
+                    },
+                },
             },
             [test_path .. '::"namespace"::"tests an erroneous test"'] = {
                 status = types.ResultStatus.failed,
@@ -133,8 +137,8 @@ describe("adapter.results", function()
                     {
                         message = "Oh noes",
                         line = 11,
-                    }
-                }
+                    },
+                },
             },
         })
 
@@ -152,7 +156,12 @@ describe("adapter.results", function()
         assert.are.same(neotest_results, {})
 
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was.called_with("Failed to read json test output file ", "test_output.json", " with error: ", "Could not read file")
+        assert.stub(logger.error).was.called_with(
+            "Failed to read json test output file ",
+            "test_output.json",
+            " with error: ",
+            "Could not read file"
+        )
     end)
 
     it("handles failure to decode json", function()
@@ -165,7 +174,12 @@ describe("adapter.results", function()
         assert.are.same(neotest_results, {})
 
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was.called_with("Failed to parse json test output file ", "test_output.json", " with error: ", "Expected value but found invalid token at character 1")
+        assert.stub(logger.error).was.called_with(
+            "Failed to parse json test output file ",
+            "test_output.json",
+            " with error: ",
+            "Expected value but found invalid token at character 1"
+        )
 
         vim.json.decode:revert()
     end)
@@ -194,12 +208,15 @@ describe("adapter.results", function()
                     {
                         message = "Oh noes",
                         line = 11,
-                    }
-                }
+                    },
+                },
             },
         })
 
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was.called_with("Failed to find matching position id for key ", test_path .. "::namespace tests a failing test::7")
+        assert.stub(logger.error).was.called_with(
+            "Failed to find matching position id for key ",
+            test_path .. "::namespace tests a failing test::7"
+        )
     end)
 end)

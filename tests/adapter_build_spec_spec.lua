@@ -39,7 +39,12 @@ describe("adapter.build_spec", function()
 
         assert.is_not_nil(spec)
 
-        assert.are.same(spec.command, ([[%s --headless -i NONE -n -u tests/minimal_init.lua -c "lua package.path = '~/.luarocks/share/lua/5.1/?.lua;' .. package.path" -c "lua package.cpath = '~/.luarocks/lib/lua/5.1/?.so;' .. package.cpath" -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --shuffle-lists ./test_files/test1_spec.lua]]):format(vim.loop.exepath()))
+        assert.are.same(
+            spec.command,
+            ([[%s --headless -i NONE -n -u tests/minimal_init.lua -c "lua package.path = '~/.luarocks/share/lua/5.1/?.lua;' .. package.path" -c "lua package.cpath = '~/.luarocks/lib/lua/5.1/?.so;' .. package.cpath" -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --shuffle-lists ./test_files/test1_spec.lua]]):format(
+                vim.loop.exepath()
+            )
+        )
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
@@ -64,7 +69,7 @@ describe("adapter.build_spec", function()
             busted_command = "./busted",
             busted_args = {},
             busted_path = false,
-            busted_cpath = false
+            busted_cpath = false,
         })
 
         local tree = create_tree(adapter)
@@ -72,7 +77,12 @@ describe("adapter.build_spec", function()
 
         assert.is_not_nil(spec)
 
-        assert.are.same(spec.command, ([[%s --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top-level namespace 1 nested namespace 1" ./test_files/test1_spec.lua]]):format(vim.loop.exepath()))
+        assert.are.same(
+            spec.command,
+            ([[%s --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top-level namespace 1 nested namespace 1" ./test_files/test1_spec.lua]]):format(
+                vim.loop.exepath()
+            )
+        )
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
@@ -94,7 +104,7 @@ describe("adapter.build_spec", function()
             busted_command = "./busted",
             busted_args = {},
             busted_path = false,
-            busted_cpath = false
+            busted_cpath = false,
         })
 
         local tree = create_tree(adapter)
@@ -104,7 +114,12 @@ describe("adapter.build_spec", function()
 
         assert.is_not_nil(spec)
 
-        assert.are.same(spec.command, ([[%s --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top-level namespace 1 nested namespace 1 test 1" ./test_files/test1_spec.lua]]):format(vim.loop.exepath()))
+        assert.are.same(
+            spec.command,
+            ([[%s --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top-level namespace 1 nested namespace 1 test 1" ./test_files/test1_spec.lua]]):format(
+                vim.loop.exepath()
+            )
+        )
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
@@ -126,7 +141,7 @@ describe("adapter.build_spec", function()
             busted_command = "./busted",
             busted_args = {},
             busted_path = false,
-            busted_cpath = false
+            busted_cpath = false,
         })
 
         local tree = create_tree(adapter)
@@ -136,7 +151,12 @@ describe("adapter.build_spec", function()
 
         assert.is_not_nil(spec)
 
-        assert.are.same(spec.command, ([[%s --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top-level namespace 1 nested namespace 1 test 1" ./test_files/test1_spec.lua]]):format(vim.loop.exepath()))
+        assert.are.same(
+            spec.command,
+            ([[%s --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top-level namespace 1 nested namespace 1 test 1" ./test_files/test1_spec.lua]]):format(
+                vim.loop.exepath()
+            )
+        )
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",

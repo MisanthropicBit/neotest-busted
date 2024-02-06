@@ -50,7 +50,8 @@ local function find_busted_command()
 
         return {
             command = local_globs[1],
-            path = config.busted_path or "./lua/?.lua;./lua_modules/share/lua/5.1/?.lua;./lua_modules/share/lua/5.1/?/init.lua;;",
+            path = config.busted_path
+                or "./lua/?.lua;./lua_modules/share/lua/5.1/?.lua;./lua_modules/share/lua/5.1/?/init.lua;;",
             cpath = config.busted_cpath or "./lua_modules/lib/lua/5.1/?.so;;",
         }
     end
@@ -93,10 +94,8 @@ local function find_minimal_init()
     local minimal_init = config.minimal_init
 
     if not minimal_init then
-        local glob_matches = vim.fn.split(
-            vim.fn.glob(("**%sminimal_init.lua"):format(lib.files.sep), true),
-            "\n"
-        )
+        local glob_matches =
+            vim.fn.split(vim.fn.glob(("**%sminimal_init.lua"):format(lib.files.sep), true), "\n")
 
         if #glob_matches > 0 then
             minimal_init = glob_matches[1]
@@ -191,7 +190,7 @@ end
 local BustedNeotestAdapter = { name = "neotest-busted" }
 
 BustedNeotestAdapter.root =
-lib.files.match_root_pattern(".busted", ".luarocks", "lua_modules", "*.rockspec", ".git")
+    lib.files.match_root_pattern(".busted", ".luarocks", "lua_modules", "*.rockspec", ".git")
 
 ---@param file_path string
 ---@return boolean
@@ -378,7 +377,12 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     local json_ok, parsed = pcall(vim.json.decode, data, { luanil = { object = true } })
 
     if not json_ok then
-        logger.error("Failed to parse json test output file ", results_path, " with error: ", parsed)
+        logger.error(
+            "Failed to parse json test output file ",
+            results_path,
+            " with error: ",
+            parsed
+        )
         return {}
     end
 
@@ -392,10 +396,10 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     ---@type { [1]: string, [2]: neotest.ResultStatus, [3]: boolean }[]
     local test_types = {
-        { "successes", types.ResultStatus.passed,  false },
-        { "pendings",  types.ResultStatus.skipped, false },
-        { "failures",  types.ResultStatus.failed,  true },
-        { "errors",    types.ResultStatus.failed,  true },
+        { "successes", types.ResultStatus.passed, false },
+        { "pendings", types.ResultStatus.skipped, false },
+        { "failures", types.ResultStatus.failed, true },
+        { "errors", types.ResultStatus.failed, true },
     }
 
     for _, test_type in ipairs(test_types) do
@@ -404,7 +408,7 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
         ---@cast test_results neotest-busted.BustedResultObject
         for _, value in pairs(test_results[test_key]) do
             local pos_id_key, result =
-            test_result_to_neotest_result(value, result_status, output, is_error)
+                test_result_to_neotest_result(value, result_status, output, is_error)
 
             local pos_id = position_ids[pos_id_key]
 
@@ -427,7 +431,9 @@ setmetatable(BustedNeotestAdapter, {
         if type(_user_config.busted_command) == "string" and #_user_config.busted_command > 0 then
             if vim.fn.executable(_user_config.busted_command) == 0 then
                 vim.notify(
-                    ("Busted command in configuration is not executable: '%s'"):format(_user_config.busted_command),
+                    ("Busted command in configuration is not executable: '%s'"):format(
+                        _user_config.busted_command
+                    ),
                     vim.log.levels.ERROR
                 )
             end
