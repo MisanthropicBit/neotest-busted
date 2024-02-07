@@ -10,7 +10,7 @@ describe("top-level namespace 1", function()
     end)
 end)
 
-describe("top-level namespace 2", function()
+describe("^top-le[ve]l (na*m+e-sp?ac%e) 2$", function()
     it("test 3", function()
         assert.is_true(true)
     end)

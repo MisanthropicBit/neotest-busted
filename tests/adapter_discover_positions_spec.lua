@@ -52,7 +52,7 @@ describe("adapter.discover_positions", function()
             },
             {
                 {
-                    name = '"top-level namespace 2"',
+                    name = '"^top-le[ve]l (na*m+e-sp?ac%e) 2$"',
                     type = "namespace",
                 },
                 {

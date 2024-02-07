@@ -41,9 +41,8 @@ describe("adapter.build_spec", function()
 
         assert.are.same(
             spec.command,
-            ([[%s --headless -i NONE -n -u tests/minimal_init.lua -c "lua package.path = '~/.luarocks/share/lua/5.1/?.lua;' .. package.path" -c "lua package.cpath = '~/.luarocks/lib/lua/5.1/?.so;' .. package.cpath" -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --shuffle-lists ./test_files/test1_spec.lua]]):format(
-                vim.loop.exepath()
-            )
+            vim.loop.exepath()
+                .. [[ --headless -i NONE -n -u tests/minimal_init.lua -c "lua package.path = '~/.luarocks/share/lua/5.1/?.lua;' .. package.path" -c "lua package.cpath = '~/.luarocks/lib/lua/5.1/?.so;' .. package.cpath" -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --shuffle-lists ./test_files/test1_spec.lua]]
         )
 
         assert.are.same(spec.context, {
@@ -58,8 +57,8 @@ describe("adapter.build_spec", function()
             position_ids = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::7"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-                ["./test_files/test1_spec.lua::top-level namespace 2 test 3::14"] = './test_files/test1_spec.lua::"top-level namespace 2"::"test 3"',
-                ["./test_files/test1_spec.lua::top-level namespace 2 test 4::18"] = './test_files/test1_spec.lua::"top-level namespace 2"::"test 4"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::18"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
             },
         })
     end)
@@ -79,9 +78,8 @@ describe("adapter.build_spec", function()
 
         assert.are.same(
             spec.command,
-            ([[%s --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top-level namespace 1 nested namespace 1" ./test_files/test1_spec.lua]]):format(
-                vim.loop.exepath()
-            )
+            vim.loop.exepath()
+                .. [[ --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top%-level namespace 1 nested namespace 1 test 1" --filter="top%-level namespace 1 nested namespace 1 test 2" ./test_files/test1_spec.lua]]
         )
 
         assert.are.same(spec.context, {
@@ -94,7 +92,8 @@ describe("adapter.build_spec", function()
                 type = "namespace",
             },
             position_ids = {
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1::2"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"',
+                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::7"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
             },
         })
     end)
@@ -116,9 +115,8 @@ describe("adapter.build_spec", function()
 
         assert.are.same(
             spec.command,
-            ([[%s --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top-level namespace 1 nested namespace 1 test 1" ./test_files/test1_spec.lua]]):format(
-                vim.loop.exepath()
-            )
+            vim.loop.exepath()
+                .. [[ --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top%-level namespace 1 nested namespace 1 test 1" ./test_files/test1_spec.lua]]
         )
 
         assert.are.same(spec.context, {
@@ -145,30 +143,27 @@ describe("adapter.build_spec", function()
         })
 
         local tree = create_tree(adapter)
-        local spec = adapter.build_spec({
-            tree = tree:children()[1]:children()[1]:children()[1],
-        })
+        local spec = adapter.build_spec({ tree = tree:children()[2]:children()[1] })
 
         assert.is_not_nil(spec)
 
         assert.are.same(
             spec.command,
-            ([[%s --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="top-level namespace 1 nested namespace 1 test 1" ./test_files/test1_spec.lua]]):format(
-                vim.loop.exepath()
-            )
+            vim.loop.exepath()
+                .. [[ --headless -i NONE -n -u tests/minimal_init.lua -l ./busted --output=./lua/neotest-busted/output_handler.lua -Xoutput=test-output.json --verbose --filter="%^top%-le%[ve]l %(na%*m%+e%-sp%?ac%%e%) 2%\$ test 3" ./test_files/test1_spec.lua]]
         )
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
             pos = {
-                id = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-                name = '"test 1"',
+                id = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+                name = '"test 3"',
                 path = "./test_files/test1_spec.lua",
-                range = { 2, 8, 4, 12 },
+                range = { 13, 4, 15, 8 },
                 type = "test",
             },
             position_ids = {
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
             },
         })
     end)

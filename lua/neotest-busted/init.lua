@@ -115,6 +115,28 @@ local function get_reporter_path()
     return table.concat({ script_path(), "output_handler.lua" })
 end
 
+--- Escape special characters in a lua pattern
+---@param filter string
+---@return string
+local function escape_test_pattern_filter(filter)
+    -- NOTE: The replacement of a literal '%' needs to come first so it does
+    -- match any earlier replacements that insert a '%'. Also we need to escape
+    -- '$' for the shell command to work
+    return (
+        filter
+            :gsub("%%", "%%%%")
+            :gsub("%(", "%%(")
+            :gsub("%)", "%%)")
+            :gsub("%[", "%%[")
+            :gsub("%*", "%%*")
+            :gsub("%+", "%%+")
+            :gsub("%-", "%%-")
+            :gsub("%?", "%%?")
+            :gsub("%$", "%%\\$")
+            :gsub("%^", "%%^")
+    )
+end
+
 ---@param results_path string
 ---@param paths string[]
 ---@param filters string[]
@@ -173,7 +195,7 @@ local function create_busted_command(results_path, paths, filters)
 
     -- Add test filters
     for _, filter in ipairs(filters) do
-        table.insert(command, "--filter=" .. '"' .. filter .. '"')
+        table.insert(command, "--filter=" .. '"' .. escape_test_pattern_filter(filter) .. '"')
     end
 
     -- Add test files
@@ -255,6 +277,38 @@ local function extract_test_info(pos)
     return path, stripped_pos_id, pos_id_key
 end
 
+--- Generate test info for the nodes in a tree
+---@param tree neotest.Tree
+---@param gen_path_filters boolean
+---@return string[]
+---@return string[]
+---@return table<string, string>
+local function generate_test_info_for_nodes(tree, gen_path_filters)
+    local paths = {}
+    local filters = {}
+    local position_ids = {}
+
+    for _, _tree in tree:iter_nodes() do
+        local _pos = _tree:data()
+
+        if _pos.type == "test" then
+            local path, filter, pos_id_key = extract_test_info(_pos)
+
+            if gen_path_filters then
+                if not vim.tbl_contains(paths, path) then
+                    table.insert(paths, path)
+                end
+
+                table.insert(filters, filter)
+            end
+
+            position_ids[pos_id_key] = _pos.id
+        end
+    end
+
+    return paths, filters, position_ids
+end
+
 ---@param args neotest.RunArgs
 ---@return neotest.RunSpec | nil
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -271,29 +325,13 @@ function BustedNeotestAdapter.build_spec(args)
         return
     end
 
-    local paths = {}
-    local filters = {}
-    local position_ids = {}
+    -- Iterate all tests in the tree and generate position ids for them
+    local is_file_pos = pos.type == "file"
+    local paths, filters, position_ids = generate_test_info_for_nodes(args.tree, not is_file_pos)
 
-    if pos.type == "namespace" or pos.type == "test" then
-        local path, filter, pos_id_key = extract_test_info(pos)
-
-        table.insert(paths, path)
-        table.insert(filters, filter)
-        position_ids[pos_id_key] = pos.id
-    elseif pos.type == "file" then
+    if is_file_pos then
+        -- No need for filters when we are running the entire file
         table.insert(paths, pos.id)
-
-        -- Iterate all tests in the file and generate position ids for them
-        for _, _tree in args.tree:iter_nodes() do
-            local _pos = _tree:data()
-
-            if _pos.type == "test" then
-                local _, _, pos_id_key = extract_test_info(_pos)
-
-                position_ids[pos_id_key] = _pos.id
-            end
-        end
     end
 
     local results_path = async.fn.tempname()
