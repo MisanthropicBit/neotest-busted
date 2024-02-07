@@ -30,3 +30,8 @@ build = {
         "doc",
     },
 }
+
+test = {
+    type = "command",
+    command = "./tests/run_tests.sh",
+}
