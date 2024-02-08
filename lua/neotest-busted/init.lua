@@ -107,12 +107,14 @@ local function find_minimal_init()
     end
 end
 
+---@return string
 local function script_path()
     local str = debug.getinfo(2, "S").source:sub(2)
 
     return str:match(util.create_path("(.*", ")"))
 end
 
+---@return string
 local function get_reporter_path()
     return table.concat({ script_path(), "output_handler.lua" })
 end
@@ -186,8 +188,7 @@ local function create_busted_command(results_path, paths, filters)
 
     -- Add test filters
     for _, filter in ipairs(filters) do
-        table.insert(command, "--filter")
-        table.insert(command, escape_test_pattern_filter(filter))
+        vim.list_extend(command, { "--filter", escape_test_pattern_filter(filter) })
     end
 
     -- Add test files
@@ -251,6 +252,11 @@ local function create_pos_id_key(path, stripped_pos_id, lnum_start)
     return ("%s::%s::%d"):format(path, stripped_pos_id, lnum_start)
 end
 
+--- Extract test info from a position
+---@param pos neotest.Position
+---@return string
+---@return string
+---@return string
 local function extract_test_info(pos)
     local parts = vim.fn.split(pos.id, "::")
     local path = parts[1]
@@ -347,6 +353,8 @@ function BustedNeotestAdapter.build_spec(args)
     }
 end
 
+---@param test_result neotest-busted.BustedFailureResult | neotest-busted.BustedResult
+---@return neotest.Error?
 local function create_error_info(test_result)
     -- We have to extract the line number that the error occurred on from the message
     -- since that information is not part of the json output

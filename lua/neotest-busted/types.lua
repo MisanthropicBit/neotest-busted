@@ -35,7 +35,7 @@
 ---@field name string
 ---@field trace neotest-busted.BustedTrace
 ---@field element neotest-busted.BustedElement
---
+
 ---@class neotest-busted.BustedFailureResult
 ---@field name string
 ---@field message string
