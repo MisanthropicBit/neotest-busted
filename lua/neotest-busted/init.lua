@@ -320,7 +320,7 @@ local function generate_test_info_for_nodes(tree, gen_path_filters)
 end
 
 ---@param args neotest.RunArgs
----@return neotest.RunSpec | nil
+---@return nil | neotest.RunSpec | neotest.RunSpec[]
 ---@diagnostic disable-next-line: duplicate-set-field
 function BustedNeotestAdapter.build_spec(args)
     local tree = args.tree
