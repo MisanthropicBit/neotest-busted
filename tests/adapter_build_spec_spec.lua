@@ -26,14 +26,16 @@ describe("adapter.build_spec", function()
         vim.notify:revert()
     end)
 
-    local adapter = require("neotest-busted")({
-        busted_command = "./busted",
-        busted_args = { "--shuffle-lists" },
-        busted_path = "~/.luarocks/share/lua/5.1/?.lua",
-        busted_cpath = "~/.luarocks/lib/lua/5.1/?.so",
-    })
-
     async.it("builds command for file test", function()
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            busted_args = { "--shuffle-lists" },
+            busted_path = "~/.luarocks/share/lua/5.1/?.lua",
+            busted_cpath = "~/.luarocks/lib/lua/5.1/?.so",
+            minimal_init = nil,
+        })
         local tree = create_tree(adapter)
         local spec = adapter.build_spec({ tree = tree })
 
@@ -81,13 +83,15 @@ describe("adapter.build_spec", function()
     end)
 
     async.it("builds command for namespace test", function()
-        adapter({
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
             busted_command = "./busted",
             busted_args = {},
-            busted_path = false,
-            busted_cpath = false,
+            busted_path = nil,
+            busted_cpath = nil,
+            minimal_init = nil,
         })
-
         local tree = create_tree(adapter)
         local spec = adapter.build_spec({ tree = tree:children()[1]:children()[1] })
 
@@ -132,13 +136,15 @@ describe("adapter.build_spec", function()
     end)
 
     async.it("builds command for test", function()
-        adapter({
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
             busted_command = "./busted",
             busted_args = {},
-            busted_path = false,
-            busted_cpath = false,
+            busted_path = nil,
+            busted_cpath = nil,
+            minimal_init = nil,
         })
-
         local tree = create_tree(adapter)
         local spec = adapter.build_spec({
             tree = tree:children()[1]:children()[1]:children()[1],
@@ -182,13 +188,12 @@ describe("adapter.build_spec", function()
     end)
 
     async.it("escapes special characters in pattern in command", function()
-        adapter({
-            busted_command = "./busted",
-            busted_args = {},
-            busted_path = false,
-            busted_cpath = false,
-        })
+        package.loaded["neotest-busted"] = nil
 
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            minimal_init = "custom_init.lua",
+        })
         local tree = create_tree(adapter)
         local spec = adapter.build_spec({ tree = tree:children()[2]:children()[1] })
 
@@ -201,7 +206,7 @@ describe("adapter.build_spec", function()
             "NONE",
             "-n",
             "-u",
-            "tests/minimal_init.lua",
+            "custom_init.lua",
             "-l",
             "./busted",
             "--output",
@@ -258,6 +263,13 @@ describe("adapter.build_spec", function()
     -- end)
 
     async.it("builds nothing if no tree", function()
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            minimal_init = "custom_init.lua",
+        })
+
         assert.is_nil(adapter.build_spec({ tree = nil }))
     end)
 

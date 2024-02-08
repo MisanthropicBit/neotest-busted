@@ -17,10 +17,10 @@ end
 ---@type neotest-busted.Config
 local config = {
     busted_command = false,
-    busted_args = false,
-    busted_path = false,
-    busted_cpath = false,
-    minimal_init = false,
+    busted_args = nil,
+    busted_path = nil,
+    busted_cpath = nil,
+    minimal_init = nil,
 }
 
 local function config_enabled(value)
@@ -95,16 +95,16 @@ end
 local function find_minimal_init()
     local minimal_init = config.minimal_init
 
-    if not minimal_init then
-        local glob_matches =
-            vim.fn.split(vim.fn.glob(("**%sminimal_init.lua"):format(lib.files.sep), true), "\n")
-
-        if #glob_matches > 0 then
-            minimal_init = glob_matches[1]
-        end
+    if type(minimal_init) == "string" and #minimal_init > 0 then
+        return minimal_init
     end
 
-    return minimal_init
+    local pattern = util.create_path("**", "minimal_init.lua")
+    local glob_matches = util.glob(pattern)
+
+    if #glob_matches > 0 then
+        return glob_matches[1]
+    end
 end
 
 local function script_path()
