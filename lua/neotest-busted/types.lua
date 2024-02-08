@@ -7,8 +7,8 @@
 
 ---@class neotest-busted.BustedCommand
 ---@field command string
----@field path string
----@field cpath string
+---@field path string | string[]
+---@field cpath string | string[]
 
 ---@class neotest-busted.BustedTrace
 ---@field what string

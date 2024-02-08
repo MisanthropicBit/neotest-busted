@@ -30,15 +30,15 @@ local function expand_and_create_path(...)
 end
 
 --- Find busted command and additional paths
----@return table<string, string>?
+---@return neotest-busted.BustedCommand?
 local function find_busted_command()
     if config_enabled(config.busted_command) then
         logger.debug("Using busted command from config")
 
         return {
             command = config.busted_command,
-            path = config.busted_path or "",
-            cpath = config.busted_cpath or "",
+            path = config.busted_path or {},
+            cpath = config.busted_cpath or {},
         }
     end
 
@@ -50,9 +50,13 @@ local function find_busted_command()
 
         return {
             command = local_globs[1],
-            path = config.busted_path
-                or "./lua/?.lua;./lua_modules/share/lua/5.1/?.lua;./lua_modules/share/lua/5.1/?/init.lua;;",
-            cpath = config.busted_cpath or "./lua_modules/lib/lua/5.1/?.so;;",
+            path = config.busted_path or {
+                "./lua/?.lua",
+                "./lua/?/init.lua",
+                "./lua_modules/share/lua/5.1/?.lua",
+                "./lua_modules/share/lua/5.1/?/init.lua",
+            },
+            cpath = config.busted_cpath or { "./lua_modules/lib/lua/5.1/?.so" },
         }
     end
 
@@ -64,14 +68,14 @@ local function find_busted_command()
 
         return {
             command = user_globs[1],
-            path = config.busted_path or expand_and_create_path({
+            path = config.busted_path or {
                 "~/.luarocks/share/lua/5.1/?.lua",
                 "~/.luarocks/share/lua/5.1/?/init.lua",
-            }),
-            cpath = config.busted_cpath or expand_and_create_path({
+            },
+            cpath = config.busted_cpath or {
                 "~/.luarocks/lib/lua/5.1/?.so",
                 "~/.luarocks/lib/lua/5.1/?/?.so",
-            }),
+            },
         }
     end
 
@@ -81,8 +85,8 @@ local function find_busted_command()
 
         return {
             command = "busted",
-            path = config.busted_path or "",
-            cpath = config.busted_cpath or "",
+            path = config.busted_path or {},
+            cpath = config.busted_cpath or {},
         }
     end
 
@@ -160,34 +164,39 @@ local function create_busted_command(results_path, paths, filters)
 
     if busted.path and #busted.path > 0 then
         -- Add local paths to package.path
+        local busted_path = type(busted.path) == "string" and busted.path
+            or expand_and_create_path(busted.path)
+
         vim.list_extend(
             command,
-            { "-c", ("\"lua package.path = '%s;' .. package.path\""):format(busted.path) }
+            { "-c", ([[lua package.path = '%s;' .. package.path]]):format(busted_path) }
         )
     end
 
     if busted.cpath and #busted.cpath > 0 then
         -- Add local cpaths to package.cpath
+        local busted_cpath = type(busted.cpath) == "string" and busted.cpath
+            or expand_and_create_path(busted.cpath)
+
         vim.list_extend(
             command,
-            { "-c", ("\"lua package.cpath = '%s;' .. package.cpath\""):format(busted.cpath) }
+            { "-c", ([[lua package.cpath = '%s;' .. package.cpath]]):format(busted_cpath) }
         )
     end
 
     -- Create a busted command invocation string using neotest-busted's own output handler
-    local busted_command = ("%s --output=%s -Xoutput=%s"):format(
+    local busted_command = {
+        "-l",
         busted.command,
+        "--output",
         get_reporter_path(),
-        results_path
-    )
-
-    -- Run busted in neovim ('-l' stops parsing arguments for neovim)
-    -- stylua: ignore start
-    vim.list_extend(command, {
-        "-l", busted_command,
+        "-Xoutput",
+        results_path,
         "--verbose",
-    })
-    -- stylua: ignore end
+    }
+
+    -- Run busted with neovim ('-l' stops parsing arguments for neovim)
+    vim.list_extend(command, busted_command)
 
     if vim.tbl_islist(config.busted_args) and #config.busted_args > 0 then
         vim.list_extend(command, config.busted_args)
@@ -195,14 +204,15 @@ local function create_busted_command(results_path, paths, filters)
 
     -- Add test filters
     for _, filter in ipairs(filters) do
-        table.insert(command, "--filter=" .. '"' .. escape_test_pattern_filter(filter) .. '"')
+        table.insert(command, "--filter")
+        table.insert(command, escape_test_pattern_filter(filter))
     end
 
     -- Add test files
     vim.list_extend(command, paths)
 
     return {
-        command = table.concat(command, " "),
+        command = command,
         path = busted.path,
         cpath = busted.cpath,
     }
