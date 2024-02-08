@@ -18,7 +18,9 @@ describe("adapter.build_spec", function()
 
             -- Handle a different path when running in github actions
             if item == "--output" then
-                assert.is_true(vim.endswith(spec_command[idx], "lua/neotest-busted/output_handler.lua"))
+                assert.is_true(
+                    vim.endswith(spec_command[idx], "lua/neotest-busted/output_handler.lua")
+                )
                 idx = idx + 1
             end
         end
