@@ -6,6 +6,26 @@ local stub = require("luassert.stub")
 local async = _async.tests
 
 describe("adapter.build_spec", function()
+    local function assert_spec_command(spec_command, items)
+        assert.are.same(#spec_command, #items)
+
+        local idx = 1
+
+        while idx <= #items do
+            local item = items[idx]
+            assert.are.same(spec_command[idx], item)
+            idx = idx + 1
+
+            -- Handle a different path when running in github actions
+            if item == "--output" then
+                assert.is_true(
+                    vim.endswith(spec_command[idx], "lua/neotest-busted/output_handler.lua")
+                )
+                idx = idx + 1
+            end
+        end
+    end
+
     ---@param adapter neotest.Adapter
     ---@return neotest.Tree
     local function create_tree(adapter)
@@ -41,7 +61,7 @@ describe("adapter.build_spec", function()
 
         assert.is_not_nil(spec)
 
-        assert.are.same(spec.command, {
+        assert_spec_command(spec.command, {
             vim.loop.exepath(),
             "--headless",
             "-i",
@@ -97,7 +117,7 @@ describe("adapter.build_spec", function()
 
         assert.is_not_nil(spec)
 
-        assert.are.same(spec.command, {
+        assert_spec_command(spec.command, {
             vim.loop.exepath(),
             "--headless",
             "-i",
@@ -152,7 +172,7 @@ describe("adapter.build_spec", function()
 
         assert.is_not_nil(spec)
 
-        assert.are.same(spec.command, {
+        assert_spec_command(spec.command, {
             vim.loop.exepath(),
             "--headless",
             "-i",
@@ -199,7 +219,7 @@ describe("adapter.build_spec", function()
 
         assert.is_not_nil(spec)
 
-        assert.are.same(spec.command, {
+        assert_spec_command(spec.command, {
             vim.loop.exepath(),
             "--headless",
             "-i",
