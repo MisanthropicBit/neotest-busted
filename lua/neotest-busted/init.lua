@@ -41,7 +41,8 @@ local function find_busted_command()
     end
 
     -- Try to find a directory-local busted executable
-    local local_globs = util.glob("lua_modules/lib/luarocks/**/bin/busted")
+    local local_globs =
+        util.glob(util.create_path("lua_modules", "lib", "luarocks", "**", "bin", "busted"))
 
     if #local_globs > 0 then
         logger.debug("Using project-local busted executable")
@@ -49,31 +50,35 @@ local function find_busted_command()
         return {
             command = local_globs[1],
             path = config.busted_path or {
-                "./lua/?.lua",
-                "./lua/?/init.lua",
-                "./lua_modules/share/lua/5.1/?.lua",
-                "./lua_modules/share/lua/5.1/?/init.lua",
+                util.create_path("lua", "?.lua"),
+                util.create_path("lua", "?", "init.lua"),
+                util.create_path("lua_modules", "share", "lua", "5.1", "?.lua"),
+                util.create_path("lua_modules", "share", "lua", "5.1", "?", "init.lua"),
             },
-            cpath = config.busted_cpath or { "./lua_modules/lib/lua/5.1/?.so" },
+            cpath = config.busted_cpath
+                or { util.create_path(".", "lua_modules", "lib", "lua", "5.1", "?.so") },
         }
     end
 
     -- Try to find a local (user home directory) busted executable
-    local user_globs = util.glob("~/.luarocks/lib/luarocks/**/bin/busted")
+    local user_globs =
+        util.glob(util.create_path("~", ".luarocks", "lib", "luarocks", "**", "bin", "busted"))
 
     if #user_globs > 0 then
         logger.debug("Using local (~/.luarocks) busted executable")
 
         return {
             command = user_globs[1],
-            path = config.busted_path or {
-                "~/.luarocks/share/lua/5.1/?.lua",
-                "~/.luarocks/share/lua/5.1/?/init.lua",
-            },
-            cpath = config.busted_cpath or {
-                "~/.luarocks/lib/lua/5.1/?.so",
-                "~/.luarocks/lib/lua/5.1/?/?.so",
-            },
+            path = config.busted_path
+                or {
+                    util.create_path("~", ".luarocks", "share", "lua", "5.1", "?.lua"),
+                    util.create_path("~", ".luarocks", "share", "lua", "5.1", "?", "init.lua"),
+                },
+            cpath = config.busted_cpath
+                or {
+                    util.create_path("~", ".luarocks", "lib", "lua", "5.1", "?.so"),
+                    util.create_path("~", ".luarocks", "lib", "lua", "5.1", "?", "?.so"),
+                },
         }
     end
 
