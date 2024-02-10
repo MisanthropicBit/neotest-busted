@@ -235,7 +235,7 @@ describe("adapter.build_spec", function()
             "test-output.json",
             "--verbose",
             "--filter",
-            [[%^top%-le%[ve]l %(na%*m%+e%-sp%?ac%%e%) 2%\$ test 3]],
+            [[%^top%-le%[ve]l %(na%*m%+e%-sp%?ac%%e%) 2%$ test 3]],
             "./test_files/test1_spec.lua",
         })
 

@@ -129,8 +129,7 @@ end
 ---@return string
 local function escape_test_pattern_filter(filter)
     -- NOTE: The replacement of a literal '%' needs to come first so it does
-    -- match any earlier replacements that insert a '%'. Also we need to escape
-    -- '$' for the shell command to work
+    -- match any earlier replacements that insert a '%'.
     return (
         filter
             :gsub("%%", "%%%%")
@@ -141,7 +140,7 @@ local function escape_test_pattern_filter(filter)
             :gsub("%+", "%%+")
             :gsub("%-", "%%-")
             :gsub("%?", "%%?")
-            :gsub("%$", "%%\\$")
+            :gsub("%$", "%%$")
             :gsub("%^", "%%^")
     )
 end
