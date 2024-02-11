@@ -7,7 +7,7 @@ on:
 
 jobs:
   release:
-    name: gh release
+    name: create gh release
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
