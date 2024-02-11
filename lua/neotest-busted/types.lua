@@ -6,7 +6,7 @@
 ---@field minimal_init string?
 
 ---@class neotest-busted.BustedCommand
----@field command string
+---@field command string[]
 ---@field path string | string[]
 ---@field cpath string | string[]
 
