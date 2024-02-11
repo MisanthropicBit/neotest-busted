@@ -1,4 +1,4 @@
-name: LuaRocks release
+name: luarocks
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 jobs:
   luarocks-release:
     runs-on: ubuntu-latest
-    name: LuaRocks upload
+    name: upload
     steps:
       - name: Checkout
         uses: actions/checkout@v3
