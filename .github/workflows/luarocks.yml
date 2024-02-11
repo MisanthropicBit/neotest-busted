@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     name: LuaRocks upload
     steps:
-      - name: Lint
+      - name: Install luarocks
         uses: leafo/gh-actions-luarocks@v4.0.0
+      - name: Lint
         run: luarocks lint neotest-busted-scm-1.rockspec
       - name: Checkout
         uses: actions/checkout@v3
