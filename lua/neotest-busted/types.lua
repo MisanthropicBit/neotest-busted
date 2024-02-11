@@ -5,6 +5,10 @@
 ---@field busted_cpath string?
 ---@field minimal_init string?
 
+---@class neotest-busted.BustedCommandOptions
+---@field commands string[]? additional commands to run with '-c'
+---@field stdin boolean? accept input from stdin
+
 ---@class neotest-busted.BustedCommand
 ---@field command string
 ---@field path string | string[]

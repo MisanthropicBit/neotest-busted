@@ -5,15 +5,6 @@ local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local types = require("neotest.types")
 
-local function get_strategy_config(strategy)
-    local config = {
-        dap = nil, -- TODO: Add dap config
-    }
-    if config[strategy] then
-        return config[strategy]()
-    end
-end
-
 ---@type neotest-busted.Config
 local config = {
     busted_command = false,
@@ -148,8 +139,9 @@ end
 ---@param results_path string
 ---@param paths string[]
 ---@param filters string[]
+---@param options neotest-busted.BustedCommandOptions?
 ---@return neotest-busted.BustedCommand?
-local function create_busted_command(results_path, paths, filters)
+local function create_busted_command(results_path, paths, filters, options)
     local busted = find_busted_command()
 
     if not busted then
@@ -171,6 +163,18 @@ local function create_busted_command(results_path, paths, filters)
 
     -- Add local cpaths to package.cpath
     vim.list_extend(command, util.create_package_path_argument("package.cpath", busted.cpath))
+
+    local _options = options or {}
+
+    if _options.commands then
+        for _, value in ipairs(_options.commands) do
+            vim.list_extend(command, { "-c", value })
+        end
+    end
+
+    if _options.stdin then
+        table.insert(command, "-")
+    end
 
     -- Create a busted command invocation string using neotest-busted's own output handler
     local busted_command = {
@@ -203,6 +207,42 @@ local function create_busted_command(results_path, paths, filters)
         path = busted.path,
         cpath = busted.cpath,
     }
+end
+
+---@param strategy string
+---@param results_path string
+---@param paths string[]
+---@param filters string[]
+---@return table?
+local function get_strategy_config(strategy, results_path, paths, filters)
+    if strategy == "dap" then
+        -- TODO: Try passing arguments for busted using args
+        local busted = create_busted_command(
+            results_path,
+            {},
+            filters,
+            {
+                stdin = true,
+                -- commands = { 'lua require("lldebugger").start()' },
+            }
+        )
+
+        if not busted then
+            return nil
+        end
+
+        vim.print(busted.command)
+
+        return {
+            name = "Debug busted tests",
+            type = "lua-local",
+            request = "launch",
+            program = { command = busted.command },
+            args = paths,
+        }
+    end
+
+    return nil
 end
 
 ---@type neotest.Adapter
@@ -353,6 +393,9 @@ function BustedNeotestAdapter.build_spec(args)
             results_path = results_path,
             pos = pos,
             position_ids = position_ids,
+        },
+        strategy = {
+            get_strategy_config(args.strategy, results_path, paths, filters)
         },
     }
 end

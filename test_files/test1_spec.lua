@@ -1,3 +1,7 @@
+if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then
+    require("lldebugger").start()
+end
+
 describe("top-level namespace 1", function()
     describe("nested namespace 1", function()
         it("test 1", function()
