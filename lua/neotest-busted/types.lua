@@ -14,6 +14,12 @@
 ---@field path string | string[]
 ---@field cpath string | string[]
 
+---@class neotest-busted.TestCommands
+---@field nvim_command string[]
+---@field arguments string[]
+---@field lua_path string | string[]
+---@field lua_cpath string | string[]
+
 ---@class neotest-busted.BustedTrace
 ---@field what string
 ---@field short_src string
