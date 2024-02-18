@@ -1,14 +1,14 @@
 ---@class neotest-busted.Config
----@field busted_command false | string?
+---@field busted_command string?
 ---@field busted_args string[]?
----@field busted_path string?
----@field busted_cpath string?
+---@field busted_paths string[]?
+---@field busted_cpaths string[]?
 ---@field minimal_init string?
 
 ---@class neotest-busted.BustedCommand
 ---@field command string[]
----@field path string | string[]
----@field cpath string | string[]
+---@field lua_paths string[]
+---@field lua_cpaths string[]
 
 ---@class neotest-busted.BustedTrace
 ---@field what string

@@ -16,27 +16,23 @@ end
 
 ---@type neotest-busted.Config
 local config = {
-    busted_command = false,
+    busted_command = nil,
     busted_args = nil,
-    busted_path = nil,
-    busted_cpath = nil,
+    busted_paths = nil,
+    busted_cpaths = nil,
     minimal_init = nil,
 }
-
-local function config_enabled(value)
-    return (type(value) == "string" and #value > 0) or (type(value) == "boolean" and value)
-end
 
 --- Find busted command and additional paths
 ---@return neotest-busted.BustedCommand?
 local function find_busted_command()
-    if config_enabled(config.busted_command) then
+    if config.busted_command and #config.busted_command > 0 then
         logger.debug("Using busted command from config")
 
         return {
             command = config.busted_command,
-            path = config.busted_path or {},
-            cpath = config.busted_cpath or {},
+            lua_paths = {},
+            lua_cpaths = {},
         }
     end
 
@@ -49,14 +45,14 @@ local function find_busted_command()
 
         return {
             command = local_globs[1],
-            path = config.busted_path or {
-                util.create_path("lua", "?.lua"),
-                util.create_path("lua", "?", "init.lua"),
+            lua_paths = {
                 util.create_path("lua_modules", "share", "lua", "5.1", "?.lua"),
                 util.create_path("lua_modules", "share", "lua", "5.1", "?", "init.lua"),
             },
-            cpath = config.busted_cpath
-                or { util.create_path(".", "lua_modules", "lib", "lua", "5.1", "?.so") },
+            lua_cpaths = {
+                util.create_path("lua_modules", "lib", "lua", "5.1", "?.so"),
+                util.create_path("lua_modules", "lib", "lua", "5.1", "?", "?.so"),
+            },
         }
     end
 
@@ -69,16 +65,14 @@ local function find_busted_command()
 
         return {
             command = user_globs[1],
-            path = config.busted_path
-                or {
-                    util.create_path("~", ".luarocks", "share", "lua", "5.1", "?.lua"),
-                    util.create_path("~", ".luarocks", "share", "lua", "5.1", "?", "init.lua"),
-                },
-            cpath = config.busted_cpath
-                or {
-                    util.create_path("~", ".luarocks", "lib", "lua", "5.1", "?.so"),
-                    util.create_path("~", ".luarocks", "lib", "lua", "5.1", "?", "?.so"),
-                },
+            lua_paths = {
+                util.create_path("~", ".luarocks", "share", "lua", "5.1", "?.lua"),
+                util.create_path("~", ".luarocks", "share", "lua", "5.1", "?", "init.lua"),
+            },
+            lua_cpaths = {
+                util.create_path("~", ".luarocks", "lib", "lua", "5.1", "?.so"),
+                util.create_path("~", ".luarocks", "lib", "lua", "5.1", "?", "?.so"),
+            },
         }
     end
 
@@ -88,8 +82,8 @@ local function find_busted_command()
 
         return {
             command = "busted",
-            path = config.busted_path or {},
-            cpath = config.busted_cpath or {},
+            lua_paths = {},
+            lua_cpaths = {},
         }
     end
 
@@ -166,13 +160,32 @@ local function create_busted_command(results_path, paths, filters)
     }
     -- stylua: ignore end
 
-    -- Add local paths to package.path
-    vim.list_extend(command, util.create_package_path_argument("package.path", busted.path))
+    local lua_paths, lua_cpaths = {}, {}
 
-    -- Add local cpaths to package.cpath
-    vim.list_extend(command, util.create_package_path_argument("package.cpath", busted.cpath))
+    -- Append custom paths from config
+    if vim.tbl_islist(config.busted_paths) then
+        vim.list_extend(lua_paths, config.busted_paths)
+    end
 
-    -- Create a busted command invocation string using neotest-busted's own output handler
+    if vim.tbl_islist(config.busted_cpaths) then
+        vim.list_extend(lua_cpaths, config.busted_cpaths)
+    end
+
+    -- Append paths so busted can find the plugin files
+    table.insert(lua_paths, util.create_path("lua", "?.lua"))
+    table.insert(lua_paths, util.create_path("lua", "?", "init.lua"))
+
+    -- Add paths for busted
+    vim.list_extend(lua_paths, busted.lua_paths)
+    vim.list_extend(lua_cpaths, busted.lua_cpaths)
+
+    -- Create '-c' arguments for updating package paths in neovim
+    vim.list_extend(command, util.create_package_path_argument("package.path", lua_paths))
+    vim.list_extend(command, util.create_package_path_argument("package.cpath", lua_cpaths))
+
+    -- Create a busted command invocation string using neotest-busted's own
+    -- output handler and run busted with neovim ('-l' stops parsing arguments
+    -- for neovim)
     local busted_command = {
         "-l",
         busted.command,
@@ -183,7 +196,6 @@ local function create_busted_command(results_path, paths, filters)
         "--verbose",
     }
 
-    -- Run busted with neovim ('-l' stops parsing arguments for neovim)
     vim.list_extend(command, busted_command)
 
     if vim.tbl_islist(config.busted_args) and #config.busted_args > 0 then
@@ -200,8 +212,8 @@ local function create_busted_command(results_path, paths, filters)
 
     return {
         command = command,
-        path = busted.path,
-        cpath = busted.cpath,
+        path = lua_paths,
+        cpath = lua_cpaths,
     }
 end
 
@@ -209,7 +221,7 @@ end
 local BustedNeotestAdapter = { name = "neotest-busted" }
 
 BustedNeotestAdapter.root =
-    lib.files.match_root_pattern(".busted", ".luarocks", "lua_modules", "*.rockspec", ".git")
+    lib.files.match_root_pattern(".busted", ".luarocks", "lua_modules", "*.rockspec")
 
 ---@param file_path string
 ---@return boolean
