@@ -4,14 +4,17 @@ local lib = require("neotest.lib")
 describe("util", function()
     describe("trim", function()
         it("trims string", function()
-            assert.are.same(util.trim('"this will be trimmed"', '"'), 'this will be trimmed')
-            assert.are.same(util.trim('"this will not be trimmed"', '-'), '"this will not be trimmed"')
+            assert.are.same(util.trim('"this will be trimmed"', '"'), "this will be trimmed")
+            assert.are.same(
+                util.trim('"this will not be trimmed"', "-"),
+                '"this will not be trimmed"'
+            )
         end)
     end)
 
     describe("create_path", function()
         it("creates paths using os-specific path separator", function()
-            assert.are.same(util.create_path("some", "path"), 'some' .. lib.files.sep .. 'path')
+            assert.are.same(util.create_path("some", "path"), "some" .. lib.files.sep .. "path")
         end)
     end)
 
@@ -32,7 +35,10 @@ describe("util", function()
         it("expands paths and creates lua path", function()
             local args = { "./lua\\neotest-busted", "tests/" }
 
-            assert.are.same(util.expand_and_create_lua_path(unpack(args)), "./lua/neotest-busted;tests")
+            assert.are.same(
+                util.expand_and_create_lua_path(unpack(args)),
+                "./lua/neotest-busted;tests"
+            )
         end)
     end)
 
@@ -42,7 +48,7 @@ describe("util", function()
 
             assert.are.same(util.create_package_path_argument("package.path", args), {
                 "-c",
-                "lua package.path = 'some/path;some/other/path;' .. package.path"
+                "lua package.path = 'some/path;some/other/path;' .. package.path",
             })
         end)
 
