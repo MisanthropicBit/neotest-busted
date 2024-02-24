@@ -275,11 +275,11 @@ end
 ---@return string
 ---@return string
 local function extract_test_info(pos)
-    local parts = vim.fn.split(pos.id, "::")
+    local parts = vim.split(pos.id, "::")
     local path = parts[1]
     local stripped_pos_id = table.concat(
         vim.tbl_map(function(part)
-            return vim.fn.trim(part, '"')
+            return util.trim(part, '"')
         end, vim.list_slice(parts, 2)),
         " "
     )

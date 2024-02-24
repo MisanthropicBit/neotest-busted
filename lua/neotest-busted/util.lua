@@ -2,6 +2,30 @@ local util = {}
 
 local lib = require("neotest.lib")
 
+--- Trim a string of a character in both ends
+---@param value string
+---@param char string
+---@return unknown
+function util.trim(value, char)
+    local start, _end = 1, #value
+
+    for idx = 1, #value do
+        if value:sub(idx, idx) ~= char then
+            start = idx
+            break
+        end
+    end
+
+    for idx = #value, 1, -1 do
+        if value:sub(idx, idx) ~= char then
+            _end = idx
+            break
+        end
+    end
+
+    return value:sub(start, _end)
+end
+
 ---@param ... string
 ---@return string
 function util.create_path(...)
