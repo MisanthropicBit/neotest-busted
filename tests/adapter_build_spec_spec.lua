@@ -81,7 +81,9 @@ describe("adapter.build_spec", function()
             "-c",
             ("lua package.path = '%s;' .. package.path"):format(lua_paths),
             "-c",
-            ("lua package.cpath = '%s;' .. package.cpath"):format(vim.fs.normalize(busted_cpaths[1])),
+            ("lua package.cpath = '%s;' .. package.cpath"):format(
+                vim.fs.normalize(busted_cpaths[1])
+            ),
             "-l",
             "./busted",
             "--output",
