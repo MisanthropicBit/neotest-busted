@@ -2,7 +2,7 @@ local util = {}
 
 local lib = require("neotest.lib")
 
---- Trim a string of a character in both ends
+--- Trim a character in both ends of a string
 ---@param value string
 ---@param char string
 ---@return unknown
