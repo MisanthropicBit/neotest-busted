@@ -348,7 +348,7 @@ function BustedNeotestAdapter.build_spec(args)
         table.insert(paths, pos.id)
     end
 
-    local results_path = async.fn.tempname()
+    local results_path = async.fn.tempname() .. ".json"
     local busted = create_busted_command(results_path, paths, filters)
 
     if not busted then
@@ -359,13 +359,30 @@ function BustedNeotestAdapter.build_spec(args)
         return
     end
 
+    lib.files.write(results_path, "")
+    local stream_iter, stop_stream = lib.files.stream_lines(results_path)
+
     return {
         command = busted.command,
         context = {
             results_path = results_path,
             pos = pos,
             position_ids = position_ids,
+            stop_stream = stop_stream,
         },
+        stream = function()
+            return function()
+                local results = {}
+                local lines = stream_iter()
+
+                for _, line in ipairs(lines) do
+                    local result = vim.json.decode(line, { luanil = { object = true } })
+                    results[result.id] = result.result
+                end
+
+                return results
+            end
+        end,
     }
 end
 
@@ -418,7 +435,9 @@ end
 ---@param tree neotest.Tree
 ---@diagnostic disable-next-line: duplicate-set-field, unused-local
 function BustedNeotestAdapter.results(spec, strategy_result, tree)
-    -- TODO: Use an output stream instead if possible
+    -- Stop streaming data from the results file
+    spec.context.stop_stream()
+
     local results_path = spec.context.results_path
     local ok, data = pcall(lib.files.read, results_path)
 
