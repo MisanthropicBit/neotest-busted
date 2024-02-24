@@ -17,9 +17,13 @@
   <br />
 </div>
 
+<div align="center">
+
 [`Neotest`](https://github.com/nvim-neotest/neotest) adapter
 for running tests using [`busted`](https://github.com/lunarmodules/busted/) with
 neovim as the lua interpreter.
+
+</div>
 
 <div align="center">
     <img width="80%" src="https://github.com/MisanthropicBit/neotest-busted/assets/1846147/d2f81d89-9ce6-4c27-8a11-bf86072e9888" />
@@ -33,7 +37,7 @@ Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option
 
 ## Configuration
 
-Setup with neotest. Leave values as `nil` to disable them.
+Setup with neotest. Leave values as `nil` to leave them unspecified.
 
 ```lua
 require("neotest").setup({
@@ -43,12 +47,10 @@ require("neotest").setup({
             busted_command = "<path to a busted executable>",
             -- Extra arguments to busted
             busted_args = { "--shuffle-files" },
-            -- Custom semi-colon separated path to load in neovim before running busted..
-            -- Can also be an array of paths
-            busted_path = "my/custom/path/?.lua;...",
-            -- Custom semi-colon separated cpath to load in neovim before running busted.
-            -- Can also be an array of paths
-            busted_cpath = "my/custom/path/?.lua;...",
+            -- List of paths to add to package.path in neovim before running busted
+            busted_paths = { "my/custom/path/?.lua" },
+            -- List of paths to add to package.cpath in neovim before running busted
+            busted_cpaths = { "my/custom/path/?.so" },
             -- Custom script to load via -u. If nil, will look for a 'minimal_init.lua' file
             minimal_init = "custom_init.lua",
         }),
@@ -56,14 +58,36 @@ require("neotest").setup({
 })
 ```
 
-`neotest-busted` will try to find a `busted` executable automatically
-(directory-local, user home directory, or global). You can have it find a
-directory-local executable by running the following commands.
+## Luarocks and Busted
+
+Install luarocks from the [website](https://luarocks.org/). `neotest-busted`
+will try to find a `busted` executable automatically at the different locations
+listed below and in that priority (i.e. a directory-local install takes
+precedence over a global install). You can check the installation by running
+`luarocks list busted`.
+
+### Directory-local install
+
+You can install busted in your project's directory by running the following commands.
 
 ```shell
 > cd <your_project>
 > luarocks init
 > luarocks config --scope project lua_version 5.1
+> luarocks install busted
+```
+
+### User home directory install
+
+The following command will install busted in your home directory.
+
+```shell
+> luarocks install --local busted
+```
+
+### Global install
+
+```shell
 > luarocks install busted
 ```
 
