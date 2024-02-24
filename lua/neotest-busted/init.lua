@@ -160,6 +160,7 @@ local function create_busted_command(results_path, paths, filters)
     }
     -- stylua: ignore end
 
+    ---@type string[], string[]
     local lua_paths, lua_cpaths = {}, {}
 
     -- Append custom paths from config

@@ -14,22 +14,18 @@ function util.glob(path)
     return vim.fn.split(vim.fn.glob(path, true), "\n")
 end
 
----@param ... unknown
+---@param ... string
 ---@return string
 function util.expand_and_create_lua_path(...)
-    return table.concat(vim.tbl_map(vim.fn.expand, ...), ";")
+    return table.concat(vim.tbl_map(vim.fs.normalize, { ... }), ";")
 end
 
 ---@param package_path string lua package path type
----@param path string | string[] string to add to the lua package path
+---@param paths string[] string to add to the lua package path
 ---@return string[]
-function util.create_package_path_argument(package_path, path)
-    if path and #path > 0 then
-        local _path = path
-
-        if type(path) ~= "string" then
-            _path = util.expand_and_create_lua_path(path)
-        end
+function util.create_package_path_argument(package_path, paths)
+    if paths and #paths > 0 then
+        local _path = util.expand_and_create_lua_path(unpack(paths))
 
         return { "-c", ([[lua %s = '%s;' .. %s]]):format(package_path, _path, package_path) }
     end
