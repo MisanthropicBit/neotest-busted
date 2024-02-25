@@ -31,20 +31,9 @@ describe("util", function()
         end)
     end)
 
-    describe("expand_and_create_lua_path", function()
-        it("expands paths and creates lua path", function()
-            local args = { "./lua\\neotest-busted", "tests/" }
-
-            assert.are.same(
-                util.expand_and_create_lua_path(unpack(args)),
-                "./lua/neotest-busted;tests"
-            )
-        end)
-    end)
-
     describe("create_package_path_argument", function()
         it("creates package path argument", function()
-            local args = { "some/path", "some/other/path" }
+            local args = { "some/path", "some\\other/path" }
 
             assert.are.same(util.create_package_path_argument("package.path", args), {
                 "-c",
