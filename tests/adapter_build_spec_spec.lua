@@ -65,7 +65,7 @@ describe("adapter.build_spec", function()
         assert.is_not_nil(spec)
 
         local lua_paths = table.concat({
-            vim.fn.expand(busted_paths[1]),
+            vim.fs.normalize(busted_paths[1]),
             "lua/?.lua",
             "lua/?/init.lua",
         }, ";")
@@ -81,7 +81,9 @@ describe("adapter.build_spec", function()
             "-c",
             ("lua package.path = '%s;' .. package.path"):format(lua_paths),
             "-c",
-            ("lua package.cpath = '%s;' .. package.cpath"):format(vim.fn.expand(busted_cpaths[1])),
+            ("lua package.cpath = '%s;' .. package.cpath"):format(
+                vim.fs.normalize(busted_cpaths[1])
+            ),
             "-l",
             "./busted",
             "--output",
