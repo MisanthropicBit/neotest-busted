@@ -256,6 +256,15 @@ function BustedNeotestAdapter.discover_positions(path)
         name: (identifier) @func_name
         arguments: (arguments (_) @test.name (function_definition))
     ) (#match? @func_name "^it$")) @test.definition
+
+    ;; async it blocks (async.it)
+    ((function_call
+        name: (
+          dot_index_expression
+            field: (identifier) @func_name
+        )
+        arguments: (arguments (_) @test.name (function_definition))
+    ) (#match? @func_name "^it$")) @test.definition
 ]]
 
     return lib.treesitter.parse_positions(path, query, { nested_namespaces = true })
