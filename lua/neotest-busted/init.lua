@@ -360,6 +360,10 @@ function BustedNeotestAdapter.build_spec(args)
         return
     end
 
+    if args.extra_args then
+        vim.list_extend(busted.command, args.extra_args)
+    end
+
     return {
         command = busted.command,
         context = {
