@@ -101,17 +101,7 @@ Yes and no. [Busted removed support for async testing in version
 it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
 busted v1 but I haven't tested that.
 
-#### Q: Why does neotest-busted run more tests than I want and fail?
-
-`neotest-busted`, like many other `neotest` adapters, works by invoking a shell
-command where filenames and filters (lua patterns) are passed along to run the
-desired tests. One shell command is invoked per run so if you have two files,
-`test1_spec.lua` and `test2_spec.lua`, with the same (full) test name (let's
-just say `test a`) and you run two tests (`test1_spec.lua::test a` and
-`test2_spec.lua::test b`) in those files then the
-command would run `test a` in both files because the filters match.
-
-This is a limitation of the current approach.
+There's also an [experimental branch](https://github.com/MisanthropicBit/neotest-busted/tree/async-tests) for async support.
 
 ## Inspired by
 
