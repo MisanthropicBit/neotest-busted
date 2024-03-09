@@ -360,7 +360,7 @@ function BustedNeotestAdapter.build_spec(args)
         return
     end
 
-    if args.extra_args then
+    if vim.tbl_islist(args.extra_args) then
         vim.list_extend(busted.command, args.extra_args)
     end
 
