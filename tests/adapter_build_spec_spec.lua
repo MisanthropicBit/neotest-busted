@@ -222,6 +222,62 @@ describe("adapter.build_spec", function()
         })
     end)
 
+    async.it("builds command for test with extra arguments", function()
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            busted_args = {},
+            busted_paths = nil,
+            busted_cpaths = nil,
+            minimal_init = nil,
+        })
+        local tree = create_tree(adapter)
+        local spec = adapter.build_spec({
+            tree = tree:children()[1]:children()[1]:children()[1],
+            extra_args = { "--no-enable-sound", "--no-sort" },
+        })
+
+        assert.is_not_nil(spec)
+
+        assert_spec_command(spec.command, {
+            vim.loop.exepath(),
+            "--headless",
+            "-i",
+            "NONE",
+            "-n",
+            "-u",
+            "tests/minimal_init.lua",
+            "-c",
+            "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
+            "-l",
+            "./busted",
+            "--output",
+            "./lua/neotest-busted/output_handler.lua",
+            "-Xoutput",
+            "test-output.json",
+            "--verbose",
+            "--filter",
+            "top%-level namespace 1 nested namespace 1 test 1",
+            "./test_files/test1_spec.lua",
+            "--no-enable-sound",
+            "--no-sort",
+        })
+
+        assert.are.same(spec.context, {
+            results_path = "test-output.json",
+            pos = {
+                id = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+                name = '"test 1"',
+                path = "./test_files/test1_spec.lua",
+                range = { 2, 8, 4, 12 },
+                type = "test",
+            },
+            position_ids = {
+                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+            },
+        })
+    end)
     async.it("escapes special characters in pattern in command", function()
         package.loaded["neotest-busted"] = nil
 
