@@ -58,6 +58,47 @@ require("neotest").setup({
 })
 ```
 
+## Defining tests
+
+Please refer to the [official busted documentation](https://lunarmodules.github.io/busted/).
+
+### Async tests
+
+Running an asynchronous test is done by wrapping the test function in a call to
+`async`. This also works for `before_each` and `after_each`.
+
+```lua
+local async = require("neotest-busted.async")
+local control = require("neotest.async").control
+
+describe("async", function()
+    before_each(async(function()
+        vim.print("async before_each")
+    end))
+
+    it("async test", async(function()
+        local timer = vim.loop.new_timer()
+        local event = control.event()
+
+        -- Print a message after 2 seconds
+        timer:start(2000, 0, function()
+            timer:stop()
+            timer:close()
+            vim.print("Hello from async test")
+            event.set()
+        end)
+
+        -- Wait for the timer to complete
+        event.wait()
+    end))
+end)
+```
+
+The `async` function takes an optional second timeout argument in milliseconds.
+If omitted, uses the numerical value of either the
+`NEOTEST_BUSTED_ASYNC_TEST_TIMEOUT` or `PLENARY_TEST_TIMEOUT` environment
+variables or a default timeout of 2000 milliseconds.
+
 ## Luarocks and Busted
 
 Install luarocks from the [website](https://luarocks.org/). `neotest-busted`
