@@ -8,6 +8,7 @@ describe("async tests", function()
         end, 50)
     end))
 
+    -- stylua: ignore start
     it("async test 1", async(function()
         vim.wait(100, function()
             return false
@@ -28,4 +29,5 @@ describe("async tests", function()
 
         event.wait()
     end))
+    -- stylua: ignore end
 end)
