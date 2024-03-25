@@ -135,6 +135,51 @@ The following command will install busted in your home directory.
 > luarocks install busted
 ```
 
+## Running from the command line
+
+A command called `NeotestBusted` is provided for running tests via the command
+line. It needs to run in `--headless` mode (no UI) and a minimal config. You can
+provide the tests to run after the `--` argument.
+
+```shell
+$ nvim -u tests/minimal_init.lua --headless -c 'NeotestBusted' -- tests/my_spec.lua
+```
+
+#### Test via rockspec
+
+If you use a rockspec, you can provide a test command so you can run tests using
+`luarocks test`.
+
+```lua
+-- Your rockspec...
+
+test = {
+    type = "command",
+    command = "nvim -u tests/minimal_init.lua --headless -c 'NeotestBusted' -- ",
+}
+```
+
+#### Using busted
+
+Lastly, you can provide a `.busted` config file and run your tests using busted.
+Learn more about busted configuration file from the [official
+docs](https://lunarmodules.github.io/busted/#usage).
+
+```lua
+return {
+    -- Default task to run if no task was specified
+    default = {
+        verbose = true,
+        lua = "???",
+    },
+}
+```
+
+```shell
+$ # Or omit the '--config-file' argument if running in the same directory
+$ busted --config-file=/path/to/.busted
+```
+
 ## FAQ
 
 #### Q: Can I run async tests with neotest-busted?

@@ -11,6 +11,10 @@
 ---@field lua_paths string[]
 ---@field lua_cpaths string[]
 
+---@class neotest-busted.BustedCommandOptions
+---@field output_handler string?
+---@field output_handler_options string[]?
+
 ---@class neotest-busted.BustedTrace
 ---@field what string
 ---@field short_src string
