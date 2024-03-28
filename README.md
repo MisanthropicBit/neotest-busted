@@ -33,7 +33,9 @@ neovim as the lua interpreter.
 
 ## Requirements
 
-Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
+* Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
+* [Neotest](https://github.com/nvim-neotest/neotest) 4.0.0+ (which requires neovim 0.9.0+).
+* [`busted`](https://github.com/lunarmodules/busted) installed (in project-local, user, or global location, see [here](#luarocks-and-busted)).
 
 ## Configuration
 
@@ -51,7 +53,8 @@ require("neotest").setup({
             busted_paths = { "my/custom/path/?.lua" },
             -- List of paths to add to package.cpath in neovim before running busted
             busted_cpaths = { "my/custom/path/?.so" },
-            -- Custom script to load via -u. If nil, will look for a 'minimal_init.lua' file
+            -- Custom config to load via -u to set up testing.
+            -- If nil, will look for a 'minimal_init.lua' file
             minimal_init = "custom_init.lua",
         }),
     },
@@ -136,15 +139,13 @@ The following command will install busted in your home directory.
 
 #### Q: Can I run async tests with neotest-busted?
 
-Yes and no. [Busted removed support for async testing in version
-2](https://github.com/lunarmodules/busted/issues/545#issuecomment-282085568)
-([even though the docs still mention
-it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
+Yes. Please see the instructions [here](#async-tests).
+
+[Busted removed support for async testing in version 2](https://github.com/lunarmodules/busted/issues/545#issuecomment-282085568)
+([even though the docs still mention it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
 busted v1 but I haven't tested that.
 
-There's also an [experimental branch](https://github.com/MisanthropicBit/neotest-busted/tree/async-tests) for async support.
-
-## Inspired by
+## Inspiration
 
 * [Using Neovim as Lua interpreter with Luarocks](https://zignar.net/2023/01/21/using-luarocks-as-lua-interpreter-with-luarocks/)
 * [nlua](https://github.com/mfussenegger/nlua)
