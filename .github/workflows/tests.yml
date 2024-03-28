@@ -27,6 +27,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
           git clone --depth 1 https://github.com/nvim-neotest/neotest ~/.local/share/nvim/site/pack/vendor/start/neotest
+          git clone --depth 1 https://github.com/nvim-neotest/nvim-nio ~/.local/share/nvim/site/pack/vendor/start/nvim-nio
           ln -s "$(pwd)" ~/.local/share/nvim/site/pack/vendor/start
       - name: Setup neovim
         uses: rhysd/action-setup-vim@v1
