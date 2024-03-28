@@ -35,7 +35,7 @@ neovim as the lua interpreter.
 
 * Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
 * [Neotest](https://github.com/nvim-neotest/neotest) 4.0.0+ (which requires neovim 0.9.0+).
-* [`busted`](https://github.com/lunarmodules/busted) installed (in project-local, user, or global location, see [here](#luarocks-and-busted)).
+* [`busted`](https://github.com/lunarmodules/busted) installed (in a project-local, user, or global location, see [here](#luarocks-and-busted)).
 
 ## Configuration
 
