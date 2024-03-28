@@ -23,6 +23,7 @@ describe("util", function()
             local path = util.create_path("lua", "**", "*.lua")
 
             assert.are.same(util.glob(path), {
+                "lua/neotest-busted/async.lua",
                 "lua/neotest-busted/init.lua",
                 "lua/neotest-busted/output_handler.lua",
                 "lua/neotest-busted/types.lua",

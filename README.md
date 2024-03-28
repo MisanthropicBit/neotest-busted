@@ -33,7 +33,9 @@ neovim as the lua interpreter.
 
 ## Requirements
 
-Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
+* Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
+* [Neotest](https://github.com/nvim-neotest/neotest) 4.0.0+ (which requires neovim 0.9.0+).
+* [`busted`](https://github.com/lunarmodules/busted) installed (in a project-local, user, or global location, see [here](#luarocks-and-busted)).
 
 ## Configuration
 
@@ -51,12 +53,54 @@ require("neotest").setup({
             busted_paths = { "my/custom/path/?.lua" },
             -- List of paths to add to package.cpath in neovim before running busted
             busted_cpaths = { "my/custom/path/?.so" },
-            -- Custom script to load via -u. If nil, will look for a 'minimal_init.lua' file
+            -- Custom config to load via -u to set up testing.
+            -- If nil, will look for a 'minimal_init.lua' file
             minimal_init = "custom_init.lua",
         }),
     },
 })
 ```
+
+## Defining tests
+
+Please refer to the [official busted documentation](https://lunarmodules.github.io/busted/).
+
+### Async tests
+
+Running an asynchronous test is done by wrapping the test function in a call to
+`async`. This also works for `before_each` and `after_each`.
+
+```lua
+local async = require("neotest-busted.async")
+local control = require("neotest.async").control
+
+describe("async", function()
+    before_each(async(function()
+        vim.print("async before_each")
+    end))
+
+    it("async test", async(function()
+        local timer = vim.loop.new_timer()
+        local event = control.event()
+
+        -- Print a message after 2 seconds
+        timer:start(2000, 0, function()
+            timer:stop()
+            timer:close()
+            vim.print("Hello from async test")
+            event.set()
+        end)
+
+        -- Wait for the timer to complete
+        event.wait()
+    end))
+end)
+```
+
+The `async` function takes an optional second timeout argument in milliseconds.
+If omitted, uses the numerical value of either the
+`NEOTEST_BUSTED_ASYNC_TEST_TIMEOUT` or `PLENARY_TEST_TIMEOUT` environment
+variables or a default timeout of 2000 milliseconds.
 
 ## Luarocks and Busted
 
@@ -95,15 +139,13 @@ The following command will install busted in your home directory.
 
 #### Q: Can I run async tests with neotest-busted?
 
-Yes and no. [Busted removed support for async testing in version
-2](https://github.com/lunarmodules/busted/issues/545#issuecomment-282085568)
-([even though the docs still mention
-it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
+Yes. Please see the instructions [here](#async-tests).
+
+[Busted removed support for async testing in version 2](https://github.com/lunarmodules/busted/issues/545#issuecomment-282085568)
+([even though the docs still mention it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
 busted v1 but I haven't tested that.
 
-There's also an [experimental branch](https://github.com/MisanthropicBit/neotest-busted/tree/async-tests) for async support.
-
-## Inspired by
+## Inspiration
 
 * [Using Neovim as Lua interpreter with Luarocks](https://zignar.net/2023/01/21/using-luarocks-as-lua-interpreter-with-luarocks/)
 * [nlua](https://github.com/mfussenegger/nlua)
