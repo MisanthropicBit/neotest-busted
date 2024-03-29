@@ -90,6 +90,17 @@ local function parse_paths(commandline)
     return paths
 end
 
+local function collect_tests()
+    local tests = {}
+    local util = require("neotest-busted.util")
+
+    vim.list_extend(tests, util.glob("test/**/*_spec.lua"))
+    vim.list_extend(tests, util.glob("tests/**/*_spec.lua"))
+    vim.list_extend(tests, util.glob("spec/**/*_spec.lua"))
+
+    return tests
+end
+
 vim.api.nvim_create_user_command("NeotestBusted", function()
     if not is_headless() then
         print_level("NeotestBusted must be run with the --headless option")
@@ -103,6 +114,10 @@ vim.api.nvim_create_user_command("NeotestBusted", function()
     end
 
     local paths = parse_paths(vim.v.argv)
+
+    if not paths or #paths == 0 then
+        paths = collect_tests()
+    end
 
     local busted = adapter.create_busted_command(
         nil,
