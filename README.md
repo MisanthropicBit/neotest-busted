@@ -31,6 +31,15 @@ neovim as the lua interpreter.
     <img width="80%" src="https://github.com/MisanthropicBit/neotest-busted/assets/1846147/cd947151-4008-47e5-89a4-42cc83094a0d" />
 </div>
 
+# Table of contents
+
+- [Requirements](#requirements)
+- [Configuration](#configuration)
+- [Defining tests](#defining-tests)
+- [Luarocks and Busted](#luarocks-and-busted)
+- [Running from the command line](#running-from-the-command-line)
+- [FAQ](#faq)
+
 ## Requirements
 
 * Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
@@ -137,9 +146,13 @@ The following command will install busted in your home directory.
 
 ## Running from the command line
 
-A command called `NeotestBusted` is provided for running tests via the command
-line. It needs to run in `--headless` mode (no UI) and a minimal config. You can
-provide the tests to run after the `--` argument.
+A `NeotestBusted` command is provided for running tests via the command line.
+This is useful for running all tests during CI. It needs to run in `--headless`
+mode (no UI) and needs a minimal config for setting up your test environment.
+
+You can provide the tests to run after the `--` argument. If you don't specify
+any tests to run, the command will automatically try to find your tests in a
+`spec`, `test`, or `tests` directory.
 
 ```shell
 $ nvim -u tests/minimal_init.lua --headless -c 'NeotestBusted' -- tests/my_spec.lua
@@ -162,7 +175,7 @@ test = {
 #### Using busted
 
 Lastly, you can provide a `.busted` config file and run your tests using busted.
-Learn more about busted configuration file from the [official
+Learn more about busted configuration files from the [official
 docs](https://lunarmodules.github.io/busted/#usage).
 
 ```lua
