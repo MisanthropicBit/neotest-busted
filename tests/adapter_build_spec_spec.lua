@@ -45,7 +45,7 @@ describe("adapter.build_spec", function()
     end
 
     before_each(function()
-        stub(_async.fn, "tempname", "test-output.json")
+        stub(_async.fn, "tempname", "test-output")
         stub(vim, "notify")
     end)
 
@@ -94,11 +94,11 @@ describe("adapter.build_spec", function()
             ),
             "-l",
             "./busted",
+            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--verbose",
             "--shuffle-lists",
             "./test_files/test1_spec.lua",
         })
@@ -148,11 +148,11 @@ describe("adapter.build_spec", function()
             "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
+            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--verbose",
             "--filter",
             "top%-level namespace 1 nested namespace 1 test 1",
             "--filter",
@@ -205,11 +205,11 @@ describe("adapter.build_spec", function()
             "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
+            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--verbose",
             "--filter",
             "top%-level namespace 1 nested namespace 1 test 1",
             "./test_files/test1_spec.lua",
@@ -260,11 +260,11 @@ describe("adapter.build_spec", function()
             "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
+            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--verbose",
             "--filter",
             "top%-level namespace 1 nested namespace 1 test 1",
             "./test_files/test1_spec.lua",
@@ -310,11 +310,11 @@ describe("adapter.build_spec", function()
             "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
+            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--verbose",
             "--filter",
             [[%^top%-le%[ve]l %(na%*m%+e%-sp%?ac%%e%) 2%$ test 3]],
             "./test_files/test1_spec.lua",

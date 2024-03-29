@@ -183,7 +183,6 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
     -- Append paths so busted can find the plugin files
     table.insert(lua_paths, util.create_path("lua", "?.lua"))
     table.insert(lua_paths, util.create_path("lua", "?", "init.lua"))
-    table.insert(lua_paths, util.create_path("lua_modules/share/lua/5.1/busted/?.lua"))
 
     -- Add paths for busted
     vim.list_extend(lua_paths, busted.lua_paths)
