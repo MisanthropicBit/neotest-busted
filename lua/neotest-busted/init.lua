@@ -1,3 +1,4 @@
+local config = require("neotest-busted.config")
 local util = require("neotest-busted.util")
 
 local async = require("neotest.async")
@@ -6,30 +7,25 @@ local logger = require("neotest.logging")
 local types = require("neotest.types")
 
 local function get_strategy_config(strategy)
-    local config = {
+    local strategy_configs = {
         dap = nil, -- TODO: Add dap config
     }
-    if config[strategy] then
-        return config[strategy]()
+    if strategy_configs[strategy] then
+        return strategy_configs[strategy]()
     end
 end
 
----@type neotest-busted.Config
-local config = {
-    busted_command = nil,
-    busted_args = nil,
-    busted_paths = nil,
-    busted_cpaths = nil,
-    minimal_init = nil,
-}
+---@type neotest.Adapter
+local BustedNeotestAdapter = { name = "neotest-busted" }
 
 --- Find busted command and additional paths
 ---@return neotest-busted.BustedCommand?
-local function find_busted_command()
+function BustedNeotestAdapter.find_busted_command()
     if config.busted_command and #config.busted_command > 0 then
         logger.debug("Using busted command from config")
 
         return {
+            type = "config",
             command = config.busted_command,
             lua_paths = {},
             lua_cpaths = {},
@@ -44,6 +40,7 @@ local function find_busted_command()
         logger.debug("Using project-local busted executable")
 
         return {
+            type = "project",
             command = local_globs[1],
             lua_paths = {
                 util.create_path("lua_modules", "share", "lua", "5.1", "?.lua"),
@@ -64,6 +61,7 @@ local function find_busted_command()
         logger.debug("Using local (~/.luarocks) busted executable")
 
         return {
+            type = "local",
             command = user_globs[1],
             lua_paths = {
                 util.create_path("~", ".luarocks", "share", "lua", "5.1", "?.lua"),
@@ -81,6 +79,7 @@ local function find_busted_command()
         logger.debug("Using global busted executable")
 
         return {
+            type = "global",
             command = "busted",
             lua_paths = {},
             lua_cpaths = {},
@@ -144,7 +143,7 @@ end
 ---@param filters string[]
 ---@return neotest-busted.BustedCommand?
 local function create_busted_command(results_path, paths, filters)
-    local busted = find_busted_command()
+    local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
         return
@@ -217,9 +216,6 @@ local function create_busted_command(results_path, paths, filters)
         cpath = lua_cpaths,
     }
 end
-
----@type neotest.Adapter
-local BustedNeotestAdapter = { name = "neotest-busted" }
 
 BustedNeotestAdapter.root =
     lib.files.match_root_pattern(".busted", ".luarocks", "lua_modules", "*.rockspec")
@@ -493,20 +489,7 @@ end
 setmetatable(BustedNeotestAdapter, {
     ---@param user_config neotest-busted.Config?
     __call = function(_, user_config)
-        local _user_config = user_config or {}
-
-        if type(_user_config.busted_command) == "string" and #_user_config.busted_command > 0 then
-            if vim.fn.executable(_user_config.busted_command) == 0 then
-                vim.notify(
-                    ("Busted command in configuration is not executable: '%s'"):format(
-                        _user_config.busted_command
-                    ),
-                    vim.log.levels.ERROR
-                )
-            end
-        end
-
-        config = vim.tbl_extend("force", config, _user_config)
+        config.configure(user_config)
 
         return BustedNeotestAdapter
     end,
