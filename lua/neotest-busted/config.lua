@@ -11,10 +11,15 @@ local default_config = {
 
 local _user_config = default_config
 
+---@param value any
+---@return boolean
 local function is_non_empty_string(value)
     return value == nil or (type(value) == "string" and #value > 0)
 end
 
+---@param value any
+---@return boolean
+---@return string?
 local function is_optional_string_list(value)
     if value == nil then
         return true
@@ -24,9 +29,13 @@ local function is_optional_string_list(value)
         return false
     end
 
+    if not vim.tbl_islist(value) then
+        return false, "must be a list-like table"
+    end
+
     for idx, item in ipairs(value) do
         if type(item) ~= "string" then
-            return false, "at index " .. tostring(idx)
+            return false, "item at at index " .. tostring(idx)
         end
     end
 
@@ -43,27 +52,27 @@ function config.validate(_config)
         busted_command = {
             _config.busted_command,
             is_non_empty_string,
-            "expected optional non-empty string"
+            "optional non-empty string"
         },
         busted_args = {
             _config.busted_args,
             is_optional_string_list,
-            "expected an optional string list",
+            "an optional string list",
         },
         busted_paths = {
             _config.busted_paths,
             is_optional_string_list,
-            "expected an optional string list",
+            "an optional string list",
         },
         busted_cpaths = {
             _config.busted_cpaths,
             is_optional_string_list,
-            "expected an optional string list",
+            "an optional string list",
         },
         minimal_init = {
             _config.minimal_init,
             is_non_empty_string,
-            "expected optional non-empty string"
+            "optional non-empty string"
         },
     })
     -- stylua: ignore end
@@ -81,16 +90,23 @@ function config.validate(_config)
     return ok
 end
 
+---@param user_config table<string, any>?
+---@return boolean
+---@return any?
 function config.configure(user_config)
     _user_config = vim.tbl_deep_extend("keep", user_config or {}, default_config)
 
     local ok, error = config.validate(_user_config)
 
     if not ok then
-        -- message.error("Errors found in config: " .. error)
+        vim.api.nvim_echo({
+            { "[neotest-busted]: ", "ErrorMsg" },
+            { "Invalid config: " },
+            { error },
+        }, true, {})
     end
 
-    return ok
+    return ok, error
 end
 
 return setmetatable(config, {

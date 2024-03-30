@@ -1,49 +1,73 @@
 local config = require("neotest-busted.config")
+local stub = require("luassert.stub")
 
 describe("config", function()
     it("handles invalid configs", function()
-        local invalid_configs = {
+        local non_empty_string = "optional non-empty string"
+        local optional_string_list = "an optional string list"
+
+        local invalid_config_tests = {
             {
-                busted_command = 1,
+                config = { busted_command = 1 },
+                error_message = non_empty_string,
             },
             {
-                busted_command = "",
+                config = { busted_command = "" },
+                error_message = non_empty_string,
             },
             {
-                busted_args = { 1, 2, 3 },
+                config = { busted_args = { 1, 2, 3 } },
+                error_message = optional_string_list,
             },
             {
-                busted_args = 1,
+                config = { busted_args = 1 },
+                error_message = optional_string_list,
             },
             {
-                busted_paths = { 1, 2, 3 },
+                config = { busted_paths = { 1, 2, 3 } },
+                error_message = optional_string_list,
             },
             {
-                busted_paths = 1,
+                config = { busted_paths = 1 },
+                error_message = optional_string_list,
             },
             {
-                busted_cpaths = { 1, 2, 3 },
+                config = { busted_cpaths = { 1, 2, 3 } },
+                error_message = optional_string_list,
             },
             {
-                busted_cpaths = 1,
+                config = { busted_cpaths = 1 },
+                error_message = optional_string_list,
             },
             {
-                minimal_init = false,
+                config = { minimal_init = false },
+                error_message = non_empty_string,
             },
             {
-                minimal_init = "",
+                config = { minimal_init = "" },
+                error_message = non_empty_string,
             },
         }
 
-        for _, invalid_config in ipairs(invalid_configs) do
-            local ok = config.configure(invalid_config)
+        stub(vim.api, "nvim_echo")
+
+        for _, invalid_config_test in ipairs(invalid_config_tests) do
+            local ok, error = config.configure(invalid_config_test.config)
 
             if ok then
-                vim.print(invalid_config)
+                vim.print(invalid_config_test)
             end
 
             assert.is_false(ok)
+
+            assert.stub(vim.api.nvim_echo).was.called_with({
+                { "[neotest-busted]: ", "ErrorMsg" },
+                { "Invalid config: " },
+                { error },
+            }, true, {})
         end
+
+        vim.api.nvim_echo:revert()
     end)
 
     it("throws no errors for a valid config", function()
