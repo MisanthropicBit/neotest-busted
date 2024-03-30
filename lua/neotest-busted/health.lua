@@ -5,14 +5,16 @@ local config = require("neotest-busted.config")
 
 local min_neovim_version = "0.9.0"
 
+---@param module_name string
+---@param not_installed_reporter fun(msg: string)?
 local function check_module_installed(module_name, not_installed_reporter)
     local installed, _ = pcall(require, module_name)
 
     if installed then
-        vim.health.report_ok(module_name .. " is installed")
+        vim.health.report_ok(("`%s` is installed"):format(module_name))
     else
         local _not_installed_reporter = not_installed_reporter or vim.health.report_ok
-        _not_installed_reporter(module_name .. " is not installed")
+        _not_installed_reporter(("`%s` is not installed"):format(module_name))
     end
 end
 
@@ -41,10 +43,13 @@ function health.check()
     local busted = adapter.find_busted_command()
 
     if not busted then
-        vim.health.report_error("could not find busted executable")
+        vim.health.report_error(
+            "could not find busted executable",
+            "please install busted using luarocks (https://luarocks.org/)"
+        )
     else
         vim.health.report_ok(
-            ("found busted (type: `%s`) at\n%s"):format(
+            ("found `busted` (type: %s) at\n%s"):format(
                 busted.type,
                 vim.loop.fs_realpath(busted.command)
             )
