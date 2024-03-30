@@ -36,7 +36,7 @@ describe("util", function()
 
     describe("create_package_path_argument", function()
         it("creates package path argument", function()
-            local args = { "some/path", "some\\other/path" }
+            local args = { "some/path", "some/other/path" }
 
             assert.are.same(util.create_package_path_argument("package.path", args), {
                 "-c",
