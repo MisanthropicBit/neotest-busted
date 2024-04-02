@@ -50,13 +50,31 @@ local function print_level(message, level)
     local options = level_options[level] or level_options[vim.log.levels.ERROR]
 
     if is_headless() then
-        io.stderr:write(("%s%s%s: %s\n"):format(color_code(options.color), options.name, color_code(Color.Reset), message))
+        io.stderr:write(
+            ("%s%s%s: %s\n"):format(
+                color_code(options.color),
+                options.name,
+                color_code(Color.Reset),
+                message
+            )
+        )
     else
         vim.api.nvim_echo({
-            { options.name, options.hl_group },
+            { ("[neotest-busted:%s]: "):format(options.name), options.hl_group },
             { " " .. message },
         }, true, {})
     end
+end
+
+local function find_minimal_init()
+    local glob_matches = vim.fn.glob("**/minimal_init.lua", false, true)
+
+    if #glob_matches == 0 then
+        print_level("Could not find minimal_init.lua")
+        return
+    end
+
+    return glob_matches[1]
 end
 
 ---@param module_name string
@@ -65,29 +83,15 @@ local function require_checked(module_name)
     local ok, module_or_error = pcall(require, module_name)
 
     if not ok then
-        print_level(
-            module_name .. " could not be loaded. Set up 'runtimepath' or provide a minimal configuration via '-u': " .. module_or_error,
-            vim.log.levels.ERROR
-        )
         return nil
     end
 
     return module_or_error
 end
 
----@param commandline string[]
 ---@return string[]
-local function parse_paths(commandline)
-    local paths = {}
-
-    for idx, item in ipairs(commandline) do
-        if item == "--" then
-            paths = vim.list_slice(commandline, idx + 1)
-            break
-        end
-    end
-
-    return paths
+local function parse_paths()
+    return _G.arg
 end
 
 local function collect_tests()
@@ -101,51 +105,51 @@ local function collect_tests()
     return tests
 end
 
-vim.api.nvim_create_user_command("NeotestBusted", function()
+local function run()
     if not is_headless() then
-        print_level("NeotestBusted must be run with the --headless option")
+        print_level("Script must be run from the command line")
         return
     end
 
-    local adapter = require_checked("neotest-busted")
+    local minimal_init = find_minimal_init()
 
-    if not adapter then
-        vim.cmd.quitall()
+    if not minimal_init then
+        print_level("Could not find a minimal_init.lua file")
+        return
     end
 
-    local paths = parse_paths(vim.v.argv)
+    vim.cmd.source(minimal_init)
+
+    local adapter_or_error = require_checked("neotest-busted")
+
+    if not adapter_or_error then
+        print_level(
+            "neotest-busted could not be loaded. Set up 'runtimepath', provide a minimal configuration via '-u', or create a 'minimal_init.lua' file: "
+            .. adapter_or_error,
+            vim.log.levels.ERROR
+        )
+        return
+    end
+
+    local paths = parse_paths()
 
     if not paths or #paths == 0 then
         paths = collect_tests()
     end
 
-    local busted = adapter.create_busted_command(
-        nil,
-        paths,
-        {},
-        {
-            output_handler = "utfTerminal",
-            output_handler_options = { "--color" },
-        }
-    )
+    local busted = adapter_or_error.create_busted_command(nil, paths, {}, {
+        output_handler = "utfTerminal",
+        output_handler_options = { "--color" },
+    })
 
     if not busted then
-        io.stdout:write("\x1b[31mError:\x1b[0m Could not find a busted executable\n")
+        print_level("Could not find a busted executable")
         return
     end
 
     io.stdout:write(
-        vim.fn.system(
-            table.concat(
-                vim.tbl_map(vim.fn.shellescape, busted.command),
-                " "
-            )
-        )
+        vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, busted.command), " "))
     )
+end
 
-    vim.cmd.quitall()
-end, {
-    nargs = "*",
-    range = false,
-    desc = "",
-})
+run()

@@ -33,5 +33,5 @@ build = {
 
 test = {
     type = "command",
-    command = "nvim -u tests/minimal_init.lua --headless -c 'NeotestBusted' -- ",
+    command = "nvim -u NONE -l ./scripts/test-runner.lua",
 }

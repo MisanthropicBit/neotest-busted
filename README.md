@@ -146,16 +146,17 @@ The following command will install busted in your home directory.
 
 ## Running from the command line
 
-A `NeotestBusted` command is provided for running tests via the command line.
-This is useful for running all tests during CI. It needs to run in `--headless`
-mode (no UI) and needs a minimal config for setting up your test environment.
+A `test-runner.lua` script is provided in the `scripts/` folder for running
+tests via the command line. This is useful for running all tests during CI for
+example.
 
-You can provide the tests to run after the `--` argument. If you don't specify
-any tests to run, the command will automatically try to find your tests in a
-`spec`, `test`, or `tests` directory.
+If you do not provide a `minimal_init.lua` to set up your test environment, the
+script will look for one and source it. If you don't specify any tests to run,
+the command will automatically try to find your tests in a `spec/`, `test/`, or
+`tests/` directory.
 
 ```shell
-$ nvim -u tests/minimal_init.lua --headless -c 'NeotestBusted' -- tests/my_spec.lua
+$ nvim -u NONE -l ./scripts/test-runner.lua tests/my_spec.lua
 ```
 
 #### Test via rockspec
@@ -168,7 +169,7 @@ If you use a rockspec, you can provide a test command so you can run tests using
 
 test = {
     type = "command",
-    command = "nvim -u tests/minimal_init.lua --headless -c 'NeotestBusted' -- ",
+    command = "nvim -u NONE -l ./scripts/test-runner.lua",
 }
 ```
 
