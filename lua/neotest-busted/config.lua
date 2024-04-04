@@ -25,17 +25,13 @@ local function is_optional_string_list(value)
         return true
     end
 
-    if type(value) ~= "table" then
-        return false
-    end
-
     if not vim.tbl_islist(value) then
         return false, "must be a list-like table"
     end
 
     for idx, item in ipairs(value) do
         if type(item) ~= "string" then
-            return false, "item at at index " .. tostring(idx)
+            return false, "item at index " .. tostring(idx)
         end
     end
 
