@@ -61,7 +61,7 @@ local function print_level(message, level)
     else
         vim.api.nvim_echo({
             { ("[neotest-busted:%s]: "):format(options.name), options.hl_group },
-            { " " .. message },
+            { message },
         }, true, {})
     end
 end
