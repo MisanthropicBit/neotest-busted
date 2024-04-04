@@ -38,7 +38,7 @@ function health.check()
         vim.health.report_error("config has errors: " .. error)
     end
 
-    local busted = adapter.find_busted_command()
+    local busted = adapter.find_busted_command(true)
 
     if busted then
         vim.health.report_ok(
@@ -48,9 +48,9 @@ function health.check()
             )
         )
     else
-        vim.health.report_error(
-            "could not find busted executable",
-            "please install busted using luarocks (https://luarocks.org/)"
+        vim.health.report_warn(
+            "could not find busted executable globally or in user home folder",
+            "if not already installed locally, please install busted using luarocks (https://luarocks.org/)"
         )
     end
 end

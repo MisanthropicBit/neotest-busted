@@ -19,8 +19,9 @@ end
 local BustedNeotestAdapter = { name = "neotest-busted" }
 
 --- Find busted command and additional paths
+---@param ignore_local? boolean
 ---@return neotest-busted.BustedCommand?
-function BustedNeotestAdapter.find_busted_command()
+function BustedNeotestAdapter.find_busted_command(ignore_local)
     if config.busted_command and #config.busted_command > 0 then
         logger.debug("Using busted command from config")
 
@@ -32,25 +33,27 @@ function BustedNeotestAdapter.find_busted_command()
         }
     end
 
-    -- Try to find a directory-local busted executable
-    local local_globs =
-        util.glob(util.create_path("lua_modules", "lib", "luarocks", "**", "bin", "busted"))
+    if not ignore_local then
+        -- Try to find a directory-local busted executable
+        local local_globs =
+            util.glob(util.create_path("lua_modules", "lib", "luarocks", "**", "bin", "busted"))
 
-    if #local_globs > 0 then
-        logger.debug("Using project-local busted executable")
+        if #local_globs > 0 then
+            logger.debug("Using project-local busted executable")
 
-        return {
-            type = "project",
-            command = local_globs[1],
-            lua_paths = {
-                util.create_path("lua_modules", "share", "lua", "5.1", "?.lua"),
-                util.create_path("lua_modules", "share", "lua", "5.1", "?", "init.lua"),
-            },
-            lua_cpaths = {
-                util.create_path("lua_modules", "lib", "lua", "5.1", "?.so"),
-                util.create_path("lua_modules", "lib", "lua", "5.1", "?", "?.so"),
-            },
-        }
+            return {
+                type = "project",
+                command = local_globs[1],
+                lua_paths = {
+                    util.create_path("lua_modules", "share", "lua", "5.1", "?.lua"),
+                    util.create_path("lua_modules", "share", "lua", "5.1", "?", "init.lua"),
+                },
+                lua_cpaths = {
+                    util.create_path("lua_modules", "lib", "lua", "5.1", "?.so"),
+                    util.create_path("lua_modules", "lib", "lua", "5.1", "?", "?.so"),
+                },
+            }
+        end
     end
 
     -- Try to find a local (user home directory) busted executable
