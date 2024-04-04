@@ -20,7 +20,7 @@ local BustedNeotestAdapter = { name = "neotest-busted" }
 
 --- Find busted command and additional paths
 ---@param ignore_local? boolean
----@return neotest-busted.BustedCommand?
+---@return neotest-busted.BustedCommandConfig?
 function BustedNeotestAdapter.find_busted_command(ignore_local)
     if config.busted_command and #config.busted_command > 0 then
         logger.debug("Using busted command from config")
@@ -145,7 +145,7 @@ end
 ---@param paths string[]
 ---@param filters string[]
 ---@param options neotest-busted.BustedCommandOptions?
----@return neotest-busted.BustedCommand?
+---@return neotest-busted.BustedCommandConfig?
 function BustedNeotestAdapter.create_busted_command(results_path, paths, filters, options)
     local busted = BustedNeotestAdapter.find_busted_command()
 
@@ -153,9 +153,8 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
         return
     end
 
-    local _options = options or {}
-
     -- stylua: ignore start
+    ---@type string[]
     local command = {
         vim.loop.exepath(),
         "--headless",
@@ -188,6 +187,8 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
     -- Create '-c' arguments for updating package paths in neovim
     vim.list_extend(command, util.create_package_path_argument("package.path", lua_paths))
     vim.list_extend(command, util.create_package_path_argument("package.cpath", lua_cpaths))
+
+    local _options = options or {}
 
     -- Create a busted command invocation string using neotest-busted's own
     -- output handler and run busted with neovim ('-l' stops parsing arguments
