@@ -125,7 +125,7 @@ local function run()
     if not adapter_or_error then
         print_level(
             "neotest-busted could not be loaded. Set up 'runtimepath', provide a minimal configuration via '-u', or create a 'minimal_init.lua' file: "
-            .. adapter_or_error,
+                .. adapter_or_error,
             vim.log.levels.ERROR
         )
         return
