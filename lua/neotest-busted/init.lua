@@ -18,9 +18,6 @@ end
 ---@type neotest.Adapter
 local BustedNeotestAdapter = { name = "neotest-busted" }
 
----@type neotest.Adapter
-local BustedNeotestAdapter = { name = "neotest-busted" }
-
 --- Find busted command and additional paths
 ---@param ignore_local? boolean
 ---@return neotest-busted.BustedCommand?
