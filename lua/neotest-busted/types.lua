@@ -6,7 +6,8 @@
 ---@field minimal_init string?
 
 ---@class neotest-busted.BustedCommand
----@field command string[]
+---@field type "config" | "project" | "user" | "global"
+---@field command string
 ---@field lua_paths string[]
 ---@field lua_cpaths string[]
 

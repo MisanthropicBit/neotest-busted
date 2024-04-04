@@ -24,6 +24,8 @@ describe("util", function()
 
             assert.are.same(util.glob(path), {
                 "lua/neotest-busted/async.lua",
+                "lua/neotest-busted/config.lua",
+                "lua/neotest-busted/health.lua",
                 "lua/neotest-busted/init.lua",
                 "lua/neotest-busted/output_handler.lua",
                 "lua/neotest-busted/types.lua",
@@ -34,7 +36,7 @@ describe("util", function()
 
     describe("create_package_path_argument", function()
         it("creates package path argument", function()
-            local args = { "some/path", "some\\other/path" }
+            local args = { "some/path", "some/other/path" }
 
             assert.are.same(util.create_package_path_argument("package.path", args), {
                 "-c",

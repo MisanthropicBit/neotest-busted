@@ -6,6 +6,14 @@ local stub = require("luassert.stub")
 local async = _async.tests
 
 describe("adapter.build_spec", function()
+    before_each(function()
+        stub(vim.api, "nvim_echo")
+    end)
+
+    after_each(function()
+        vim.api.nvim_echo:revert()
+    end)
+
     local function assert_spec_command(spec_command, items)
         assert.are.same(#spec_command, #items)
 
