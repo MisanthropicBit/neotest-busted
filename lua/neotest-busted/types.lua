@@ -14,6 +14,7 @@
 ---@class neotest-busted.BustedCommandOptions
 ---@field output_handler string?
 ---@field output_handler_options string[]?
+---@field extra_busted_args string[]?
 
 ---@class neotest-busted.BustedTrace
 ---@field what string

@@ -156,8 +156,6 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
         return
     end
 
-    local _options = options or {}
-
     -- stylua: ignore start
     local command = {
         vim.loop.exepath(),
@@ -192,6 +190,8 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
     vim.list_extend(command, util.create_package_path_argument("package.path", lua_paths))
     vim.list_extend(command, util.create_package_path_argument("package.cpath", lua_cpaths))
 
+    local _options = options or {}
+
     -- Create a busted command invocation string using neotest-busted's own
     -- output handler and run busted with neovim ('-l' stops parsing arguments
     -- for neovim)
@@ -200,6 +200,8 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
         busted.command,
         "--verbose",
     }
+
+    vim.list_extend(busted_command, _options.extra_busted_args or {})
 
     if _options.output_handler then
         vim.list_extend(busted_command, {

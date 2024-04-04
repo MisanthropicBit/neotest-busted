@@ -91,9 +91,10 @@ end
 
 ---@return string[]
 local function parse_paths()
-    return _G.arg
+    return vim.list_slice(_G.arg, 3)
 end
 
+---@return string[]
 local function collect_tests()
     local tests = {}
     local util = require("neotest-busted.util")
@@ -131,15 +132,15 @@ local function run()
         return
     end
 
-    local paths = parse_paths()
-
-    if not paths or #paths == 0 then
-        paths = collect_tests()
-    end
+    local paths = parse_paths() or collect_tests()
 
     local busted = adapter_or_error.create_busted_command(nil, paths, {}, {
         output_handler = "utfTerminal",
         output_handler_options = { "--color" },
+        -- If we don't add this the subsequent busted command (run via neovim) will use the
+        -- .busted config file and use the 'lua' option for running the tests which will
+        -- cause an infinite process spawning loop
+        extra_busted_args = { "--ignore-lua" }
     })
 
     if not busted then
