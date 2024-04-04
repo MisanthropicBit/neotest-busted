@@ -173,27 +173,6 @@ test = {
 }
 ```
 
-#### Using busted
-
-Lastly, you can provide a `.busted` config file and run your tests using busted.
-Learn more about busted configuration files from the [official
-docs](https://lunarmodules.github.io/busted/#usage).
-
-```lua
-return {
-    -- Default task to run if no task was specified
-    default = {
-        verbose = true,
-        lua = "???",
-    },
-}
-```
-
-```shell
-$ # Or omit the '--config-file' argument if running in the same directory
-$ busted --config-file=/path/to/.busted
-```
-
 ## FAQ
 
 #### Q: Can I run async tests with neotest-busted?
