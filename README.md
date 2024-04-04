@@ -184,7 +184,7 @@ return {
     -- Default task to run if no task was specified
     default = {
         verbose = true,
-        lua = "???",
+        lua = "path/to/neotest-busted/scripts/nlua"
     },
 }
 ```
