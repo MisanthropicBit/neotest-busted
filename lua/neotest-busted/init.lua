@@ -150,7 +150,7 @@ end
 ---@param options neotest-busted.BustedCommandOptions?
 ---@return neotest-busted.BustedCommand?
 function BustedNeotestAdapter.create_busted_command(results_path, paths, filters, options)
-    local busted = find_busted_command()
+    local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
         return
