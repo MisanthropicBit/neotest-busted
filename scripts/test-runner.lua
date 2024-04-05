@@ -66,7 +66,9 @@ local function print_level(message, level)
     end
 end
 
+---@return string?
 local function find_minimal_init()
+    -- NOTE: Do not use util.glob as we haven't loaded neotest-busted at this point
     local glob_matches = vim.fn.glob("**/minimal_init.lua", false, true)
 
     if #glob_matches == 0 then
@@ -98,9 +100,9 @@ local function collect_tests()
     local tests = {}
     local util = require("neotest-busted.util")
 
-    vim.list_extend(tests, util.glob("test/**/*_spec.lua"))
-    vim.list_extend(tests, util.glob("tests/**/*_spec.lua"))
-    vim.list_extend(tests, util.glob("spec/**/*_spec.lua"))
+    vim.list_extend(tests, util.glob("./test/**/*_spec.lua"))
+    vim.list_extend(tests, util.glob("./tests/**/*_spec.lua"))
+    vim.list_extend(tests, util.glob("./spec/**/*_spec.lua"))
 
     return tests
 end
@@ -131,11 +133,7 @@ local function run()
         return
     end
 
-    local paths = parse_paths()
-
-    if not paths or #paths == 0 then
-        paths = collect_tests()
-    end
+    local paths = parse_paths() or collect_tests()
 
     local busted = adapter_or_error.create_busted_command(nil, paths, {}, {
         output_handler = "utfTerminal",
