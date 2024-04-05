@@ -141,7 +141,7 @@ local function escape_test_pattern_filter(filter)
     )
 end
 
----@param results_path string
+---@param results_path string?
 ---@param paths string[]
 ---@param filters string[]
 ---@param options neotest-busted.BustedCommandOptions?
@@ -210,6 +210,10 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
             vim.list_extend(busted_command, _options.output_handler_options)
         end
     else
+        if not results_path then
+            error("Results path expected but not set")
+        end
+
         vim.list_extend(busted_command, {
             "--output",
             get_reporter_path(),
