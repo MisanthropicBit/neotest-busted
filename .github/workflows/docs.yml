@@ -1,0 +1,40 @@
+name: autogen-docs
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    name: generate docs
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - name: panvimdoc
+        uses: kdheepak/panvimdoc@v4.0.0
+        with:
+          vimdoc: neotest-busted
+          pandoc: "README.md"
+          version: "NVIM >= v0.9.0"
+          toc: true
+          description: "Neotest adapter for running tests using busted with neovim as the lua interpreter."
+          demojify: false
+          dedupsubheadings: true
+          treesitter: true
+          ignorerawblocks: true
+          docmapping: false
+          docmappingprojectname: true
+          shiftheadinglevelby: 0
+          incrementheadinglevelby: 0
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: github.ref == 'refs/heads/master'
+        with:
+          commit_message: "Auto-generate docs"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
