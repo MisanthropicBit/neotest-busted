@@ -20,7 +20,7 @@ local BustedNeotestAdapter = { name = "neotest-busted" }
 
 --- Find busted command and additional paths
 ---@param ignore_local? boolean
----@return neotest-busted.BustedCommand?
+---@return neotest-busted.BustedCommandConfig?
 function BustedNeotestAdapter.find_busted_command(ignore_local)
     if config.busted_command and #config.busted_command > 0 then
         logger.debug("Using busted command from config")
@@ -141,11 +141,12 @@ local function escape_test_pattern_filter(filter)
     )
 end
 
----@param results_path string
+---@param results_path string?
 ---@param paths string[]
 ---@param filters string[]
----@return neotest-busted.BustedCommand?
-local function create_busted_command(results_path, paths, filters)
+---@param options neotest-busted.BustedCommandOptions?
+---@return neotest-busted.BustedCommandConfig?
+function BustedNeotestAdapter.create_busted_command(results_path, paths, filters, options)
     local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
@@ -153,6 +154,7 @@ local function create_busted_command(results_path, paths, filters)
     end
 
     -- stylua: ignore start
+    ---@type string[]
     local command = {
         vim.loop.exepath(),
         "--headless",
@@ -186,18 +188,39 @@ local function create_busted_command(results_path, paths, filters)
     vim.list_extend(command, util.create_package_path_argument("package.path", lua_paths))
     vim.list_extend(command, util.create_package_path_argument("package.cpath", lua_cpaths))
 
+    local _options = options or {}
+
     -- Create a busted command invocation string using neotest-busted's own
     -- output handler and run busted with neovim ('-l' stops parsing arguments
     -- for neovim)
     local busted_command = {
         "-l",
         busted.command,
-        "--output",
-        get_reporter_path(),
-        "-Xoutput",
-        results_path,
         "--verbose",
     }
+
+    if _options.output_handler then
+        vim.list_extend(busted_command, {
+            "--output",
+            _options.output_handler,
+        })
+
+        if _options.output_handler_options then
+            table.insert(busted_command, "-Xoutput")
+            vim.list_extend(busted_command, _options.output_handler_options)
+        end
+    else
+        if not results_path then
+            error("Results path expected but not set")
+        end
+
+        vim.list_extend(busted_command, {
+            "--output",
+            get_reporter_path(),
+            "-Xoutput",
+            results_path,
+        })
+    end
 
     vim.list_extend(command, busted_command)
 
@@ -356,8 +379,8 @@ function BustedNeotestAdapter.build_spec(args)
         table.insert(paths, pos.id)
     end
 
-    local results_path = async.fn.tempname()
-    local busted = create_busted_command(results_path, paths, filters)
+    local results_path = async.fn.tempname() .. ".json"
+    local busted = BustedNeotestAdapter.create_busted_command(results_path, paths, filters)
 
     if not busted then
         local message = "Could not find a busted executable"

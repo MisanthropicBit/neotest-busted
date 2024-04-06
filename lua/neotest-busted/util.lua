@@ -35,7 +35,7 @@ end
 ---@param path string
 ---@return string[]
 function util.glob(path)
-    return vim.fn.split(vim.fn.glob(path, true), "\n")
+    return vim.fn.glob(path, false, true)
 end
 
 ---@param ... string

@@ -5,11 +5,15 @@
 ---@field busted_cpaths string[]?
 ---@field minimal_init string?
 
----@class neotest-busted.BustedCommand
+---@class neotest-busted.BustedCommandConfig
 ---@field type "config" | "project" | "user" | "global"
----@field command string
+---@field command string[]
 ---@field lua_paths string[]
 ---@field lua_cpaths string[]
+
+---@class neotest-busted.BustedCommandOptions
+---@field output_handler string?
+---@field output_handler_options string[]?
 
 ---@class neotest-busted.BustedTrace
 ---@field what string

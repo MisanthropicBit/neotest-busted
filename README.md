@@ -31,6 +31,15 @@ neovim as the lua interpreter.
     <img width="80%" src="https://github.com/MisanthropicBit/neotest-busted/assets/1846147/cd947151-4008-47e5-89a4-42cc83094a0d" />
 </div>
 
+# Table of contents
+
+- [Requirements](#requirements)
+- [Configuration](#configuration)
+- [Defining tests](#defining-tests)
+- [Luarocks and Busted](#luarocks-and-busted)
+- [Running from the command line](#running-from-the-command-line)
+- [FAQ](#faq)
+
 ## Requirements
 
 * Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
@@ -133,6 +142,35 @@ The following command will install busted in your home directory.
 
 ```shell
 > luarocks install busted
+```
+
+## Running from the command line
+
+A `test-runner.lua` script is provided in the `scripts/` folder for running
+tests via the command line. This is useful for running all tests during CI for
+example.
+
+If you do not provide a `minimal_init.lua` to set up your test environment, the
+script will look for one and source it. If you don't specify any tests to run,
+the command will automatically try to find your tests in a `spec/`, `test/`, or
+`tests/` directory.
+
+```shell
+$ nvim -u NONE -l ./scripts/test-runner.lua tests/my_spec.lua
+```
+
+#### Test via rockspec
+
+If you use a rockspec, you can provide a test command so you can run tests using
+`luarocks test`.
+
+```lua
+-- Your rockspec...
+
+test = {
+    type = "command",
+    command = "nvim -u NONE -l ./scripts/test-runner.lua",
+}
 ```
 
 ## FAQ
