@@ -1,18 +1,19 @@
 ---@class neotest-busted.Config
----@field busted_command false | string?
+---@field busted_command string?
 ---@field busted_args string[]?
----@field busted_path string?
----@field busted_cpath string?
+---@field busted_paths string[]?
+---@field busted_cpaths string[]?
 ---@field minimal_init string?
 
----@class neotest-busted.BustedCommandOptions
----@field commands string[]? additional commands to run with '-c'
----@field stdin boolean? accept input from stdin
+---@class neotest-busted.BustedCommandConfig
+---@field type "config" | "project" | "user" | "global"
+---@field command string[]
+---@field lua_paths string[]
+---@field lua_cpaths string[]
 
----@class neotest-busted.BustedCommand
----@field command string
----@field path string | string[]
----@field cpath string | string[]
+---@class neotest-busted.BustedCommandOptions
+---@field output_handler string?
+---@field output_handler_options string[]?
 
 ---@class neotest-busted.TestCommands
 ---@field nvim_command string[]

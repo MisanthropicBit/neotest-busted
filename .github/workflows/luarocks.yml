@@ -1,4 +1,4 @@
-name: LuaRocks release
+name: luarocks
 
 on:
   push:
@@ -9,13 +9,16 @@ on:
 jobs:
   luarocks-release:
     runs-on: ubuntu-latest
-    name: LuaRocks upload
+    name: upload
     steps:
-      - name: Lint
-        uses: leafo/gh-actions-luarocks@v4.0.0
-        run: luarocks lint neotest-busted-scm-1.rockspec
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1"
+      - uses: leafo/gh-actions-luarocks@v4.0.0
+      - name: Lint
+        run: luarocks lint neotest-busted-scm-1.rockspec
       - name: Test and upload
         uses: nvim-neorocks/luarocks-tag-release@v5
         env:

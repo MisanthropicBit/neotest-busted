@@ -17,9 +17,13 @@
   <br />
 </div>
 
+<div align="center">
+
 [`Neotest`](https://github.com/nvim-neotest/neotest) adapter
 for running tests using [`busted`](https://github.com/lunarmodules/busted/) with
 neovim as the lua interpreter.
+
+</div>
 
 <div align="center">
     <img width="80%" src="https://github.com/MisanthropicBit/neotest-busted/assets/1846147/d2f81d89-9ce6-4c27-8a11-bf86072e9888" />
@@ -27,13 +31,24 @@ neovim as the lua interpreter.
     <img width="80%" src="https://github.com/MisanthropicBit/neotest-busted/assets/1846147/cd947151-4008-47e5-89a4-42cc83094a0d" />
 </div>
 
+# Table of contents
+
+- [Requirements](#requirements)
+- [Configuration](#configuration)
+- [Defining tests](#defining-tests)
+- [Luarocks and Busted](#luarocks-and-busted)
+- [Running from the command line](#running-from-the-command-line)
+- [FAQ](#faq)
+
 ## Requirements
 
-Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
+* Neovim 0.9.0+ for the [`-l`](https://neovim.io/doc/user/starting.html#-l) option.
+* [Neotest](https://github.com/nvim-neotest/neotest) 4.0.0+ (which requires neovim 0.9.0+).
+* [`busted`](https://github.com/lunarmodules/busted) installed (in a project-local, user, or global location, see [here](#luarocks-and-busted)).
 
 ## Configuration
 
-Setup with neotest. Leave values as `nil` to disable them.
+Setup with neotest. Leave values as `nil` to leave them unspecified.
 
 ```lua
 require("neotest").setup({
@@ -43,22 +58,70 @@ require("neotest").setup({
             busted_command = "<path to a busted executable>",
             -- Extra arguments to busted
             busted_args = { "--shuffle-files" },
-            -- Custom semi-colon separated path to load in neovim before running busted..
-            -- Can also be an array of paths
-            busted_path = "my/custom/path/?.lua;...",
-            -- Custom semi-colon separated cpath to load in neovim before running busted.
-            -- Can also be an array of paths
-            busted_cpath = "my/custom/path/?.lua;...",
-            -- Custom script to load via -u. If nil, will look for a 'minimal_init.lua' file
+            -- List of paths to add to package.path in neovim before running busted
+            busted_paths = { "my/custom/path/?.lua" },
+            -- List of paths to add to package.cpath in neovim before running busted
+            busted_cpaths = { "my/custom/path/?.so" },
+            -- Custom config to load via -u to set up testing.
+            -- If nil, will look for a 'minimal_init.lua' file
             minimal_init = "custom_init.lua",
         }),
     },
 })
 ```
 
-`neotest-busted` will try to find a `busted` executable automatically
-(directory-local, user home directory, or global). You can have it find a
-directory-local executable by running the following commands.
+## Defining tests
+
+Please refer to the [official busted documentation](https://lunarmodules.github.io/busted/).
+
+### Async tests
+
+Running an asynchronous test is done by wrapping the test function in a call to
+`async`. This also works for `before_each` and `after_each`.
+
+```lua
+local async = require("neotest-busted.async")
+local control = require("neotest.async").control
+
+describe("async", function()
+    before_each(async(function()
+        vim.print("async before_each")
+    end))
+
+    it("async test", async(function()
+        local timer = vim.loop.new_timer()
+        local event = control.event()
+
+        -- Print a message after 2 seconds
+        timer:start(2000, 0, function()
+            timer:stop()
+            timer:close()
+            vim.print("Hello from async test")
+            event.set()
+        end)
+
+        -- Wait for the timer to complete
+        event.wait()
+    end))
+end)
+```
+
+The `async` function takes an optional second timeout argument in milliseconds.
+If omitted, uses the numerical value of either the
+`NEOTEST_BUSTED_ASYNC_TEST_TIMEOUT` or `PLENARY_TEST_TIMEOUT` environment
+variables or a default timeout of 2000 milliseconds.
+
+## Luarocks and Busted
+
+Install luarocks from the [website](https://luarocks.org/). `neotest-busted`
+will try to find a `busted` executable automatically at the different locations
+listed below and in that priority (i.e. a directory-local install takes
+precedence over a global install). You can check the installation by running
+`luarocks list busted`.
+
+### Directory-local install
+
+You can install busted in your project's directory by running the following commands.
 
 ```shell
 > cd <your_project>
@@ -67,29 +130,60 @@ directory-local executable by running the following commands.
 > luarocks install busted
 ```
 
+### User home directory install
+
+The following command will install busted in your home directory.
+
+```shell
+> luarocks install --local busted
+```
+
+### Global install
+
+```shell
+> luarocks install busted
+```
+
+## Running from the command line
+
+A `test-runner.lua` script is provided in the `scripts/` folder for running
+tests via the command line. This is useful for running all tests during CI for
+example.
+
+If you do not provide a `minimal_init.lua` to set up your test environment, the
+script will look for one and source it. If you don't specify any tests to run,
+the command will automatically try to find your tests in a `spec/`, `test/`, or
+`tests/` directory.
+
+```shell
+$ nvim -u NONE -l ./scripts/test-runner.lua tests/my_spec.lua
+```
+
+#### Test via rockspec
+
+If you use a rockspec, you can provide a test command so you can run tests using
+`luarocks test`.
+
+```lua
+-- Your rockspec...
+
+test = {
+    type = "command",
+    command = "nvim -u NONE -l ./scripts/test-runner.lua",
+}
+```
+
 ## FAQ
 
 #### Q: Can I run async tests with neotest-busted?
 
-Yes and no. [Busted removed support for async testing in version
-2](https://github.com/lunarmodules/busted/issues/545#issuecomment-282085568)
-([even though the docs still mention
-it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
+Yes. Please see the instructions [here](#async-tests).
+
+[Busted removed support for async testing in version 2](https://github.com/lunarmodules/busted/issues/545#issuecomment-282085568)
+([even though the docs still mention it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
 busted v1 but I haven't tested that.
 
-#### Q: Why does neotest-busted run more tests than I want and fail?
-
-`neotest-busted`, like many other `neotest` adapters, works by invoking a shell
-command where filenames and filters (lua patterns) are passed along to run the
-desired tests. One shell command is invoked per run so if you have two files,
-`test1_spec.lua` and `test2_spec.lua`, with the same (full) test name (let's
-just say `test a`) and you run two tests (`test1_spec.lua::test a` and
-`test2_spec.lua::test b`) in those files then the
-command would run `test a` in both files because the filters match.
-
-This is a limitation of the current approach.
-
-## Inspired by
+## Inspiration
 
 * [Using Neovim as Lua interpreter with Luarocks](https://zignar.net/2023/01/21/using-luarocks-as-lua-interpreter-with-luarocks/)
 * [nlua](https://github.com/mfussenegger/nlua)

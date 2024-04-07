@@ -6,6 +6,14 @@ local stub = require("luassert.stub")
 local async = _async.tests
 
 describe("adapter.build_spec", function()
+    before_each(function()
+        stub(vim.api, "nvim_echo")
+    end)
+
+    after_each(function()
+        vim.api.nvim_echo:revert()
+    end)
+
     local function assert_spec_command(spec_command, items)
         assert.are.same(#spec_command, #items)
 
@@ -37,7 +45,7 @@ describe("adapter.build_spec", function()
     end
 
     before_each(function()
-        stub(_async.fn, "tempname", "test-output.json")
+        stub(_async.fn, "tempname", "test-output")
         stub(vim, "notify")
     end)
 
@@ -49,17 +57,26 @@ describe("adapter.build_spec", function()
     async.it("builds command for file test", function()
         package.loaded["neotest-busted"] = nil
 
+        local busted_paths = { "~/.luarocks/share/lua/5.1/?.lua" }
+        local busted_cpaths = { "~/.luarocks/lib/lua/5.1/?.so" }
+
         local adapter = require("neotest-busted")({
             busted_command = "./busted",
             busted_args = { "--shuffle-lists" },
-            busted_path = "~/.luarocks/share/lua/5.1/?.lua",
-            busted_cpath = "~/.luarocks/lib/lua/5.1/?.so",
+            busted_paths = busted_paths,
+            busted_cpaths = busted_cpaths,
             minimal_init = nil,
         })
         local tree = create_tree(adapter)
         local spec = adapter.build_spec({ tree = tree })
 
         assert.is_not_nil(spec)
+
+        local lua_paths = table.concat({
+            vim.fs.normalize(busted_paths[1]),
+            "lua/?.lua",
+            "lua/?/init.lua",
+        }, ";")
 
         assert_spec_command(spec.command, {
             vim.loop.exepath(),
@@ -70,16 +87,18 @@ describe("adapter.build_spec", function()
             "-u",
             "tests/minimal_init.lua",
             "-c",
-            "lua package.path = '~/.luarocks/share/lua/5.1/?.lua;' .. package.path",
+            ("lua package.path = '%s;' .. package.path"):format(lua_paths),
             "-c",
-            "lua package.cpath = '~/.luarocks/lib/lua/5.1/?.so;' .. package.cpath",
+            ("lua package.cpath = '%s;' .. package.cpath"):format(
+                vim.fs.normalize(busted_cpaths[1])
+            ),
             "-l",
             "./busted",
+            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--verbose",
             "--shuffle-lists",
             "./test_files/test1_spec.lua",
         })
@@ -108,8 +127,8 @@ describe("adapter.build_spec", function()
         local adapter = require("neotest-busted")({
             busted_command = "./busted",
             busted_args = {},
-            busted_path = nil,
-            busted_cpath = nil,
+            busted_paths = nil,
+            busted_cpaths = nil,
             minimal_init = nil,
         })
         local tree = create_tree(adapter)
@@ -125,13 +144,15 @@ describe("adapter.build_spec", function()
             "-n",
             "-u",
             "tests/minimal_init.lua",
+            "-c",
+            "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
+            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--verbose",
             "--filter",
             "top%-level namespace 1 nested namespace 1 test 1",
             "--filter",
@@ -161,8 +182,8 @@ describe("adapter.build_spec", function()
         local adapter = require("neotest-busted")({
             busted_command = "./busted",
             busted_args = {},
-            busted_path = nil,
-            busted_cpath = nil,
+            busted_paths = nil,
+            busted_cpaths = nil,
             minimal_init = nil,
         })
         local tree = create_tree(adapter)
@@ -180,13 +201,15 @@ describe("adapter.build_spec", function()
             "-n",
             "-u",
             "tests/minimal_init.lua",
+            "-c",
+            "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
+            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--verbose",
             "--filter",
             "top%-level namespace 1 nested namespace 1 test 1",
             "./test_files/test1_spec.lua",
@@ -207,6 +230,62 @@ describe("adapter.build_spec", function()
         })
     end)
 
+    async.it("builds command for test with extra arguments", function()
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            busted_args = {},
+            busted_paths = nil,
+            busted_cpaths = nil,
+            minimal_init = nil,
+        })
+        local tree = create_tree(adapter)
+        local spec = adapter.build_spec({
+            tree = tree:children()[1]:children()[1]:children()[1],
+            extra_args = { "--no-enable-sound", "--no-sort" },
+        })
+
+        assert.is_not_nil(spec)
+
+        assert_spec_command(spec.command, {
+            vim.loop.exepath(),
+            "--headless",
+            "-i",
+            "NONE",
+            "-n",
+            "-u",
+            "tests/minimal_init.lua",
+            "-c",
+            "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
+            "-l",
+            "./busted",
+            "--verbose",
+            "--output",
+            "./lua/neotest-busted/output_handler.lua",
+            "-Xoutput",
+            "test-output.json",
+            "--filter",
+            "top%-level namespace 1 nested namespace 1 test 1",
+            "./test_files/test1_spec.lua",
+            "--no-enable-sound",
+            "--no-sort",
+        })
+
+        assert.are.same(spec.context, {
+            results_path = "test-output.json",
+            pos = {
+                id = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+                name = '"test 1"',
+                path = "./test_files/test1_spec.lua",
+                range = { 2, 8, 4, 12 },
+                type = "test",
+            },
+            position_ids = {
+                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+            },
+        })
+    end)
     async.it("escapes special characters in pattern in command", function()
         package.loaded["neotest-busted"] = nil
 
@@ -227,13 +306,15 @@ describe("adapter.build_spec", function()
             "-n",
             "-u",
             "custom_init.lua",
+            "-c",
+            "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
+            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--verbose",
             "--filter",
             [[%^top%-le%[ve]l %(na%*m%+e%-sp%?ac%%e%) 2%$ test 3]],
             "./test_files/test1_spec.lua",
@@ -258,8 +339,8 @@ describe("adapter.build_spec", function()
     --     adapter({
     --         busted_command = false,
     --         busted_args = {},
-    --         busted_path = false,
-    --         busted_cpath = false
+    --         busted_paths = false,
+    --         busted_cpaths = false
     --     })
     --     stub(vim.fn, "glob", "")
     --     stub(vim.fn, "executable", 0)
