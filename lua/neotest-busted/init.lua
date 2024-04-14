@@ -492,11 +492,19 @@ local function create_error_info(test_result)
     return nil
 end
 
----@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult
+---@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
 ---@param status neotest.ResultStatus
 ---@param output string
 ---@param is_error boolean
 local function test_result_to_neotest_result(test_result, status, output, is_error)
+    if test_result.isError == true then
+        -- This is an internal error in busted, not a test that threw
+        return nil, {
+            message = test_result.message,
+            line = 0,
+        }
+    end
+
     local pos_id = create_pos_id_key(
         test_result.element.trace.source:sub(2), -- Strip the "@" from the source path
         test_result.name,

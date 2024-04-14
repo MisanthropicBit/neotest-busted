@@ -60,6 +60,11 @@
 ---@field trace neotest-busted.BustedTrace
 ---@field element neotest-busted.BustedElement
 
+---@class neotest-busted.BustedErrorResult
+---@field isError true
+---@field message string
+---@field name string
+
 ---@class neotest-busted.BustedResultObject
 ---@field errors neotest-busted.BustedFailureResult[]
 ---@field pendings neotest-busted.BustedResult[]
