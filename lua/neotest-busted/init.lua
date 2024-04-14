@@ -113,7 +113,7 @@ end
 
 ---@return string
 local function get_debug_start_script()
-    return table.concat({ script_path(), "start-debug.lua" })
+    return table.concat({ script_path(), "start_debug.lua" })
 end
 
 --- Escape special characters in a lua pattern
