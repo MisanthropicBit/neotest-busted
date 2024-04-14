@@ -137,15 +137,21 @@ local function escape_test_pattern_filter(filter)
     )
 end
 
+---@param string string
+local function quote_string(string)
+    return '"' .. string .. '"'
+end
+
 ---@param results_path string?
 ---@param paths string[]
 ---@param filters string[]
----@param options neotest-busted.BustedCommandOptions?
----@return neotest-busted.BustedCommandConfig?
-function BustedNeotestAdapter.create_busted_command(results_path, paths, filters, options)
+---@param options neotest-busted.TestCommandOptions?
+---@return neotest-busted.TestCommandConfig?
+function BustedNeotestAdapter.create_test_command(results_path, paths, filters, options)
     local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
+        logger.debug("Could not find a busted command")
         return
     end
 
@@ -194,15 +200,15 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
         "--verbose",
     }
 
-    if _options.output_handler then
+    if _options.busted_output_handler then
         vim.list_extend(busted_command, {
             "--output",
-            _options.output_handler,
+            _options.busted_output_handler,
         })
 
-        if _options.output_handler_options then
+        if _options.busted_output_handler_options then
             table.insert(busted_command, "-Xoutput")
-            vim.list_extend(busted_command, _options.output_handler_options)
+            vim.list_extend(busted_command, _options.busted_output_handler_options)
         end
     else
         if not results_path then
@@ -217,7 +223,7 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
         })
     end
 
-    vim.list_extend(command, busted_command)
+    vim.list_extend(arguments, busted_command)
 
     if vim.tbl_islist(config.busted_args) and #config.busted_args > 0 then
         vim.list_extend(arguments, config.busted_args)
@@ -225,17 +231,27 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
 
     -- Add test filters
     for _, filter in ipairs(filters) do
-        vim.list_extend(arguments, { "--filter", escape_test_pattern_filter(filter) })
+        local escaped_filter = escape_test_pattern_filter(filter)
+
+        if _options.quote_strings then
+            escaped_filter = quote_string(escaped_filter)
+        end
+
+        vim.list_extend(arguments, { "--filter", escaped_filter })
     end
 
     -- Add test files
-    vim.list_extend(arguments, paths)
+    if _options.quote_strings then
+        vim.list_extend(arguments, vim.tbl_map(quote_string, paths))
+    else
+        vim.list_extend(arguments, paths)
+    end
 
     return {
         nvim_command = vim.loop.exepath(),
         arguments = arguments,
-        path = lua_paths,
-        cpath = lua_cpaths,
+        paths = lua_paths,
+        cpaths = lua_cpaths,
     }
 end
 
@@ -248,15 +264,29 @@ local function get_strategy_config(strategy, results_path, paths, filters)
     if strategy == "dap" then
         table.insert(paths, 1, get_debug_start_script())
 
-        local test_command_info = create_test_command_info(
+        local test_command_info = BustedNeotestAdapter.create_test_command(
             results_path,
             paths,
-            filters
+            filters,
+            -- NOTE: When run via dap, passing arguments such as the one for
+            -- busted's '--filter' need to be escaped since the command is run
+            -- using node's child_process.spawn with { shell: true } that will
+            -- run via a shell and split arguments on spaces. This will break
+            -- the command if a filter contains spaces.
+            --
+            -- On the other hand, we don't need to quote when running the integrated
+            -- strategy (through vim.fn.jobstart) because it runs with command as a
+            -- list which does not run through a shell
+            { quote_strings = true }
         )
 
         if not test_command_info then
+            logger.debug("Failed to construct test command for debugging")
             return nil
         end
+
+        local lua_paths = util.normalize_and_create_lua_path(unpack(test_command_info.paths))
+        local lua_cpaths = util.normalize_and_create_lua_path(unpack(test_command_info.cpaths))
 
         return {
             name = "Debug busted tests",
@@ -264,8 +294,8 @@ local function get_strategy_config(strategy, results_path, paths, filters)
             cwd = "${workspaceFolder}",
             request = "launch",
             env = {
-                LUA_PATH = util.expand_and_create_lua_path(test_command_info.lua_path),
-                LUA_CPATH = util.expand_and_create_lua_path(test_command_info.lua_cpath),
+                LUA_PATH = lua_paths,
+                LUA_CPATH = lua_cpaths,
             },
             program = {
                 command = test_command_info.nvim_command,
@@ -417,9 +447,9 @@ function BustedNeotestAdapter.build_spec(args)
     end
 
     local results_path = async.fn.tempname() .. ".json"
-    local busted = BustedNeotestAdapter.create_busted_command(results_path, paths, filters)
+    local test_command = BustedNeotestAdapter.create_test_command(results_path, paths, filters)
 
-    if not busted then
+    if not test_command then
         local message = "Could not find a busted executable"
         logger.error(message)
         vim.notify(message, vim.log.levels.ERROR)
@@ -427,10 +457,12 @@ function BustedNeotestAdapter.build_spec(args)
         return
     end
 
-    local command = vim.list_extend({ command_test_info.nvim_command }, command_test_info.arguments)
+    ---@type string[]
+    local command = vim.list_extend({ test_command.nvim_command }, test_command.arguments)
 
+    -- Extra arguments for busted
     if vim.tbl_islist(args.extra_args) then
-        vim.list_extend(busted.command, args.extra_args)
+        vim.list_extend(command, args.extra_args)
     end
 
     return {
