@@ -307,9 +307,6 @@ local function get_strategy_config(strategy, results_path, paths, filters)
     return nil
 end
 
----@type neotest.Adapter
-local BustedNeotestAdapter = { name = "neotest-busted" }
-
 BustedNeotestAdapter.root =
     lib.files.match_root_pattern(".busted", ".luarocks", "lua_modules", "*.rockspec")
 
