@@ -19,8 +19,8 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         return {
             type = "config",
             command = config.busted_command,
-            path = config.busted_path or {},
-            cpath = config.busted_cpath or {},
+            lua_paths = config.busted_path or {},
+            lua_cpaths = config.busted_cpath or {},
         }
     end
 
