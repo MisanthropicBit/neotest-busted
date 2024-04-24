@@ -262,7 +262,7 @@ end
 ---@return table?
 local function get_strategy_config(strategy, results_path, paths, filters)
     if strategy == "dap" then
-        table.insert(paths, 1, get_debug_start_script())
+        vim.list_extend(paths, { "--helper", get_debug_start_script() }, 1)
 
         local test_command_info = BustedNeotestAdapter.create_test_command(
             results_path,
