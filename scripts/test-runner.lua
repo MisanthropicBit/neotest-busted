@@ -92,10 +92,11 @@ local function require_checked(module_name)
 end
 
 ---@return string[]
-local function parse_paths()
-    return _G.arg
+local function parse_args()
+    return vim.list_slice(_G.arg, 1)
 end
 
+---@return string[]
 local function collect_tests()
     local tests = {}
     local util = require("neotest-busted.util")
@@ -113,6 +114,7 @@ local function run()
         return
     end
 
+    local paths = parse_args()
     local minimal_init = find_minimal_init()
 
     if not minimal_init then
@@ -122,9 +124,9 @@ local function run()
 
     vim.cmd.source(minimal_init)
 
-    local adapter_or_error = require_checked("neotest-busted")
+    local ok, adapter_or_error = pcall(require, "neotest-busted")
 
-    if not adapter_or_error then
+    if not ok then
         print_level(
             "neotest-busted could not be loaded. Set up 'runtimepath', provide a minimal configuration via '-u', or create a 'minimal_init.lua' file: "
                 .. adapter_or_error,
@@ -133,11 +135,13 @@ local function run()
         return
     end
 
-    local paths = parse_paths() or collect_tests()
+    if #paths == 0 then
+        paths = collect_tests()
+    end
 
-    local busted = adapter_or_error.create_busted_command(nil, paths, {}, {
-        output_handler = "utfTerminal",
-        output_handler_options = { "--color" },
+    local busted = adapter_or_error.create_test_command(nil, paths, {}, {
+        busted_output_handler = "utfTerminal",
+        busted_output_handler_options = { "--color" },
     })
 
     if not busted then
@@ -145,8 +149,10 @@ local function run()
         return
     end
 
+    local command = vim.list_extend({ busted.nvim_command }, busted.arguments)
+
     io.stdout:write(
-        vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, busted.command), " "))
+        vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, command), " "))
     )
 end
 
