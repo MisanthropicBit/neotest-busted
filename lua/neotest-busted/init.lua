@@ -168,6 +168,7 @@ function BustedNeotestAdapter.create_test_command(results_path, paths, filters, 
     ---@type string[], string[]
     local lua_paths, lua_cpaths = {}, {}
 
+    -- TODO: Should paths be quoted? Try seeing if a path with a space works
     -- Append custom paths from config
     if vim.tbl_islist(config.busted_paths) then
         vim.list_extend(lua_paths, config.busted_paths)
@@ -518,6 +519,7 @@ local function test_result_to_neotest_result(test_result, status, output, is_err
     }
 
     if is_error then
+        ---@cast test_result -neotest-busted.BustedErrorResult
         result.errors = create_error_info(test_result)
     end
 
