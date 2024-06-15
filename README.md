@@ -157,7 +157,7 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 `tests/` directory.
 
 ```shell
-$ nvim -u NONE -l ./scripts/test-runner.lua tests/my_spec.lua
+$ nvim -l ./scripts/test-runner.lua tests/my_spec.lua
 ```
 
 #### Test via rockspec
