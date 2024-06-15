@@ -30,6 +30,11 @@ describe("adapter.build_spec", function()
                     vim.endswith(spec_command[idx], "lua/neotest-busted/output_handler.lua")
                 )
                 idx = idx + 1
+            elseif item == "--helper" then
+                assert.is_true(
+                    vim.endswith(spec_command[idx], "lua/neotest-busted/start_debug.lua")
+                )
+                idx = idx + 1
             end
         end
     end
@@ -410,20 +415,32 @@ describe("adapter.build_spec", function()
             '"./lua/neotest-busted/start_debug.lua"',
         })
 
-        assert.are.same(spec.strategy, {
-            name = "Debug busted tests",
-            type = "local-lua",
-            cwd = "${workspaceFolder}",
-            request = "launch",
-            env = {
-                LUA_PATH = lua_paths,
-                LUA_CPATH = vim.fs.normalize(busted_cpaths[1]),
-            },
-            program = {
-                command = vim.loop.exepath(),
-            },
-            args = debug_arguments,
+        local strategy_keys = vim.tbl_keys(spec.strategy)
+        table.sort(strategy_keys)
+
+        assert.are.same(strategy_keys, {
+            "args",
+            "cwd",
+            "env",
+            "name",
+            "program",
+            "request",
+            "type",
         })
+
+        assert.are.same(spec.strategy.name, "Debug busted tests")
+        assert.are.same(spec.strategy.type, "local-lua")
+        assert.are.same(spec.strategy.cwd, "${workspaceFolder}")
+        assert.are.same(spec.strategy.request, "launch")
+        assert.are.same(spec.strategy.env, {
+            LUA_PATH = lua_paths,
+            LUA_CPATH = vim.fs.normalize(busted_cpaths[1]),
+        })
+        assert.are.same(spec.strategy.program, {
+            command = vim.loop.exepath(),
+        })
+
+        assert_spec_command(spec.strategy.args, debug_arguments)
     end)
 
     -- async.it("handles failure to find a busted command", function()
