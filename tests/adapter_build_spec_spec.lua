@@ -32,7 +32,7 @@ describe("adapter.build_spec", function()
                 idx = idx + 1
             elseif item == '"--helper"' then
                 assert.is_true(
-                    vim.endswith(spec_command[idx], "lua/neotest-busted/start_debug.lua")
+                    vim.endswith(spec_command[idx], 'lua/neotest-busted/start_debug.lua"')
                 )
                 idx = idx + 1
             end
