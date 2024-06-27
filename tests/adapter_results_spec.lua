@@ -156,7 +156,11 @@ describe("adapter.results", function()
         assert.are.same(neotest_results, {})
 
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was.called_with("Failed to read json test output file test_output.json with error: Could not read file")
+        assert
+            .stub(logger.error).was
+            .called_with(
+                "Failed to read json test output file test_output.json with error: Could not read file"
+            )
     end)
 
     it("handles failure to decode json", function()
@@ -169,7 +173,9 @@ describe("adapter.results", function()
         assert.are.same(neotest_results, {})
 
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was.called_with("Failed to parse json test output file test_output.json with error: Expected value but found invalid token at character 1")
+        assert.stub(logger.error).was.called_with(
+            "Failed to parse json test output file test_output.json with error: Expected value but found invalid token at character 1"
+        )
 
         vim.json.decode:revert()
     end)
@@ -204,6 +210,10 @@ describe("adapter.results", function()
         })
 
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was.called_with("Failed to find matching position id for key " .. test_path .. "::namespace tests a failing test::7")
+        assert.stub(logger.error).was.called_with(
+            "Failed to find matching position id for key "
+                .. test_path
+                .. "::namespace tests a failing test::7"
+        )
     end)
 end)
