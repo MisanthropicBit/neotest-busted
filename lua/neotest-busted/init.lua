@@ -67,6 +67,10 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         end
     end
 
+    if config.local_luarocks_only == true then
+        return nil
+    end
+
     -- Try to find a local (user home directory) busted executable
     local user_globs =
         util.glob(util.create_path("~", ".luarocks", "lib", "luarocks", "**", "bin", "busted"))

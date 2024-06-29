@@ -47,6 +47,10 @@ describe("config", function()
                 config = { minimal_init = "" },
                 error_message = non_empty_string,
             },
+            {
+                config = { local_luarocks_only = 1 },
+                error_message = "expected boolean, got number",
+            },
         }
 
         stub(vim.api, "nvim_echo")
@@ -77,6 +81,7 @@ describe("config", function()
             busted_paths = { "some/path" },
             busted_cpaths = {},
             minimal_init = "some_init_file.lua",
+            local_luarocks_only = false,
         })
 
         assert.is_true(ok)
