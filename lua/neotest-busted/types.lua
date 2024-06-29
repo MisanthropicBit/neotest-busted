@@ -4,6 +4,7 @@
 ---@field busted_paths string[]?
 ---@field busted_cpaths string[]?
 ---@field minimal_init string?
+---@field local_luarocks_only boolean?
 
 ---@class neotest-busted.BustedCommandConfig
 ---@field type "config" | "project" | "user" | "global"
