@@ -38,6 +38,7 @@ neovim as the lua interpreter.
 - [Defining tests](#defining-tests)
 - [Luarocks and Busted](#luarocks-and-busted)
 - [Running from the command line](#running-from-the-command-line)
+- [Debugging tests](#debugging-tests)
 - [FAQ](#faq)
 
 ## Requirements
@@ -156,7 +157,7 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 `tests/` directory.
 
 ```shell
-$ nvim -u NONE -l ./scripts/test-runner.lua tests/my_spec.lua
+$ nvim -l ./scripts/test-runner.lua tests/my_spec.lua
 ```
 
 #### Test via rockspec
@@ -172,6 +173,11 @@ test = {
     command = "nvim -u NONE -l ./scripts/test-runner.lua",
 }
 ```
+
+## Debugging tests
+
+`neotest-busted` has support for debugging tests via [`local-lua-debugger-vscode`](https://github.com/tomblind/local-lua-debugger-vscode)
+which can be set up via [`nvim-dap`](https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#lua). Once set up, you can set a breakpoint and run the test with the `dap` strategy. Please refer to the [`neotest`](https://github.com/nvim-neotest/neotest) documentation for more information.
 
 ## FAQ
 

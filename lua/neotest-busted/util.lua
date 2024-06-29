@@ -40,7 +40,7 @@ end
 
 ---@param ... string
 ---@return string
-local function normalize_and_create_lua_path(...)
+function util.normalize_and_create_lua_path(...)
     return table.concat(vim.tbl_map(vim.fs.normalize, { ... }), ";")
 end
 
@@ -49,7 +49,7 @@ end
 ---@return string[]
 function util.create_package_path_argument(package_path, paths)
     if paths and #paths > 0 then
-        local _path = normalize_and_create_lua_path(unpack(paths))
+        local _path = util.normalize_and_create_lua_path(unpack(paths))
 
         return { "-c", ([[lua %s = '%s;' .. %s]]):format(package_path, _path, package_path) }
     end

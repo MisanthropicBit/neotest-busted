@@ -11,9 +11,16 @@
 ---@field lua_paths string[]
 ---@field lua_cpaths string[]
 
----@class neotest-busted.BustedCommandOptions
----@field output_handler string?
----@field output_handler_options string[]?
+---@class neotest-busted.TestCommandOptions
+---@field busted_output_handler string?
+---@field busted_output_handler_options string[]?
+---@field quote_strings boolean
+
+---@class neotest-busted.TestCommandConfig
+---@field nvim_command string
+---@field arguments string[]
+---@field paths string[]
+---@field cpaths string[]
 
 ---@class neotest-busted.BustedTrace
 ---@field what string
@@ -46,6 +53,11 @@
 ---@field message string
 ---@field trace neotest-busted.BustedTrace
 ---@field element neotest-busted.BustedElement
+
+---@class neotest-busted.BustedErrorResult
+---@field isError true
+---@field message string
+---@field name string
 
 ---@class neotest-busted.BustedResultObject
 ---@field errors neotest-busted.BustedFailureResult[]
