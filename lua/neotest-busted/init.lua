@@ -22,8 +22,10 @@ local function log_and_notify(message, level)
         return
     end
 
-    logger[log_method](message)
-    vim.notify(message, level)
+    vim.schedule(function()
+        logger[log_method](message)
+        vim.notify(message, level)
+    end)
 end
 
 ---@type neotest.Adapter
