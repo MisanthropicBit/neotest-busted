@@ -67,7 +67,8 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         end
     end
 
-    if config.local_luarocks_only == true then
+    -- Only skip checking further installations if we are not doing the healthcheck
+    if not ignore_local and config.local_luarocks_only == true then
         return nil
     end
 
