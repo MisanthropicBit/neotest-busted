@@ -141,6 +141,10 @@ You can install busted in your project's directory by running the following comm
 
 ### User home directory install
 
+> [!IMPORTANT]
+> You need to set `local_luarocks_only` to `false` for `neotest-busted` to find
+> your home directory installation.
+
 The following command will install busted in your home directory.
 
 ```shell
@@ -148,6 +152,10 @@ The following command will install busted in your home directory.
 ```
 
 ### Global install
+
+> [!IMPORTANT]
+> You need to set `local_luarocks_only` to `false` for `neotest-busted` to find
+> your global installation.
 
 ```shell
 > luarocks install busted
