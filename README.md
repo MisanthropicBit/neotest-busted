@@ -66,6 +66,10 @@ require("neotest").setup({
             -- Custom config to load via -u to set up testing.
             -- If nil, will look for a 'minimal_init.lua' file
             minimal_init = "custom_init.lua",
+            -- Only use a luarocks installation in the project's directory. If
+            -- true, installations in $HOME and global installations will be
+            -- ignored. Useful for isolating the test environment
+            local_luarocks_only = true,
         }),
     },
 })
@@ -133,6 +137,10 @@ You can install busted in your project's directory by running the following comm
 
 ### User home directory install
 
+> [!IMPORTANT]
+> You need to set `local_luarocks_only` to `false` for `neotest-busted` to find
+> your home directory installation.
+
 The following command will install busted in your home directory.
 
 ```shell
@@ -140,6 +148,10 @@ The following command will install busted in your home directory.
 ```
 
 ### Global install
+
+> [!IMPORTANT]
+> You need to set `local_luarocks_only` to `false` for `neotest-busted` to find
+> your global installation.
 
 ```shell
 > luarocks install busted
@@ -157,7 +169,7 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 `tests/` directory.
 
 ```shell
-$ nvim -l ./scripts/test-runner.lua tests/my_spec.lua
+$ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
 ```
 
 #### Test via rockspec
@@ -170,7 +182,7 @@ If you use a rockspec, you can provide a test command so you can run tests using
 
 test = {
     type = "command",
-    command = "nvim -u NONE -l ./scripts/test-runner.lua",
+    command = "nvim -u NONE -l <path-to-neotest-busted>/scripts/test-runner.lua",
 }
 ```
 
