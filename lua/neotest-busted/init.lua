@@ -377,11 +377,10 @@ function BustedNeotestAdapter.discover_positions(path)
 end
 
 --- Create a unique key to identify a test
----@param stripped_pos_id string neotest position id stripped of "::"
 ---@param lnum_start integer
 ---@return string
-local function create_pos_id_key(path, stripped_pos_id, lnum_start)
-    return ("%s::%s::%d"):format(path, stripped_pos_id, lnum_start)
+local function create_pos_id_key(path, lnum_start)
+    return ("%s::%d"):format(path, lnum_start)
 end
 
 --- Extract test info from a position
@@ -402,7 +401,7 @@ local function extract_test_info(pos)
     -- Busted creates test names concatenated with spaces so we can't recreate the
     -- position id using "::". Instead create a key stripped of "::" like the one
     -- from busted along with the test line range to uniquely identify the test
-    local pos_id_key = create_pos_id_key(path, stripped_pos_id, pos.range[1] + 1)
+    local pos_id_key = create_pos_id_key(path, pos.range[1] + 1)
 
     return path, stripped_pos_id, pos_id_key
 end
@@ -525,7 +524,6 @@ local function test_result_to_neotest_result(test_result, status, output, is_err
 
     local pos_id = create_pos_id_key(
         test_result.element.trace.source:sub(2), -- Strip the "@" from the source path
-        test_result.name,
         test_result.element.trace.currentline
     )
 
