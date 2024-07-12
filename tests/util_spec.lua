@@ -2,12 +2,13 @@ local util = require("neotest-busted.util")
 local lib = require("neotest.lib")
 
 describe("util", function()
-    describe("trim", function()
-        it("trims string", function()
-            assert.are.same(util.trim('"this will be trimmed"', '"'), "this will be trimmed")
+    describe("trim_quotes", function()
+        it("trims quotes", function()
+            assert.are.same(util.trim_quotes('"this will be trimmed"'), "this will be trimmed")
+
             assert.are.same(
-                util.trim('"this will not be trimmed"', "-"),
-                '"this will not be trimmed"'
+                util.trim_quotes('this will not be trimmed'),
+                'this will not be trimmed'
             )
         end)
     end)

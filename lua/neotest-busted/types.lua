@@ -1,3 +1,5 @@
+local types = {}
+
 ---@class neotest-busted.Config
 ---@field busted_command string?
 ---@field busted_args string[]?
@@ -21,6 +23,14 @@
 ---@field arguments string[]
 ---@field paths string[]
 ---@field cpaths string[]
+
+---@enum neotest-busted.BustedResultKey
+types.BustedResultKey = {
+    successes = "successes",
+    pendings = "pendings",
+    failures = "failures",
+    errors = "errors",
+}
 
 ---@class neotest-busted.BustedTrace
 ---@field what string
@@ -64,3 +74,5 @@
 ---@field pendings neotest-busted.BustedResult[]
 ---@field successes neotest-busted.BustedResult[]
 ---@field failures neotest-busted.BustedFailureResult[]
+
+return types

@@ -2,28 +2,11 @@ local util = {}
 
 local lib = require("neotest.lib")
 
---- Trim a character in both ends of a string
+--- Strip quotes from a string
 ---@param value string
----@param char string
 ---@return string
-function util.trim(value, char)
-    local start, _end = 1, #value
-
-    for idx = 1, #value do
-        if value:sub(idx, idx) ~= char then
-            start = idx
-            break
-        end
-    end
-
-    for idx = #value, 1, -1 do
-        if value:sub(idx, idx) ~= char then
-            _end = idx
-            break
-        end
-    end
-
-    return value:sub(start, _end)
+function util.trim_quotes(value)
+    return vim.fn.trim(value, '"')
 end
 
 ---@param ... string
@@ -55,6 +38,16 @@ function util.create_package_path_argument(package_path, paths)
     end
 
     return {}
+end
+
+--- Create a busted test key (path  describe 1  test 1) from a neotest position
+--- id (path::describe 1::test 1)
+---@param position_id string
+---@return string
+function util.strip_position_id(position_id)
+    local parts = vim.split(position_id, "::")
+
+    return table.concat(vim.tbl_map(util.trim_quotes, vim.list_slice(parts, 2)), " ")
 end
 
 return util
