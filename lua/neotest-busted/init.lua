@@ -8,6 +8,7 @@ local logger = require("neotest.logging")
 local types = require("neotest.types")
 local nb_types = require("neotest-busted.types")
 
+local ResultStatus = types.ResultStatus
 local BustedResultKey = nb_types.BustedResultKey
 
 local log_methods = {
@@ -412,13 +413,15 @@ end
 
 --- Generate test info for the nodes in a tree
 ---@param tree neotest.Tree
+---@param unexpanded_tests neotest.Position[]
+---@param is_parametric boolean
 ---@param parametric_tests neotest.Position[]
 ---@return string[]
 ---@return string[]
-local function generate_test_info_for_nodes(tree, parametric_tests)
+local function generate_test_info_for_nodes(tree, unexpanded_tests, is_parametric, parametric_tests)
     local filters = {}
     local position = tree:data()
-    local position_ids = {}
+    local position_id_mapping = {}
     local gen_filters = position.type ~= types.PositionType.file
 
     local function add_filter(filter)
@@ -429,7 +432,7 @@ local function generate_test_info_for_nodes(tree, parametric_tests)
     for _, node in tree:iter_nodes() do
         local pos = node:data()
 
-        if pos.id == position.id and #parametric_tests > 0 then
+        if (is_parametric and pos.id == position.id) or unexpanded_tests[pos.id] ~= nil then
             -- Skip generating test info for the position we are building a
             -- spec for if the test is parametric as it won't appear in the
             -- test output
@@ -443,24 +446,24 @@ local function generate_test_info_for_nodes(tree, parametric_tests)
                 add_filter(filter)
             end
 
-            position_ids[pos_id_key] = pos.id
+            position_id_mapping[pos_id_key] = pos.id
         end
 
         :: continue ::
     end
 
-    -- Generate test info for parametric tests so we will run when running busted
+    -- Generate test info for parametric tests that will run when running busted
     for _, test in ipairs(parametric_tests) do
         local stripped_pos_id = util.strip_position_id(test.id)
         local pos_id_key = create_pos_id_key_from_position(test, stripped_pos_id)
 
         -- Always generate path info for parametric tests since they will not
         -- be a file position
-        position_ids[pos_id_key] = test.id
+        position_id_mapping[pos_id_key] = test.id
         add_filter(stripped_pos_id)
     end
 
-    return filters, position_ids
+    return filters, position_id_mapping
 end
 
 ---@param args neotest.RunArgs
@@ -479,15 +482,27 @@ function BustedNeotestAdapter.build_spec(args)
         return
     end
 
+    local unexpanded_tests = {}
+    local is_parametric = false
     local parametric_tests = {}
 
     if pos.type == types.PositionType.test or pos.type == types.PositionType.namespace then
-        parametric_tests = busted_util.expand_parametric_tests(tree)
+        unexpanded_tests, is_parametric, parametric_tests = busted_util.expand_parametric_tests(tree)
     end
 
     -- Iterate all tests in the tree and generate position ids for them
-    local filters, position_ids = generate_test_info_for_nodes(tree, parametric_tests)
+    local filters, position_id_mapping = generate_test_info_for_nodes(
+        tree,
+        unexpanded_tests,
+        is_parametric,
+        parametric_tests
+    )
     local paths = { pos.path }
+
+    vim.print(vim.inspect(unexpanded_tests))
+    vim.print(is_parametric)
+    vim.print(vim.inspect(parametric_tests))
+    vim.print(vim.inspect(position_id_mapping))
 
     local results_path = async.fn.tempname() .. ".json"
     local test_command = BustedNeotestAdapter.create_test_command(
@@ -513,7 +528,9 @@ function BustedNeotestAdapter.build_spec(args)
         command = command,
         context = {
             results_path = results_path,
-            position_ids = position_ids,
+            position_ids = position_id_mapping,
+            unexpanded_tests = unexpanded_tests,
+            is_parametric = is_parametric,
             parametric_tests = parametric_tests,
         },
         strategy = get_strategy_config(args.strategy, results_path, paths, filters),
@@ -607,14 +624,13 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     local results = {}
     local output = strategy_result.output
     local position_ids = spec.context.position_ids
-    local all_pass = true
 
     ---@type { [1]: neotest-busted.BustedResultKey, [2]: neotest.ResultStatus }[]
     local test_types = {
-        { BustedResultKey.successes, types.ResultStatus.passed },
-        { BustedResultKey.pendings, types.ResultStatus.skipped },
-        { BustedResultKey.failures, types.ResultStatus.failed },
-        { BustedResultKey.errors, types.ResultStatus.failed },
+        { BustedResultKey.successes, ResultStatus.passed },
+        { BustedResultKey.pendings, ResultStatus.skipped },
+        { BustedResultKey.failures, ResultStatus.failed },
+        { BustedResultKey.errors, ResultStatus.failed },
     }
 
     for _, test_type in ipairs(test_types) do
@@ -623,12 +639,12 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
         ---@cast test_results neotest-busted.BustedResultObject
         for _, value in pairs(test_results[test_key]) do
-            if is_error then
-                all_pass = false
-            end
-
-            local pos_id_key, result =
-                test_result_to_neotest_result(value, result_status, output, is_error)
+            local pos_id_key, result = test_result_to_neotest_result(
+                value,
+                result_status,
+                output,
+                is_error
+            )
 
             local pos_id = position_ids[pos_id_key]
 
@@ -638,20 +654,50 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
                     vim.log.levels.ERROR
                 )
             else
-                results[position_ids[pos_id_key]] = result
+                results[pos_id] = result
             end
         end
     end
 
-    if #spec.context.parametric_tests > 0 and all_pass then
-        local pos = tree:data()
+    -- Unexpanded tests (parametric tests in source code) won't a
+    -- representation at runtime so instead generate the results
+    -- manually based on the results of the expanded tests
+    if vim.tbl_count(spec.context.unexpanded_tests) > 0 then
+        for unexpanded_key, parametric_tests in pairs(spec.context.unexpanded_tests) do
+            local status = ResultStatus.passed
 
-        results[pos.id] = {
-            status = types.ResultStatus.passed,
-            short = ("%s: %s"):format(pos.name, types.ResultStatus.passed),
-            output = output,
-        }
+            for _, test in ipairs(parametric_tests) do
+                local new_status = results[test.id].status
+
+                if new_status ~= ResultStatus.passed then
+                    status = new_status
+                end
+
+                local temp = vim.split(unexpanded_key, "::")
+                local name = temp[#temp]
+
+                results[unexpanded_key] = {
+                    status = status,
+                    short = ("%s: %s"):format(name, status),
+                    output = output,
+                }
+            end
+        end
     end
+
+    vim.print(vim.inspect(results))
+
+    -- If the test itself was parametric and all tests passed then mark it
+    -- as passed as well so neotest will mark it as passed
+    -- if spec.context.is_parametric and all_pass then
+    --     local pos = tree:data()
+
+    --     results[pos.id] = {
+    --         status = ResultStatus.passed,
+    --         short = ("%s: %s"):format(pos.name, ResultStatus.passed),
+    --         output = output,
+    --     }
+    -- end
 
     return results
 end

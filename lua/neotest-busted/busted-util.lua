@@ -23,14 +23,16 @@ local function lnum_is_in_range(lnum, range)
     return _lnum >= range[1] and _lnum <= range[3]
 end
 
+--- Normalize a neotest position id
 ---@param position_id string
 ---@return string
 local function normalize_position_id(position_id)
-    local parts = vim.split(position_id, "::")
+    -- TODO: Isn't this what create_pos_id_key does?
+    local parts = util.split_position_id(position_id)
     local stripped_parts = {}
 
     for idx, part in ipairs(parts) do
-        local trimmed = vim.split(vim.fn.trim(part, '"'), " ")
+        local trimmed = vim.split(util.trim_quotes(part), " ")
 
         if idx > 1 then
             trimmed = vim.tbl_map(function(trim)
@@ -103,26 +105,45 @@ local function get_tests_in_range_for_file(position)
     return tests
 end
 
----@param position neotest.Position
+---@param tree neotest.Tree
 ---@param test_info neotest-busted.RuntimeTestInfo
+---@return neotest.Position
 ---@return string
 ---@return string
-local function deduce_test_position_id(position, test_info)
-    local position_parts = vim.split(position.id, "::")
-    local test_info_parts = vim.split(test_info.position_id, "::")
+local function find_test_position_id(tree, test_info)
+    local position = tree:data()
+
+    if position.type == types.PositionType.namespace then
+        -- If this is a namespace (i.e. a 'describe'), iterate all tree nodes
+        -- to find a test position that matches the line number of the runtime
+        -- test info
+        for _, node in tree:iter_nodes() do
+            if node:data().range[1] + 1 == test_info.lnum then
+                position = node:data()
+                break
+            end
+        end
+    end
+
+    local position_parts = util.split_position_id(position.id)
+    local test_info_parts = util.split_position_id(test_info.position_id)
+    local common_prefix = util.longest_common_prefix(position_parts, test_info_parts)
     local test_name = table.concat(
-        vim.tbl_map(util.trim_quotes, vim.list_slice(test_info_parts, #position_parts)),
+        vim.tbl_map(util.trim_quotes, vim.list_slice(test_info_parts, #common_prefix + 1)),
         " "
     )
 
-    return table.concat(position_parts, "::", 1, #position_parts - 1), test_name
+    return position, table.concat(common_prefix, "::"), test_name
 end
 
 ---@param tree neotest.Tree
 ---@return neotest.Position[]
+---@return boolean
+---@return neotest.Position[]
 function busted_util.expand_parametric_tests(tree)
     local position = tree:data()
     local tests_in_range = get_tests_in_range_for_file(position)
+    local unexpanded_tests = {}
 
     nio.scheduler()
 
@@ -135,9 +156,14 @@ function busted_util.expand_parametric_tests(tree)
 
         if tests_in_range[id] then
             tests_in_range[id].in_tree = true
+        else
+            if data.type == types.PositionType.test then
+                unexpanded_tests[data.id] = {}
+            end
         end
     end
 
+    local is_parametric = false
     local parametric_positions = {}
 
     -- Iterate all tests again and add those that were not in the tree to the tree
@@ -145,17 +171,22 @@ function busted_util.expand_parametric_tests(tree)
     -- exist in the tree (source) itself
     for _, test in pairs(tests_in_range) do
         if not test.in_tree then
-            local prefix, test_name = deduce_test_position_id(position, test)
+            -- If the test position is on the same line as a runtime test then
+            -- the test itself must be parametric
+            is_parametric = test.lnum == position.range[1] + 1
+
+            local matched_position, prefix, test_name = find_test_position_id(tree, test)
 
             local data = {
                 id = ('%s::"%s"'):format(prefix, test_name),
                 name = test_name,
                 path = position.path,
-                range = position.range,
+                range = matched_position.range,
                 type = types.PositionType.test,
             }
 
             table.insert(parametric_positions, data)
+            table.insert(unexpanded_tests[matched_position.id], data)
 
             ---@diagnostic disable-next-line: invisible
             -- local new_tree = types.Tree:new(data, {}, tree._key, nil, nil)
@@ -166,7 +197,7 @@ function busted_util.expand_parametric_tests(tree)
         end
     end
 
-    return parametric_positions
+    return unexpanded_tests, is_parametric, parametric_positions
 end
 
 return busted_util
