@@ -35,8 +35,6 @@ neovim as the lua interpreter.
 
 # Table of contents
 
-<!-- panvimdoc-ignore-end -->
-
 - [Requirements](#requirements)
 - [Configuration](#configuration)
 - [Defining tests](#defining-tests)
@@ -44,6 +42,8 @@ neovim as the lua interpreter.
 - [Running from the command line](#running-from-the-command-line)
 - [Debugging tests](#debugging-tests)
 - [FAQ](#faq)
+
+<!-- panvimdoc-ignore-end -->
 
 ## Requirements
 
