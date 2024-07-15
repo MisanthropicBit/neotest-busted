@@ -31,7 +31,11 @@ neovim as the lua interpreter.
     <img width="80%" src="https://github.com/MisanthropicBit/neotest-busted/assets/1846147/cd947151-4008-47e5-89a4-42cc83094a0d" />
 </div>
 
+<!-- panvimdoc-ignore-start -->
+
 # Table of contents
+
+<!-- panvimdoc-ignore-end -->
 
 - [Requirements](#requirements)
 - [Configuration](#configuration)
