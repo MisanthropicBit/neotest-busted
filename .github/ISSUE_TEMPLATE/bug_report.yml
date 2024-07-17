@@ -18,10 +18,12 @@ body:
           required: true
         - label: I have searched the existing issues of plugins related to this issue (if relevant)
           required: true
+        - label: I have tried setting `log_level` to `vim.log.levels.debug` in `neotest.setup` and examined the logs.
+          required: true
   - type: input
     attributes:
       label: "Neovim version (nvim -v)"
-      placeholder: "0.8.0 commit db1b0ee3b30f"
+      placeholder: "0.9.0 commit 1234567"
     validations:
       required: true
   - type: input
@@ -38,10 +40,16 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: Output of `:checkhealth neotest-busted`
+      label: Output of `:checkhealth neotest-busted` if relevant
       description: Healthcheck output for neotest-busted.
     validations:
-      required: true
+      required: false
+  - type: textarea
+    attributes:
+      label: neotest-busted debug log output if relevant
+      description: Debug log output for neotest-busted.
+    validations:
+      required: false
   - type: textarea
     attributes:
       label: Steps To Reproduce
