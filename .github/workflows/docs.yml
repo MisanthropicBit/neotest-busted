@@ -33,7 +33,7 @@ jobs:
           incrementheadinglevelby: 0
       - name: preview changes
         if: github.event_name == 'pull_request'
-        run: git diff ${{ github.head_ref }}..origin/master -- "doc/neotest-busted.txt"
+        run: git diff origin/${{ github.head_ref }}..origin/master -- "doc/neotest-busted.txt"
       - uses: stefanzweifel/git-auto-commit-action@v4
         if: github.ref == 'refs/heads/master'
         with:
