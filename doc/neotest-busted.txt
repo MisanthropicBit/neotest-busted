@@ -3,39 +3,26 @@
 ==============================================================================
 Table of Contents                           *neotest-busted-table-of-contents*
 
-1. Table of contents                        |neotest-busted-table-of-contents|
-  - Requirements               |neotest-busted-table-of-contents-requirements|
-  - Configuration             |neotest-busted-table-of-contents-configuration|
-  - Defining tests           |neotest-busted-table-of-contents-defining-tests|
-  - Luarocks and Busted |neotest-busted-table-of-contents-luarocks-and-busted|
-  - Running from the command line|neotest-busted-table-of-contents-running-from-the-command-line|
-  - Debugging tests         |neotest-busted-table-of-contents-debugging-tests|
-  - FAQ                                 |neotest-busted-table-of-contents-faq|
-  - Inspiration                 |neotest-busted-table-of-contents-inspiration|
+  - Requirements                                 |neotest-busted-requirements|
+  - Configuration                               |neotest-busted-configuration|
+  - Defining tests                             |neotest-busted-defining-tests|
+  - Luarocks and Busted                   |neotest-busted-luarocks-and-busted|
+  - Running from the command line|neotest-busted-running-from-the-command-line|
+  - Debugging tests                           |neotest-busted-debugging-tests|
+  - FAQ                                                   |neotest-busted-faq|
+  - Inspiration                                   |neotest-busted-inspiration|
 
 
 
 
-==============================================================================
-1. Table of contents                        *neotest-busted-table-of-contents*
-
-- |neotest-busted-requirements|
-- |neotest-busted-configuration|
-- |neotest-busted-defining-tests|
-- |neotest-busted-luarocks-and-busted|
-- |neotest-busted-running-from-the-command-line|
-- |neotest-busted-debugging-tests|
-- |neotest-busted-faq|
-
-
-REQUIREMENTS                   *neotest-busted-table-of-contents-requirements*
+REQUIREMENTS                                     *neotest-busted-requirements*
 
 - Neovim 0.9.0+ for the |`-l`| option.
 - Neotest <https://github.com/nvim-neotest/neotest> 4.0.0+ (which requires neovim 0.9.0+).
 - `busted` <https://github.com/lunarmodules/busted> installed (in a project-local, user, or global location, see |neotest-busted-here|).
 
 
-CONFIGURATION                 *neotest-busted-table-of-contents-configuration*
+CONFIGURATION                                   *neotest-busted-configuration*
 
 Setup with neotest. Leave values as `nil` to leave them unspecified.
 
@@ -60,7 +47,7 @@ Setup with neotest. Leave values as `nil` to leave them unspecified.
 <
 
 
-DEFINING TESTS               *neotest-busted-table-of-contents-defining-tests*
+DEFINING TESTS                                 *neotest-busted-defining-tests*
 
 Please refer to the official busted documentation
 <https://lunarmodules.github.io/busted/>.
@@ -104,7 +91,7 @@ If omitted, uses the numerical value of either the
 variables or a default timeout of 2000 milliseconds.
 
 
-LUAROCKS AND BUSTED     *neotest-busted-table-of-contents-luarocks-and-busted*
+LUAROCKS AND BUSTED                       *neotest-busted-luarocks-and-busted*
 
 Install luarocks from the website <https://luarocks.org/>. `neotest-busted`
 will try to find a `busted` executable automatically at the different locations
@@ -142,7 +129,7 @@ GLOBAL INSTALL ~
 <
 
 
-RUNNING FROM THE COMMAND LINE*neotest-busted-table-of-contents-running-from-the-command-line*
+RUNNING FROM THE COMMAND LINE   *neotest-busted-running-from-the-command-line*
 
 A `test-runner.lua` script is provided in the `scripts/` folder for running
 tests via the command line. This is useful for running all tests during CI for
@@ -173,7 +160,7 @@ using `luarocks test`.
 <
 
 
-DEBUGGING TESTS             *neotest-busted-table-of-contents-debugging-tests*
+DEBUGGING TESTS                               *neotest-busted-debugging-tests*
 
 `neotest-busted` has support for debugging tests via
 `local-lua-debugger-vscode`
@@ -185,7 +172,7 @@ Please refer to the `neotest` <https://github.com/nvim-neotest/neotest>
 documentation for more information.
 
 
-FAQ                                     *neotest-busted-table-of-contents-faq*
+FAQ                                                       *neotest-busted-faq*
 
 
 Q: CAN I RUN ASYNC TESTS WITH NEOTEST-BUSTED?
@@ -199,7 +186,7 @@ Busted removed support for async testing in version 2
 busted v1 but I haven’t tested that.
 
 
-INSPIRATION                     *neotest-busted-table-of-contents-inspiration*
+INSPIRATION                                       *neotest-busted-inspiration*
 
 - Using Neovim as Lua interpreter with Luarocks <https://zignar.net/2023/01/21/using-luarocks-as-lua-interpreter-with-luarocks/>
 - nlua <https://github.com/mfussenegger/nlua>
