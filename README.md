@@ -128,6 +128,15 @@ listed below and in that priority (i.e. a directory-local install takes
 precedence over a global install). You can check the installation by running
 `luarocks list busted`.
 
+> [!WARNING]
+> If you have set `busted_command` to a non-nil value in the `setup` function,
+> `neotest-busted` will not know where to look for appropriate lua paths and
+> will not look for installations as specified below to avoid setting up paths
+> for a different busted installation.
+>
+> In this case, you should set `busted_paths` and `busted_cpaths` to appropriate
+> paths.
+
 ### Directory-local install
 
 You can install busted in your project's directory by running the following commands.
