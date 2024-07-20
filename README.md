@@ -214,6 +214,12 @@ Yes. Please see the instructions [here](#async-tests).
 ([even though the docs still mention it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
 busted v1 but I haven't tested that.
 
+#### Q: Why is `neotest-busted` tested using plenary?
+
+The test could be run via `neotest-busted` itself but I decided to use plenary
+instead to use another test runner so that bugs in `neotest-busted` won't affect
+its own tests.
+
 ## Inspiration
 
 * [Using Neovim as Lua interpreter with Luarocks](https://zignar.net/2023/01/21/using-luarocks-as-lua-interpreter-with-luarocks/)
