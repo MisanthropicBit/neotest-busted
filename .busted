@@ -1,0 +1,6 @@
+return {
+    default = {
+        verbose = true,
+        lua = "nvim -l ./scripts/test-runner.lua",
+    },
+}
