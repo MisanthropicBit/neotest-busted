@@ -1,7 +1,7 @@
-local help_message = [[test-runner [...options] <...test_files>
+local help_message = [[test-runner [...options] [...test_files] [-- [...busted_options]
 
-Run tests using neotest-busted from the commandline. Unrecognised options are
-forwarded to busted.
+Run tests using neotest-busted from the commandline. Options given after '--'
+are forwarded to busted.
 
 Usage:
 
@@ -124,13 +124,12 @@ local function parse_args()
         busted_args = {},
     }
 
-    -- TODO: Account for flags that take arguments e.g. "--tags"
-    for _, arg in ipairs(_G.arg) do
+    for idx, arg in ipairs(_G.arg) do
         if arg == "-h" or arg == "--help" then
             parsed_args.help = true
-        elseif vim.startswith(arg, "-") then
-            -- Assume this is a busted argument
-            table.insert(parsed_args.busted_args, arg)
+        elseif arg == "--" then
+            vim.list_extend(parsed_args.busted_args, _G.arg, idx + 1)
+            break
         else
             table.insert(parsed_args.paths, arg)
         end
