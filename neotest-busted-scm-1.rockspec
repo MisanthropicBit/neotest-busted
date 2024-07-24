@@ -32,6 +32,5 @@ build = {
 }
 
 test = {
-    type = "command",
-    command = "nvim -u NONE -l ./scripts/test-runner.lua",
+    type = "busted",
 }
