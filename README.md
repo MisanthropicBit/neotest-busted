@@ -185,20 +185,6 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 $ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
 ```
 
-#### Test via rockspec
-
-If you use a rockspec, you can provide a test command so you can run tests using
-`luarocks test`.
-
-```lua
--- Your rockspec...
-
-test = {
-    type = "command",
-    command = "nvim -u NONE -l <path-to-neotest-busted>/scripts/test-runner.lua",
-}
-```
-
 ## Debugging tests
 
 `neotest-busted` has support for debugging tests via [`local-lua-debugger-vscode`](https://github.com/tomblind/local-lua-debugger-vscode)
