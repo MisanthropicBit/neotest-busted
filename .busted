@@ -1,6 +1,8 @@
 return {
+    _all = {
+        lua = "nvim -l ./scripts/test-runner.lua",
+    },
     default = {
         verbose = true,
-        lua = "nvim -l ./scripts/test-runner.lua",
     },
 }
