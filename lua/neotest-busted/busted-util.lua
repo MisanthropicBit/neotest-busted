@@ -1,7 +1,8 @@
 local busted_util = {}
 
+local logging = require("neotest-busted.logging")
+
 local lib = require("neotest.lib")
-local logger = require("neotest.logging")
 local types = require("neotest.types")
 local nio = require("nio")
 local util = require("neotest-busted.util")
@@ -57,11 +58,12 @@ local function get_tests_in_range_for_file(position)
     )
 
     if code ~= 0 or results.stderr ~= "" then
-        -- TODO: Notify
-        logger.error(
-            ("Failed to get all tests via busted (code: %d)"):format(code),
-            "stderr: ",
-            results.stderr
+        logging.log_and_notify(
+            ("Failed to get all tests via busted (code: %d): %s"):format(
+                code,
+                results.stderr
+            ),
+            vim.log.levels.ERROR
         )
         return {}
     end

@@ -1,5 +1,6 @@
 local busted_util = require("neotest-busted.busted-util")
 local config = require("neotest-busted.config")
+local logging = require("neotest-busted.logging")
 local util = require("neotest-busted.util")
 
 local async = require("neotest.async")
@@ -10,26 +11,6 @@ local nb_types = require("neotest-busted.types")
 
 local ResultStatus = types.ResultStatus
 local BustedResultKey = nb_types.BustedResultKey
-
-local log_methods = {
-    "debug",
-    "info",
-    "warn",
-    "error",
-}
-
----@param message string
----@param level 1 | 2 | 3 | 4
-local function log_and_notify(message, level)
-    local log_method = log_methods[level]
-
-    if not log_method then
-        return
-    end
-
-    logger[log_method](message)
-    -- vim.notify(message, level)
-end
 
 ---@type neotest.Adapter
 local BustedNeotestAdapter = { name = "neotest-busted" }
@@ -176,7 +157,7 @@ function BustedNeotestAdapter.create_test_command(results_path, paths, filters, 
     local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
-        log_and_notify("Could not find a busted command", vim.log.levels.ERROR)
+        logging.log_and_notify("Could not find a busted command", vim.log.levels.ERROR)
         return
     end
 
@@ -307,7 +288,10 @@ local function get_strategy_config(strategy, results_path, paths, filters)
         )
 
         if not test_command_info then
-            log_and_notify("Failed to construct test command for debugging", vim.log.levels.ERROR)
+            logging.log_and_notify(
+                "Failed to construct test command for debugging",
+                vim.log.levels.ERROR
+            )
             return nil
         end
 
@@ -512,7 +496,7 @@ function BustedNeotestAdapter.build_spec(args)
     )
 
     if not test_command then
-        log_and_notify("Could not find a busted executable", vim.log.levels.ERROR)
+        logging.log_and_notify("Could not find a busted executable", vim.log.levels.ERROR)
         return
     end
 
@@ -600,7 +584,7 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     local ok, data = pcall(lib.files.read, results_path)
 
     if not ok then
-        log_and_notify(
+        logging.log_and_notify(
             ("Failed to read json test output file %s with error: %s"):format(results_path, data),
             vim.log.levels.ERROR
         )
@@ -611,7 +595,7 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     local json_ok, parsed = pcall(vim.json.decode, data, { luanil = { object = true } })
 
     if not json_ok then
-        log_and_notify(
+        logging.log_and_notify(
             ("Failed to parse json test output file %s with error: %s"):format(results_path, parsed),
             vim.log.levels.ERROR
         )
@@ -649,7 +633,7 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
             local pos_id = position_ids[pos_id_key]
 
             if not pos_id then
-                log_and_notify(
+                logging.log_and_notify(
                     ("Failed to find matching position id for key %s"):format(pos_id_key),
                     vim.log.levels.ERROR
                 )
