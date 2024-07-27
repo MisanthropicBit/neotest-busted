@@ -24,11 +24,12 @@ local function lnum_is_in_range(lnum, range)
     return _lnum >= range[1] and _lnum <= range[3]
 end
 
---- Normalize a neotest position id
+--- Normalize a neotest position id to a position id key used internally by -
+--- neotest-busted e.g.
+--- "path::"describe 1"::test 1" => "path::describe::1::test::1"
 ---@param position_id string
 ---@return string
 local function normalize_position_id(position_id)
-    -- TODO: Isn't this what create_pos_id_key does?
     local parts = util.split_position_id(position_id)
     local stripped_parts = {}
 
@@ -68,8 +69,7 @@ local function get_tests_in_range_for_file(position)
         return {}
     end
 
-    -- TODO: Handle windows
-    local lines = vim.split(results.stdout, "\n", { trimempty = true })
+    local lines = vim.split(results.stdout, util.newline(), { trimempty = true })
     local tests = {}
 
     for _, line in ipairs(lines) do
@@ -130,10 +130,8 @@ local function find_test_position_id(tree, test_info)
     local position_parts = util.split_position_id(position.id)
     local test_info_parts = util.split_position_id(test_info.position_id)
     local common_prefix = util.longest_common_prefix(position_parts, test_info_parts)
-    local test_name = table.concat(
-        vim.tbl_map(util.trim_quotes, vim.list_slice(test_info_parts, #common_prefix + 1)),
-        " "
-    )
+    local non_common_prefix = vim.list_slice(test_info_parts, #common_prefix + 1)
+    local test_name = table.concat(vim.tbl_map(util.trim_quotes, non_common_prefix), " ")
 
     return position, table.concat(common_prefix, "::"), test_name
 end

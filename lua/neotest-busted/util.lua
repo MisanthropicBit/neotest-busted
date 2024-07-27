@@ -2,6 +2,11 @@ local util = {}
 
 local lib = require("neotest.lib")
 
+---@return string
+function util.newline()
+    return package.config:sub(1, 1) == "/" and "\n" or "\r\n"
+end
+
 --- Strip quotes from a string
 ---@param value string
 ---@return string

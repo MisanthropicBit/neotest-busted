@@ -365,7 +365,7 @@ function BustedNeotestAdapter.discover_positions(path)
     return lib.treesitter.parse_positions(path, query, { nested_namespaces = true })
 end
 
---- Create a unique key to identify a test
+--- Create a unique key from a position to identify a test
 ---@param position neotest.Position
 ---@param stripped_pos_id string neotest position id stripped of "::"
 ---@return string
