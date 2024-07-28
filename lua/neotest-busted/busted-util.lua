@@ -1,5 +1,6 @@
 local busted_util = {}
 
+local adapter = require("neotest-busted")
 local logging = require("neotest-busted.logging")
 
 local lib = require("neotest.lib")
@@ -53,12 +54,24 @@ end
 local function get_tests_in_range_for_file(position)
     local path = position.path
 
+    local command_info = adapter.create_busted_command({ path }, {
+        busted_arguments = { "--list" },
+    })
+
+    if not command_info then
+        logging.log_and_notify(
+            "Could not find a busted command for listing tests",
+            vim.log.levels.ERROR
+        )
+        return {}
+    end
+
     local code, results = lib.process.run(
-        { "busted", "--list", path },
+        vim.list_extend({ command_info.nvim_command }, command_info.arguments),
         { stdout = true, stderr = true }
     )
 
-    if code ~= 0 or results.stderr ~= "" then
+    if code ~= 0 then
         logging.log_and_notify(
             ("Failed to get all tests via busted (code: %d): %s"):format(
                 code,
@@ -69,7 +82,8 @@ local function get_tests_in_range_for_file(position)
         return {}
     end
 
-    local lines = vim.split(results.stdout, util.newline(), { trimempty = true })
+    -- 'busted --list' outputs to stderr
+    local lines = vim.split(results.stderr, "\r\n", { trimempty = true })
     local tests = {}
 
     for _, line in ipairs(lines) do
@@ -143,6 +157,8 @@ end
 function busted_util.expand_parametric_tests(tree)
     local position = tree:data()
     local tests_in_range = get_tests_in_range_for_file(position)
+
+    ---@type table<string, neotest.Position[]>
     local unexpanded_tests = {}
 
     nio.scheduler()
@@ -156,10 +172,6 @@ function busted_util.expand_parametric_tests(tree)
 
         if tests_in_range[id] then
             tests_in_range[id].in_tree = true
-        else
-            if data.type == types.PositionType.test then
-                unexpanded_tests[data.id] = {}
-            end
         end
     end
 
@@ -186,6 +198,12 @@ function busted_util.expand_parametric_tests(tree)
             }
 
             table.insert(parametric_positions, data)
+
+            if not unexpanded_tests[matched_position.id] then
+                unexpanded_tests[matched_position.id] = {}
+            end
+
+            -- TODO: Does this need to be a table?
             table.insert(unexpanded_tests[matched_position.id], data)
 
             ---@diagnostic disable-next-line: invisible

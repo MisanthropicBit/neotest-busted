@@ -1,4 +1,3 @@
-local busted_util = require("neotest-busted.busted-util")
 local config = require("neotest-busted.config")
 local logging = require("neotest-busted.logging")
 local util = require("neotest-busted.util")
@@ -148,12 +147,10 @@ local function quote_string(string)
     return '"' .. string .. '"'
 end
 
----@param results_path string?
 ---@param paths string[]
----@param filters string[]
 ---@param options neotest-busted.TestCommandOptions?
 ---@return neotest-busted.TestCommandConfig?
-function BustedNeotestAdapter.create_test_command(results_path, paths, filters, options)
+function BustedNeotestAdapter.create_busted_command(paths, options)
     local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
@@ -204,7 +201,6 @@ function BustedNeotestAdapter.create_test_command(results_path, paths, filters, 
     local busted_command = {
         "-l",
         busted.command,
-        "--verbose",
     }
 
     if _options.busted_output_handler then
@@ -218,26 +214,36 @@ function BustedNeotestAdapter.create_test_command(results_path, paths, filters, 
             vim.list_extend(busted_command, _options.busted_output_handler_options)
         end
     else
-        if not results_path then
-            error("Results path expected but not set")
+        if _options.results_path then
+            vim.list_extend(busted_command, {
+                "--output",
+                get_reporter_path(),
+                "-Xoutput",
+                _options.results_path,
+            })
         end
-
-        vim.list_extend(busted_command, {
-            "--output",
-            get_reporter_path(),
-            "-Xoutput",
-            results_path,
-        })
     end
 
     vim.list_extend(arguments, busted_command)
 
     if vim.tbl_islist(config.busted_args) and #config.busted_args > 0 then
-        vim.list_extend(arguments, config.busted_args)
+        for _, busted_arg in ipairs(config.busted_args) do
+            local arg = _options.quote_strings and '"' .. busted_arg .. '"' or busted_arg
+
+            table.insert(arguments, arg)
+        end
+    end
+
+    if vim.tbl_islist(_options.busted_arguments) and #_options.busted_arguments > 0 then
+        for _, busted_arg in ipairs(_options.busted_arguments) do
+            local arg = _options.quote_strings and '"' .. busted_arg .. '"' or busted_arg
+
+            table.insert(arguments, arg)
+        end
     end
 
     -- Add test filters
-    for _, filter in ipairs(filters) do
+    for _, filter in ipairs(_options.filters or {}) do
         local _filter = filter
 
         if _options.quote_strings then
@@ -269,12 +275,8 @@ end
 ---@return table?
 local function get_strategy_config(strategy, results_path, paths, filters)
     if strategy == "dap" then
-        vim.list_extend(paths, { "--helper", get_debug_start_script() }, 1)
-
-        local test_command_info = BustedNeotestAdapter.create_test_command(
-            results_path,
+        local test_command_info = BustedNeotestAdapter.create_busted_command(
             paths,
-            filters,
             -- NOTE: When run via dap, passing arguments such as the one for
             -- busted's '--filter' need to be escaped since the command is run
             -- using node's child_process.spawn with { shell: true } that will
@@ -284,7 +286,15 @@ local function get_strategy_config(strategy, results_path, paths, filters)
             -- On the other hand, we don't need to quote when running the integrated
             -- strategy (through vim.fn.jobstart) because it runs with command as a
             -- list which does not run through a shell
-            { quote_strings = true }
+            {
+                results_path = results_path,
+                filters = filters,
+                quote_strings = true,
+                busted_arguments = {
+                    "--helper",
+                    get_debug_start_script(),
+                }
+            }
         )
 
         if not test_command_info then
@@ -471,6 +481,8 @@ function BustedNeotestAdapter.build_spec(args)
     local parametric_tests = {}
 
     if pos.type == types.PositionType.test or pos.type == types.PositionType.namespace then
+        local busted_util = require("neotest-busted.busted-util")
+
         unexpanded_tests, is_parametric, parametric_tests = busted_util.expand_parametric_tests(tree)
     end
 
@@ -483,16 +495,14 @@ function BustedNeotestAdapter.build_spec(args)
     )
     local paths = { pos.path }
 
-    vim.print(vim.inspect(unexpanded_tests))
-    vim.print(is_parametric)
-    vim.print(vim.inspect(parametric_tests))
-    vim.print(vim.inspect(position_id_mapping))
-
     local results_path = async.fn.tempname() .. ".json"
-    local test_command = BustedNeotestAdapter.create_test_command(
-        results_path,
+    local test_command = BustedNeotestAdapter.create_busted_command(
         paths,
-        filters
+        {
+            results_path = results_path,
+            filters = filters,
+            busted_arguments = { "--verbose" },
+        }
     )
 
     if not test_command then
@@ -514,7 +524,6 @@ function BustedNeotestAdapter.build_spec(args)
             results_path = results_path,
             position_ids = position_id_mapping,
             unexpanded_tests = unexpanded_tests,
-            is_parametric = is_parametric,
             parametric_tests = parametric_tests,
         },
         strategy = get_strategy_config(args.strategy, results_path, paths, filters),
@@ -643,10 +652,12 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
         end
     end
 
+    local unexpanded_tests = spec.context.unexpanded_tests
+
     -- Unexpanded tests (parametric tests in source code) won't a
     -- representation at runtime so instead generate the results
     -- manually based on the results of the expanded tests
-    if vim.tbl_count(spec.context.unexpanded_tests) > 0 then
+    if unexpanded_tests and vim.tbl_count(unexpanded_tests) > 0 then
         for unexpanded_key, parametric_tests in pairs(spec.context.unexpanded_tests) do
             local status = ResultStatus.passed
 
@@ -668,8 +679,6 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
             end
         end
     end
-
-    vim.print(vim.inspect(results))
 
     -- If the test itself was parametric and all tests passed then mark it
     -- as passed as well so neotest will mark it as passed
