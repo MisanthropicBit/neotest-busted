@@ -147,6 +147,12 @@ describe("adapter.results", function()
     end)
 
     it("handles failure to read json test output", function()
+        stub(vim, "schedule", function(func)
+            func()
+        end)
+
+        stub(vim, "notify")
+
         stub(lib.files, "read", function()
             error("Could not read file", 0)
         end)
@@ -155,15 +161,27 @@ describe("adapter.results", function()
 
         assert.are.same(neotest_results, {})
 
+        assert.stub(vim.schedule).was.called()
+        assert.stub(vim.notify).was.called()
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
         assert
             .stub(logger.error).was
             .called_with(
                 "Failed to read json test output file test_output.json with error: Could not read file"
             )
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+
+        vim.schedule:revert()
+        vim.notify:revert()
     end)
 
     it("handles failure to decode json", function()
+        stub(vim, "schedule", function(func)
+            func()
+        end)
+
+        stub(vim, "notify")
+
         stub(vim.json, "decode", function()
             error("Expected value but found invalid token at character 1", 0)
         end)
@@ -172,15 +190,25 @@ describe("adapter.results", function()
 
         assert.are.same(neotest_results, {})
 
+        assert.stub(vim.schedule).was.called()
+        assert.stub(vim.notify).was.called()
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
         assert.stub(logger.error).was.called_with(
             "Failed to parse json test output file test_output.json with error: Expected value but found invalid token at character 1"
         )
 
+        vim.schedule:revert()
+        vim.notify:revert()
         vim.json.decode:revert()
     end)
 
     it("logs not finding a matching position id", function()
+        stub(vim, "schedule", function(func)
+            func()
+        end)
+
+        stub(vim, "notify")
+
         spec.context.position_ids[test_path .. "::namespace tests a failing test::7"] = nil
 
         local neotest_results = adapter.results(spec, strategy_result)
@@ -209,11 +237,16 @@ describe("adapter.results", function()
             },
         })
 
+        assert.stub(vim.schedule).was.called()
+        assert.stub(vim.notify).was.called()
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
         assert.stub(logger.error).was.called_with(
             "Failed to find matching position id for key "
                 .. test_path
                 .. "::namespace tests a failing test::7"
         )
+
+        vim.schedule:revert()
+        vim.notify:revert()
     end)
 end)

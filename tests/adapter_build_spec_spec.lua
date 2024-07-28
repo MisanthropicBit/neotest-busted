@@ -8,10 +8,14 @@ local async = _async.tests
 describe("adapter.build_spec", function()
     before_each(function()
         stub(vim.api, "nvim_echo")
+        stub(_async.fn, "tempname", "test-output")
+        stub(vim, "notify")
     end)
 
     after_each(function()
         vim.api.nvim_echo:revert()
+        _async.fn.tempname:revert()
+        vim.notify:revert()
     end)
 
     local function assert_spec_command(spec_command, items)
@@ -48,16 +52,6 @@ describe("adapter.build_spec", function()
             return pos.id
         end)
     end
-
-    before_each(function()
-        stub(_async.fn, "tempname", "test-output")
-        stub(vim, "notify")
-    end)
-
-    after_each(function()
-        _async.fn.tempname:revert()
-        vim.notify:revert()
-    end)
 
     async.it("builds command for file test", function()
         package.loaded["neotest-busted"] = nil
@@ -99,30 +93,25 @@ describe("adapter.build_spec", function()
             ),
             "-l",
             "./busted",
-            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
             "--shuffle-lists",
+            "--verbose",
             "./test_files/test1_spec.lua",
         })
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
-            pos = {
-                id = "./test_files/test1_spec.lua",
-                name = "test1_spec.lua",
-                path = "./test_files/test1_spec.lua",
-                range = { 0, 0, 21, 0 },
-                type = "file",
-            },
             position_ids = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::7"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
                 ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
                 ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::18"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
             },
+            unexpanded_tests = {},
+            parametric_tests = {},
         })
     end)
 
@@ -153,31 +142,26 @@ describe("adapter.build_spec", function()
             "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
-            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
+            "--verbose",
             "--filter",
-            "top%-level namespace 1 nested namespace 1 test 1",
+            "^top%-level namespace 1 nested namespace 1 test 1$",
             "--filter",
-            "top%-level namespace 1 nested namespace 1 test 2",
+            "^top%-level namespace 1 nested namespace 1 test 2$",
             "./test_files/test1_spec.lua",
         })
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
-            pos = {
-                id = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"',
-                name = '"nested namespace 1"',
-                path = "./test_files/test1_spec.lua",
-                range = { 1, 4, 9, 8 },
-                type = "namespace",
-            },
             position_ids = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::7"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
             },
+            unexpanded_tests = {},
+            parametric_tests = {},
         })
     end)
 
@@ -210,28 +194,23 @@ describe("adapter.build_spec", function()
             "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
-            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
+            "--verbose",
             "--filter",
-            "top%-level namespace 1 nested namespace 1 test 1",
+            "^top%-level namespace 1 nested namespace 1 test 1$",
             "./test_files/test1_spec.lua",
         })
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
-            pos = {
-                id = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-                name = '"test 1"',
-                path = "./test_files/test1_spec.lua",
-                range = { 2, 8, 4, 12 },
-                type = "test",
-            },
             position_ids = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
             },
+            unexpanded_tests = {},
+            parametric_tests = {},
         })
     end)
 
@@ -265,13 +244,13 @@ describe("adapter.build_spec", function()
             "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
-            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
+            "--verbose",
             "--filter",
-            "top%-level namespace 1 nested namespace 1 test 1",
+            "^top%-level namespace 1 nested namespace 1 test 1$",
             "./test_files/test1_spec.lua",
             "--no-enable-sound",
             "--no-sort",
@@ -279,16 +258,11 @@ describe("adapter.build_spec", function()
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
-            pos = {
-                id = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-                name = '"test 1"',
-                path = "./test_files/test1_spec.lua",
-                range = { 2, 8, 4, 12 },
-                type = "test",
-            },
             position_ids = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
             },
+            unexpanded_tests = {},
+            parametric_tests = {},
         })
     end)
 
@@ -316,28 +290,23 @@ describe("adapter.build_spec", function()
             "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
             "-l",
             "./busted",
-            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
+            "--verbose",
             "--filter",
-            [[%^top%-le%[ve]l %(na%*m%+e%-sp%?ac%%e%) 2%$ test 3]],
+            [[^%^top%-le%[ve]l %(na%*m%+e%-sp%?ac%%e%) 2%$ test 3$]],
             "./test_files/test1_spec.lua",
         })
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
-            pos = {
-                id = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-                name = '"test 3"',
-                path = "./test_files/test1_spec.lua",
-                range = { 13, 4, 15, 8 },
-                type = "test",
-            },
             position_ids = {
                 ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
             },
+            unexpanded_tests = {},
+            parametric_tests = {},
         })
     end)
 
@@ -349,7 +318,7 @@ describe("adapter.build_spec", function()
 
         local adapter = require("neotest-busted")({
             busted_command = "./busted",
-            busted_args = { "--shuffle-lists" },
+            busted_args = { "--shuffle-tests" },
             busted_paths = busted_paths,
             busted_cpaths = busted_cpaths,
             minimal_init = nil,
@@ -380,12 +349,12 @@ describe("adapter.build_spec", function()
             ),
             "-l",
             "./busted",
-            "--verbose",
             "--output",
             "./lua/neotest-busted/output_handler.lua",
             "-Xoutput",
             "test-output.json",
-            "--shuffle-lists",
+            "--shuffle-tests",
+            "--verbose",
             "./test_files/test1_spec.lua",
         }
 
@@ -393,26 +362,23 @@ describe("adapter.build_spec", function()
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
-            pos = {
-                id = "./test_files/test1_spec.lua",
-                name = "test1_spec.lua",
-                path = "./test_files/test1_spec.lua",
-                range = { 0, 0, 21, 0 },
-                type = "file",
-            },
             position_ids = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::7"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
                 ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
                 ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::18"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
             },
+            unexpanded_tests = {},
+            parametric_tests = {},
         })
 
-        local debug_arguments = vim.list_slice(arguments, 1, #arguments - 1)
+        local debug_arguments = vim.list_slice(arguments, 1, #arguments - 3)
+
         vim.list_extend(debug_arguments, {
-            '"./test_files/test1_spec.lua"',
+            '"--shuffle-tests"',
             '"--helper"',
             '"./lua/neotest-busted/start_debug.lua"',
+            '"./test_files/test1_spec.lua"',
         })
 
         local strategy_keys = vim.tbl_keys(spec.strategy)
@@ -483,6 +449,13 @@ describe("adapter.build_spec", function()
     end)
 
     -- async.it("builds nothing if tree data has 'dir' type", function()
+    --     package.loaded["neotest-busted"] = nil
+
+    --     local adapter = require("neotest-busted")({
+    --         busted_command = "./busted",
+    --         minimal_init = "custom_init.lua",
+    --     })
+
     --     local positions = adapter.discover_positions("./test_files"):to_list()
 
     --     local tree = Tree.from_list(positions, function(pos)
