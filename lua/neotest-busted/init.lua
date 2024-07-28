@@ -293,7 +293,7 @@ local function get_strategy_config(strategy, results_path, paths, filters)
                 busted_arguments = {
                     "--helper",
                     get_debug_start_script(),
-                }
+                },
             }
         )
 
@@ -443,7 +443,7 @@ local function generate_test_info_for_nodes(tree, unexpanded_tests, is_parametri
             position_id_mapping[pos_id_key] = pos.id
         end
 
-        :: continue ::
+        ::continue::
     end
 
     -- Generate test info for parametric tests that will run when running busted
@@ -483,27 +483,21 @@ function BustedNeotestAdapter.build_spec(args)
     if pos.type == types.PositionType.test or pos.type == types.PositionType.namespace then
         local busted_util = require("neotest-busted.busted-util")
 
-        unexpanded_tests, is_parametric, parametric_tests = busted_util.expand_parametric_tests(tree)
+        unexpanded_tests, is_parametric, parametric_tests =
+            busted_util.expand_parametric_tests(tree)
     end
 
     -- Iterate all tests in the tree and generate position ids for them
-    local filters, position_id_mapping = generate_test_info_for_nodes(
-        tree,
-        unexpanded_tests,
-        is_parametric,
-        parametric_tests
-    )
+    local filters, position_id_mapping =
+        generate_test_info_for_nodes(tree, unexpanded_tests, is_parametric, parametric_tests)
     local paths = { pos.path }
 
     local results_path = async.fn.tempname() .. ".json"
-    local test_command = BustedNeotestAdapter.create_busted_command(
-        paths,
-        {
-            results_path = results_path,
-            filters = filters,
-            busted_arguments = { "--verbose" },
-        }
-    )
+    local test_command = BustedNeotestAdapter.create_busted_command(paths, {
+        results_path = results_path,
+        filters = filters,
+        busted_arguments = { "--verbose" },
+    })
 
     if not test_command then
         logging.log_and_notify("Could not find a busted executable", vim.log.levels.ERROR)
@@ -628,16 +622,13 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     for _, test_type in ipairs(test_types) do
         local test_key, result_status = test_type[1], test_type[2]
-        local is_error = test_key ~= BustedResultKey.successes and test_key ~= BustedResultKey.pendings
+        local is_error = test_key ~= BustedResultKey.successes
+            and test_key ~= BustedResultKey.pendings
 
         ---@cast test_results neotest-busted.BustedResultObject
         for _, value in pairs(test_results[test_key]) do
-            local pos_id_key, result = test_result_to_neotest_result(
-                value,
-                result_status,
-                output,
-                is_error
-            )
+            local pos_id_key, result =
+                test_result_to_neotest_result(value, result_status, output, is_error)
 
             local pos_id = position_ids[pos_id_key]
 

@@ -9,8 +9,8 @@ describe("util", function()
             assert.are.same(util.trim_quotes('"this will be trimmed"'), "this will be trimmed")
 
             assert.are.same(
-                util.trim_quotes('this will not be trimmed'),
-                'this will not be trimmed'
+                util.trim_quotes("this will not be trimmed"),
+                "this will not be trimmed"
             )
         end)
     end)
@@ -24,13 +24,9 @@ describe("util", function()
             assert.are.same(prefix, vim.list_slice(value1, 1, 4))
         end)
 
-        it("finds longest common prefix with items of different lengths", function()
+        it("finds longest common prefix with items of different lengths", function() end)
 
-        end)
-
-        it("finds no common prefix", function()
-
-        end)
+        it("finds no common prefix", function() end)
     end)
 
     describe("create_path", function()

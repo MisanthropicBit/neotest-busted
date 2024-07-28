@@ -73,10 +73,7 @@ local function get_tests_in_range_for_file(position)
 
     if code ~= 0 then
         logging.log_and_notify(
-            ("Failed to get all tests via busted (code: %d): %s"):format(
-                code,
-                results.stderr
-            ),
+            ("Failed to get all tests via busted (code: %d): %s"):format(code, results.stderr),
             vim.log.levels.ERROR
         )
         return {}
@@ -89,7 +86,7 @@ local function get_tests_in_range_for_file(position)
     for _, line in ipairs(lines) do
         local parts = vim.split(line, ": ?")
         local non_path_parts = vim.split(parts[3], " ")
-        local position_id = ('%s::%s'):format(
+        local position_id = ("%s::%s"):format(
             path,
             table.concat(
                 vim.tbl_map(function(item)
