@@ -53,6 +53,11 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         end
     end
 
+    -- Only skip checking further installations if we are not doing the healthcheck
+    if not ignore_local and config.local_luarocks_only == true then
+        return nil
+    end
+
     -- Try to find a local (user home directory) busted executable
     local user_globs =
         util.glob(util.create_path("~", ".luarocks", "lib", "luarocks", "**", "bin", "busted"))
@@ -61,7 +66,7 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         logger.debug("Using local (~/.luarocks) busted executable")
 
         return {
-            type = "local",
+            type = "user",
             command = user_globs[1],
             lua_paths = {
                 util.create_path("~", ".luarocks", "share", "lua", "5.1", "?.lua"),

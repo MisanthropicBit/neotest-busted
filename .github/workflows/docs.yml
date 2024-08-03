@@ -15,6 +15,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+      - if: github.event_name == 'pull_request'
+        run: git fetch --no-tags --depth=1 origin master
       - name: panvimdoc
         uses: kdheepak/panvimdoc@v4.0.0
         with:
@@ -31,6 +33,9 @@ jobs:
           docmappingprojectname: true
           shiftheadinglevelby: 0
           incrementheadinglevelby: 0
+      - name: preview changes
+        if: github.event_name == 'pull_request'
+        run: git diff --color=always origin/master -- "doc/neotest-busted.txt"
       - uses: stefanzweifel/git-auto-commit-action@v4
         if: github.ref == 'refs/heads/master'
         with:

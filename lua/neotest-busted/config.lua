@@ -7,6 +7,7 @@ local default_config = {
     busted_paths = nil,
     busted_cpaths = nil,
     minimal_init = nil,
+    local_luarocks_only = true,
     parametric_test_discovery = true,
 }
 
@@ -70,6 +71,10 @@ function config.validate(_config)
             _config.minimal_init,
             is_non_empty_string,
             "optional non-empty string"
+        },
+        local_luarocks_only = {
+            _config.local_luarocks_only,
+            "boolean",
         },
         parametric_test_discovery = {
             _config.parametric_test_discovery,

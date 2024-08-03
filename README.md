@@ -31,6 +31,8 @@ neovim as the lua interpreter.
     <img width="80%" src="https://github.com/MisanthropicBit/neotest-busted/assets/1846147/cd947151-4008-47e5-89a4-42cc83094a0d" />
 </div>
 
+<!-- panvimdoc-ignore-start -->
+
 # Table of contents
 
 - [Requirements](#requirements)
@@ -41,6 +43,8 @@ neovim as the lua interpreter.
 - [Luarocks and Busted](#luarocks-and-busted)
 - [Running from the command line](#running-from-the-command-line)
 - [FAQ](#faq)
+
+<!-- panvimdoc-ignore-end -->
 
 ## Requirements
 
@@ -67,6 +71,10 @@ require("neotest").setup({
             -- Custom config to load via -u to set up testing.
             -- If nil, will look for a 'minimal_init.lua' file
             minimal_init = "custom_init.lua",
+            -- Only use a luarocks installation in the project's directory. If
+            -- true, installations in $HOME and global installations will be
+            -- ignored. Useful for isolating the test environment
+            local_luarocks_only = true,
             -- Find parametric tests
             parametric_test_discovery = false,
         }),
@@ -150,6 +158,15 @@ listed below and in that priority (i.e. a directory-local install takes
 precedence over a global install). You can check the installation by running
 `luarocks list busted`.
 
+> [!WARNING]
+> If you have set `busted_command` to a non-nil value in the `setup` function,
+> `neotest-busted` will not know where to look for appropriate lua paths and
+> will not look for installations as specified below to avoid setting up paths
+> for a different busted installation.
+>
+> In this case, you should set `busted_paths` and `busted_cpaths` to appropriate
+> paths.
+
 ### Directory-local install
 
 You can install busted in your project's directory by running the following commands.
@@ -163,6 +180,10 @@ You can install busted in your project's directory by running the following comm
 
 ### User home directory install
 
+> [!IMPORTANT]
+> You need to set `local_luarocks_only` to `false` for `neotest-busted` to find
+> your home directory installation.
+
 The following command will install busted in your home directory.
 
 ```shell
@@ -170,6 +191,10 @@ The following command will install busted in your home directory.
 ```
 
 ### Global install
+
+> [!IMPORTANT]
+> You need to set `local_luarocks_only` to `false` for `neotest-busted` to find
+> your global installation.
 
 ```shell
 > luarocks install busted
@@ -187,21 +212,7 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 `tests/` directory.
 
 ```shell
-$ nvim -l ./scripts/test-runner.lua tests/my_spec.lua
-```
-
-#### Test via rockspec
-
-If you use a rockspec, you can provide a test command so you can run tests using
-`luarocks test`.
-
-```lua
--- Your rockspec...
-
-test = {
-    type = "command",
-    command = "nvim -u NONE -l ./scripts/test-runner.lua",
-}
+$ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
 ```
 
 ## FAQ
@@ -214,21 +225,11 @@ Yes. Please see the instructions [here](#async-tests).
 ([even though the docs still mention it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
 busted v1 but I haven't tested that.
 
-#### Q: Why are parametric tests not shown in the summary?
+#### Q: Why is `neotest-busted` tested using plenary?
 
-Mostly for ease of implementation. When `neotest` builds the tree of all tests,
-it uses treesitter queries to find the test definitions in source but that won't
-include parametric tests which are not visible at runtime.
-
-To include them, `neotest-busted` would have to run a process to execute `busted
---list` on every test file which would be expensive for larger projects since
-`neotest` parses the entire project when a test is first run.
-
-For now, parametric tests can just be run when running a test or namespace
-(`describe`) that includes them. A future option for adding parametric tests to
-the `neotest` tree (similar to
-[`neotest-jest`](https://github.com/nvim-neotest/neotest-jest)) might be
-implemented.
+The test could be run via `neotest-busted` itself but I decided to use plenary
+instead to use another test runner so that bugs in `neotest-busted` won't affect
+its own tests.
 
 ## Inspiration
 

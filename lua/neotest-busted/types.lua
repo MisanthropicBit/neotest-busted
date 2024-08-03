@@ -6,11 +6,12 @@ local types = {}
 ---@field busted_paths string[]?
 ---@field busted_cpaths string[]?
 ---@field minimal_init string?
+---@field local_luarocks_only boolean?
 ---@field parametric_test_discovery boolean?
 
 ---@class neotest-busted.BustedCommandConfig
 ---@field type "config" | "project" | "user" | "global"
----@field command string[]
+---@field command string
 ---@field lua_paths string[]
 ---@field lua_cpaths string[]
 

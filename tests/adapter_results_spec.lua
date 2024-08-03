@@ -200,6 +200,7 @@ describe("adapter.results", function()
             "Failed to parse json test output file test_output.json with error: Expected value but found invalid token at character 1",
             nil
         )
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
 
         ---@diagnostic disable-next-line: undefined-field
         vim.schedule:revert()
