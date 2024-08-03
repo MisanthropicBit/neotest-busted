@@ -2,14 +2,31 @@ local util = require("neotest-busted.util")
 local lib = require("neotest.lib")
 
 describe("util", function()
-    describe("trim", function()
-        it("trims string", function()
-            assert.are.same(util.trim('"this will be trimmed"', '"'), "this will be trimmed")
+    -- TODO: Test new util functions
+
+    describe("trim_quotes", function()
+        it("trims quotes", function()
+            assert.are.same(util.trim_quotes('"this will be trimmed"'), "this will be trimmed")
+
             assert.are.same(
-                util.trim('"this will not be trimmed"', "-"),
-                '"this will not be trimmed"'
+                util.trim_quotes("this will not be trimmed"),
+                "this will not be trimmed"
             )
         end)
+    end)
+
+    describe("longest_common_prefix", function()
+        it("finds longest common prefix", function()
+            local value1 = { "path", "des1", "des2", "des3", '("test %d"):format(i)' }
+            local value2 = { "path", "des1", "des2", "des3", "test 1" }
+            local prefix = util.longest_common_prefix(value1, value2)
+
+            assert.are.same(prefix, vim.list_slice(value1, 1, 4))
+        end)
+
+        it("finds longest common prefix with items of different lengths", function() end)
+
+        it("finds no common prefix", function() end)
     end)
 
     describe("create_path", function()
@@ -24,9 +41,11 @@ describe("util", function()
 
             assert.are.same(util.glob(path), {
                 "lua/neotest-busted/async.lua",
+                "lua/neotest-busted/busted-util.lua",
                 "lua/neotest-busted/config.lua",
                 "lua/neotest-busted/health.lua",
                 "lua/neotest-busted/init.lua",
+                "lua/neotest-busted/logging.lua",
                 "lua/neotest-busted/output_handler.lua",
                 "lua/neotest-busted/start_debug.lua",
                 "lua/neotest-busted/types.lua",

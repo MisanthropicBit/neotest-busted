@@ -8,6 +8,7 @@ local default_config = {
     busted_cpaths = nil,
     minimal_init = nil,
     local_luarocks_only = true,
+    parametric_test_discovery = true,
 }
 
 local _user_config = default_config
@@ -74,6 +75,10 @@ function config.validate(_config)
         local_luarocks_only = {
             _config.local_luarocks_only,
             "boolean",
+        },
+        parametric_test_discovery = {
+            _config.parametric_test_discovery,
+            "boolean"
         },
     })
     -- stylua: ignore end

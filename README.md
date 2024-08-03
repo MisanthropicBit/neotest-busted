@@ -38,9 +38,10 @@ neovim as the lua interpreter.
 - [Requirements](#requirements)
 - [Configuration](#configuration)
 - [Defining tests](#defining-tests)
+- [Parametric tests](#parametric-tests)
+- [Debugging tests](#debugging-tests)
 - [Luarocks and Busted](#luarocks-and-busted)
 - [Running from the command line](#running-from-the-command-line)
-- [Debugging tests](#debugging-tests)
 - [FAQ](#faq)
 
 <!-- panvimdoc-ignore-end -->
@@ -74,6 +75,8 @@ require("neotest").setup({
             -- true, installations in $HOME and global installations will be
             -- ignored. Useful for isolating the test environment
             local_luarocks_only = true,
+            -- Find parametric tests
+            parametric_test_discovery = false,
         }),
     },
 })
@@ -82,6 +85,33 @@ require("neotest").setup({
 ## Defining tests
 
 Please refer to the [official busted documentation](https://lunarmodules.github.io/busted/).
+
+## Parametric tests
+
+`neotest-busted` supports parametric tests that are generated at runtime as
+opposed to being defined entirely at source-level as shown below. `describe`'s
+can also be parametric and are also supported. Parametric tests will also
+be shown in the neotest summary.
+
+```lua
+describe("parametric tests", function()
+    for i = 1, 3 do
+        it(("test %d"):format(i), function()
+            assert.are.same(i, i)
+        end)
+    end
+end)
+```
+
+> [!IMPORTANT]
+> Supporting parametric tests requires extra computation to collect them so
+> support is disabled by default. You need to set `parametric_test_discovery`
+> to `true` if you want neotest-busted to find parametric tests.
+
+## Debugging tests
+
+`neotest-busted` has support for debugging tests via [`local-lua-debugger-vscode`](https://github.com/tomblind/local-lua-debugger-vscode)
+which can be set up via [`nvim-dap`](https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#lua). Once set up, you can set a breakpoint and run the test with the `dap` strategy. Please refer to the [`neotest`](https://github.com/nvim-neotest/neotest) documentation for more information.
 
 ### Async tests
 
@@ -184,11 +214,6 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 ```shell
 $ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
 ```
-
-## Debugging tests
-
-`neotest-busted` has support for debugging tests via [`local-lua-debugger-vscode`](https://github.com/tomblind/local-lua-debugger-vscode)
-which can be set up via [`nvim-dap`](https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#lua). Once set up, you can set a breakpoint and run the test with the `dap` strategy. Please refer to the [`neotest`](https://github.com/nvim-neotest/neotest) documentation for more information.
 
 ## FAQ
 

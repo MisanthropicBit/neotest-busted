@@ -1,3 +1,5 @@
+local types = {}
+
 ---@class neotest-busted.Config
 ---@field busted_command string?
 ---@field busted_args string[]?
@@ -5,6 +7,7 @@
 ---@field busted_cpaths string[]?
 ---@field minimal_init string?
 ---@field local_luarocks_only boolean?
+---@field parametric_test_discovery boolean?
 
 ---@class neotest-busted.BustedCommandConfig
 ---@field type "config" | "project" | "user" | "global"
@@ -13,15 +16,26 @@
 ---@field lua_cpaths string[]
 
 ---@class neotest-busted.TestCommandOptions
+---@field busted_arguments string[]?
 ---@field busted_output_handler string?
 ---@field busted_output_handler_options string[]?
----@field quote_strings boolean
+---@field results_path string?
+---@field filters string[]?
+---@field quote_strings boolean?
 
 ---@class neotest-busted.TestCommandConfig
 ---@field nvim_command string
 ---@field arguments string[]
 ---@field paths string[]
 ---@field cpaths string[]
+
+---@enum neotest-busted.BustedResultKey
+types.BustedResultKey = {
+    successes = "successes",
+    pendings = "pendings",
+    failures = "failures",
+    errors = "errors",
+}
 
 ---@class neotest-busted.BustedTrace
 ---@field what string
@@ -65,3 +79,5 @@
 ---@field pendings neotest-busted.BustedResult[]
 ---@field successes neotest-busted.BustedResult[]
 ---@field failures neotest-busted.BustedFailureResult[]
+
+return types

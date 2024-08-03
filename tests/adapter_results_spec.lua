@@ -12,7 +12,7 @@ describe("adapter.results", function()
     local spec = {
         context = {
             results_path = "test_output.json",
-            position_ids = {
+            position_id_mapping = {
                 [test_path .. "::namespace tests a pending test::5"] = test_path
                     .. '::"namespace"::"tests a pending test"',
                 [test_path .. "::namespace tests a passing test::6"] = test_path
@@ -100,7 +100,9 @@ describe("adapter.results", function()
     end)
 
     after_each(function()
+        ---@diagnostic disable-next-line: undefined-field
         lib.files.read:revert()
+        ---@diagnostic disable-next-line: undefined-field
         logger.error:revert()
     end)
 
@@ -163,14 +165,16 @@ describe("adapter.results", function()
 
         assert.stub(vim.schedule).was.called()
         assert.stub(vim.notify).was.called()
-        assert
-            .stub(logger.error).was
-            .called_with(
-                "Failed to read json test output file test_output.json with error: Could not read file"
-            )
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was.called_with(
+            "Failed to read json test output file test_output.json with error: Could not read file",
+            nil
+        )
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
 
+        ---@diagnostic disable-next-line: undefined-field
         vim.schedule:revert()
+        ---@diagnostic disable-next-line: undefined-field
         vim.notify:revert()
     end)
 
@@ -191,13 +195,18 @@ describe("adapter.results", function()
 
         assert.stub(vim.schedule).was.called()
         assert.stub(vim.notify).was.called()
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
         assert.stub(logger.error).was.called_with(
-            "Failed to parse json test output file test_output.json with error: Expected value but found invalid token at character 1"
+            "Failed to parse json test output file test_output.json with error: Expected value but found invalid token at character 1",
+            nil
         )
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
 
+        ---@diagnostic disable-next-line: undefined-field
         vim.schedule:revert()
+        ---@diagnostic disable-next-line: undefined-field
         vim.notify:revert()
+        ---@diagnostic disable-next-line: undefined-field
         vim.json.decode:revert()
     end)
 
@@ -208,7 +217,7 @@ describe("adapter.results", function()
 
         stub(vim, "notify")
 
-        spec.context.position_ids[test_path .. "::namespace tests a failing test::7"] = nil
+        spec.context.position_id_mapping[test_path .. "::namespace tests a failing test::7"] = nil
 
         local neotest_results = adapter.results(spec, strategy_result)
 
@@ -242,10 +251,13 @@ describe("adapter.results", function()
         assert.stub(logger.error).was.called_with(
             "Failed to find matching position id for key "
                 .. test_path
-                .. "::namespace tests a failing test::7"
+                .. "::namespace tests a failing test::7",
+            nil
         )
 
+        ---@diagnostic disable-next-line: undefined-field
         vim.schedule:revert()
+        ---@diagnostic disable-next-line: undefined-field
         vim.notify:revert()
     end)
 end)
