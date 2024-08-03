@@ -226,7 +226,7 @@ local function discover_parametric_tests(tree)
                 table.insert(parametric_positions[matched_id], data)
             end
 
-            :: continue ::
+            ::continue::
         end
     end
 
@@ -257,7 +257,7 @@ function busted_util.add_parametric_tests(tree)
             node:add_child(parametric_position.id, new_tree)
         end
 
-        :: continue ::
+        ::continue::
     end
 end
 

@@ -603,8 +603,7 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     for _, test_type in ipairs(test_types) do
         local test_key, result_status = test_type[1], test_type[2]
-        local is_error = test_key == BustedResultKey.failures
-            or test_key == BustedResultKey.errors
+        local is_error = test_key == BustedResultKey.failures or test_key == BustedResultKey.errors
 
         for _, value in pairs(test_results[test_key]) do
             local pos_id_key, result =
@@ -612,11 +611,7 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
             local pos_id = position_id_mapping[pos_id_key]
 
             if not pos_id then
-                logging.error(
-                    "Failed to find matching position id for key %s",
-                    nil,
-                    pos_id_key
-                )
+                logging.error("Failed to find matching position id for key %s", nil, pos_id_key)
             else
                 results[pos_id] = result
             end

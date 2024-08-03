@@ -166,12 +166,10 @@ describe("adapter.results", function()
         assert.stub(vim.schedule).was.called()
         assert.stub(vim.notify).was.called()
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert
-            .stub(logger.error).was
-            .called_with(
-                "Failed to read json test output file test_output.json with error: Could not read file",
-                nil
-            )
+        assert.stub(logger.error).was.called_with(
+            "Failed to read json test output file test_output.json with error: Could not read file",
+            nil
+        )
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
 
         ---@diagnostic disable-next-line: undefined-field
