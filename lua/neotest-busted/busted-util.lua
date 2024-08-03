@@ -41,6 +41,21 @@ local function normalize_position_id(position_id)
     return table.concat(stripped_parts, "::")
 end
 
+--- Process a line from the output 'busted --list'
+---@param line string
+---@return string?
+---@return string?
+local function process_runtime_test_line(line)
+    -- Splitting like this accounts for colons in test names
+    local iter = vim.gsplit(line, ": ?")
+
+    local path = iter()
+    local lnum = iter()
+    local rest = line:sub(#path + #lnum + 4)
+
+    return lnum, rest
+end
+
 ---@param tree neotest.Tree
 ---@return table<string, neotest-busted.RuntimeTestInfo>
 local function get_runtime_test_info(tree)
@@ -75,11 +90,11 @@ local function get_runtime_test_info(tree)
 
     -- 'busted --list' outputs to stderr and apparently uses carriage return
     for line in vim.gsplit(results.stderr, "\r\n", { plain = true, trimempty = true }) do
-        local parts = vim.split(line, ": ?")
+        local lnum, rest = process_runtime_test_line(line)
         local test = { path = path, in_tree = false }
 
-        if #parts == 3 then
-            local non_path_parts = vim.split(parts[3], " ")
+        if path then
+            local non_path_parts = vim.split(rest, " ")
             -- local position_id = normalize_position_id(path .. "::" .. non_path_parts)
             local position_id = ("%s::%s"):format(
                 path,
@@ -91,10 +106,10 @@ local function get_runtime_test_info(tree)
                 )
             )
 
-            test.lnum = tonumber(parts[2])
+            test.lnum = tonumber(lnum)
             test.position_id = position_id
             tests[position_id] = test
-        elseif #parts == 1 then
+        else
             -- FIX: This can happen for 'it' tests outside of a 'describe'
             -- where only the test name is listed
         end

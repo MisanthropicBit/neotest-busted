@@ -371,7 +371,6 @@ function BustedNeotestAdapter.discover_positions(path)
     ) (#match? @func_name "^it$")) @test.definition
 ]]
 
-    ---@diagnostic disable-next-line: missing-fields
     local tree = lib.treesitter.parse_positions(path, query, { nested_namespaces = true })
 
     if config.parametric_test_discovery == true then
@@ -439,7 +438,6 @@ local function generate_test_info_for_nodes(tree)
 
         if pos.type == types.PositionType.test then
             local filter, pos_id_key = extract_test_info(pos)
-            vim.print(vim.inspect({ pos.id, pos_id_key }))
 
             if gen_filters then
                 add_filter(filter)
