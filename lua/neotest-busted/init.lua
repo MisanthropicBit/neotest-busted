@@ -22,8 +22,10 @@ local function log_and_notify(message, level)
         return
     end
 
-    logger[log_method](message)
-    vim.notify(message, level)
+    vim.schedule(function()
+        logger[log_method](message)
+        vim.notify(message, level)
+    end)
 end
 
 ---@type neotest.Adapter
@@ -67,6 +69,11 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         end
     end
 
+    -- Only skip checking further installations if we are not doing the healthcheck
+    if not ignore_local and config.local_luarocks_only == true then
+        return nil
+    end
+
     -- Try to find a local (user home directory) busted executable
     local user_globs =
         util.glob(util.create_path("~", ".luarocks", "lib", "luarocks", "**", "bin", "busted"))
@@ -75,7 +82,7 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         logger.debug("Using local (~/.luarocks) busted executable")
 
         return {
-            type = "local",
+            type = "user",
             command = user_globs[1],
             lua_paths = {
                 util.create_path("~", ".luarocks", "share", "lua", "5.1", "?.lua"),
@@ -171,7 +178,7 @@ function BustedNeotestAdapter.create_test_command(results_path, paths, filters, 
     local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
-        log_and_notify("Could not find a busted command", vim.log.levels.ERROR)
+        log_and_notify("Could not find busted executable", vim.log.levels.ERROR)
         return
     end
 

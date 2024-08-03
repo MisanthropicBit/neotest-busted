@@ -19,8 +19,8 @@ describe("async tests", function()
         local timer = vim.loop.new_timer()
         local event = control.event()
 
-        -- Print a message after 1 second
-        timer:start(1000, 0, function()
+        -- Print a message after 200 milliseconds
+        timer:start(200, 0, function()
             timer:stop()
             timer:close()
             vim.print("Hello from async test")

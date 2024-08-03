@@ -7,6 +7,7 @@ local default_config = {
     busted_paths = nil,
     busted_cpaths = nil,
     minimal_init = nil,
+    local_luarocks_only = true,
 }
 
 local _user_config = default_config
@@ -69,6 +70,10 @@ function config.validate(_config)
             _config.minimal_init,
             is_non_empty_string,
             "optional non-empty string"
+        },
+        local_luarocks_only = {
+            _config.local_luarocks_only,
+            "boolean",
         },
     })
     -- stylua: ignore end
