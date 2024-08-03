@@ -3,25 +3,30 @@ local logging = {}
 local logger = require("neotest.logging")
 
 local log_methods = {
-    "debug",
     "info",
     "warn",
     "error",
 }
 
+---@param level string
+---@param context table?
 ---@param message string
----@param level 1 | 2 | 3 | 4
-function logging.log_and_notify(message, level)
-    local log_method = log_methods[level]
-
-    if not log_method then
-        return
-    end
+---@param ... unknown
+local function log(level, context, message, ...)
+    local args = { ... }
 
     vim.schedule(function()
-        logger[log_method](message)
-        vim.notify(message, level)
+        local formatted_message = message:format(unpack(args))
+
+        logger[level](formatted_message, context)
+        vim.notify(formatted_message, vim.log.levels[level:upper()])
     end)
+end
+
+for _, name in ipairs(log_methods) do
+    logging[name] = function(message, context, ...)
+        log(name, context, message, ...)
+    end
 end
 
 return logging

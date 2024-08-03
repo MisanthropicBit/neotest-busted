@@ -7,6 +7,7 @@ local default_config = {
     busted_paths = nil,
     busted_cpaths = nil,
     minimal_init = nil,
+    parametric_test_discovery = true,
 }
 
 local _user_config = default_config
@@ -69,6 +70,10 @@ function config.validate(_config)
             _config.minimal_init,
             is_non_empty_string,
             "optional non-empty string"
+        },
+        parametric_test_discovery = {
+            _config.parametric_test_discovery,
+            "boolean"
         },
     })
     -- stylua: ignore end

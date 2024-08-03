@@ -6,6 +6,7 @@ local types = {}
 ---@field busted_paths string[]?
 ---@field busted_cpaths string[]?
 ---@field minimal_init string?
+---@field parametric_test_discovery boolean?
 
 ---@class neotest-busted.BustedCommandConfig
 ---@field type "config" | "project" | "user" | "global"
@@ -19,7 +20,7 @@ local types = {}
 ---@field busted_output_handler_options string[]?
 ---@field results_path string?
 ---@field filters string[]?
----@field quote_strings boolean
+---@field quote_strings boolean?
 
 ---@class neotest-busted.TestCommandConfig
 ---@field nvim_command string

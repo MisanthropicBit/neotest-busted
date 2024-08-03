@@ -67,6 +67,8 @@ require("neotest").setup({
             -- Custom config to load via -u to set up testing.
             -- If nil, will look for a 'minimal_init.lua' file
             minimal_init = "custom_init.lua",
+            -- Find parametric tests
+            parametric_test_discovery = false,
         }),
     },
 })
@@ -78,13 +80,14 @@ Please refer to the [official busted documentation](https://lunarmodules.github.
 
 ## Parametric tests
 
-`neotest-busted` supports parametric tests which are tests that are generated at
-runtime as opposed to being defined entirely at source-level as shown below.
-`describe`'s can also be parametric and are also supported.
+`neotest-busted` supports parametric tests that are generated at runtime as
+opposed to being defined entirely at source-level as shown below. `describe`'s
+can also be parametric and are also supported. Parametric tests will also
+be shown in the neotest summary.
 
 ```lua
 describe("parametric tests", function()
-    for i = 1, 3, 1 do
+    for i = 1, 3 do
         it(("test %d"):format(i), function()
             assert.are.same(i, i)
         end)
@@ -92,17 +95,10 @@ describe("parametric tests", function()
 end)
 ```
 
-Running `busted --list <test_file>` shows all tests that `busted` finds.
-
-```shell
-test_spec.lua:3: parametric tests test 1
-test_spec.lua:3: parametric tests test 2
-test_spec.lua:3: parametric tests test 3
-```
-
-> [!INFO]
-> Since these tests only exist at runtime, they are not shown in the `neotest`
-> summary but are run when running a parametric test.
+> [!IMPORTANT]
+> Supporting parametric tests requires extra computation to collect them so
+> support is disabled by default. You need to set `parametric_test_discovery`
+> to `true` if you want neotest-busted to find parametric tests.
 
 ## Debugging tests
 
