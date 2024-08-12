@@ -185,7 +185,7 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 $ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
 ```
 
-### Using busted
+### Using busted directly
 
 You can also provide a `.busted` config file and run your tests using busted.
 Learn more about busted configuration files from the [official
@@ -193,12 +193,25 @@ docs](https://lunarmodules.github.io/busted/#usage).
 
 ```lua
 return {
+    -- Use neotest-busted in all tasks
+    _all = {
+        lua = "nvim -l path/to/neotest-busted/scripts/test-runner.lua"
+    },
     -- Default task to run if no task was specified
     default = {
         verbose = true,
-        lua = "nvim -l path/to/neotest-busted/scripts/test-runner.lua"
+    },
+    integration = {
+        tags = "integration",
     },
 }
+```
+
+Pass extra arguments to `neotest` to run a specific task. For example, to run
+the `"integration"` task in a test file:
+
+```lua
+require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integration" } })
 ```
 
 ## Debugging tests
