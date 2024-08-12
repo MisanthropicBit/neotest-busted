@@ -93,6 +93,7 @@ local function print_level(message, level)
     end
 end
 
+---@return string?
 local function find_minimal_init()
     local glob_matches = vim.fn.glob("**/minimal_init.lua", false, true)
 
@@ -143,6 +144,7 @@ local function collect_tests()
     local tests = {}
     local util = require("neotest-busted.util")
 
+    -- TODO: Support other test file patterns (via .busted)
     vim.list_extend(tests, util.glob("test/**/*_spec.lua"))
     vim.list_extend(tests, util.glob("tests/**/*_spec.lua"))
     vim.list_extend(tests, util.glob("spec/**/*_spec.lua"))

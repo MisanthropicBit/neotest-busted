@@ -31,6 +31,8 @@ neovim as the lua interpreter.
     <img width="80%" src="https://github.com/MisanthropicBit/neotest-busted/assets/1846147/cd947151-4008-47e5-89a4-42cc83094a0d" />
 </div>
 
+<!-- panvimdoc-ignore-start -->
+
 # Table of contents
 
 - [Requirements](#requirements)
@@ -38,7 +40,10 @@ neovim as the lua interpreter.
 - [Defining tests](#defining-tests)
 - [Luarocks and Busted](#luarocks-and-busted)
 - [Running from the command line](#running-from-the-command-line)
+- [Debugging tests](#debugging-tests)
 - [FAQ](#faq)
+
+<!-- panvimdoc-ignore-end -->
 
 ## Requirements
 
@@ -65,6 +70,10 @@ require("neotest").setup({
             -- Custom config to load via -u to set up testing.
             -- If nil, will look for a 'minimal_init.lua' file
             minimal_init = "custom_init.lua",
+            -- Only use a luarocks installation in the project's directory. If
+            -- true, installations in $HOME and global installations will be
+            -- ignored. Useful for isolating the test environment
+            local_luarocks_only = true,
         }),
     },
 })
@@ -119,6 +128,15 @@ listed below and in that priority (i.e. a directory-local install takes
 precedence over a global install). You can check the installation by running
 `luarocks list busted`.
 
+> [!WARNING]
+> If you have set `busted_command` to a non-nil value in the `setup` function,
+> `neotest-busted` will not know where to look for appropriate lua paths and
+> will not look for installations as specified below to avoid setting up paths
+> for a different busted installation.
+>
+> In this case, you should set `busted_paths` and `busted_cpaths` to appropriate
+> paths.
+
 ### Directory-local install
 
 You can install busted in your project's directory by running the following commands.
@@ -132,6 +150,10 @@ You can install busted in your project's directory by running the following comm
 
 ### User home directory install
 
+> [!IMPORTANT]
+> You need to set `local_luarocks_only` to `false` for `neotest-busted` to find
+> your home directory installation.
+
 The following command will install busted in your home directory.
 
 ```shell
@@ -139,6 +161,10 @@ The following command will install busted in your home directory.
 ```
 
 ### Global install
+
+> [!IMPORTANT]
+> You need to set `local_luarocks_only` to `false` for `neotest-busted` to find
+> your global installation.
 
 ```shell
 > luarocks install busted
@@ -156,26 +182,12 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 `tests/` directory.
 
 ```shell
-$ nvim -u NONE -l ./scripts/test-runner.lua tests/my_spec.lua
+$ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
 ```
 
-#### Test via rockspec
+### Using busted
 
-If you use a rockspec, you can provide a test command so you can run tests using
-`luarocks test`.
-
-```lua
--- Your rockspec...
-
-test = {
-    type = "command",
-    command = "nvim -u NONE -l ./scripts/test-runner.lua",
-}
-```
-
-#### Using busted
-
-Lastly, you can provide a `.busted` config file and run your tests using busted.
+You can also provide a `.busted` config file and run your tests using busted.
 Learn more about busted configuration files from the [official
 docs](https://lunarmodules.github.io/busted/#usage).
 
@@ -184,15 +196,15 @@ return {
     -- Default task to run if no task was specified
     default = {
         verbose = true,
-        lua = "path/to/neotest-busted/scripts/nlua"
+        lua = "nvim -l path/to/neotest-busted/scripts/test-runner.lua"
     },
 }
 ```
 
-```shell
-$ # Or omit the '--config-file' argument if running in the same directory
-$ busted --config-file=/path/to/.busted
-```
+## Debugging tests
+
+`neotest-busted` has support for debugging tests via [`local-lua-debugger-vscode`](https://github.com/tomblind/local-lua-debugger-vscode)
+which can be set up via [`nvim-dap`](https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#lua). Once set up, you can set a breakpoint and run the test with the `dap` strategy. Please refer to the [`neotest`](https://github.com/nvim-neotest/neotest) documentation for more information.
 
 ## FAQ
 
@@ -203,6 +215,12 @@ Yes. Please see the instructions [here](#async-tests).
 [Busted removed support for async testing in version 2](https://github.com/lunarmodules/busted/issues/545#issuecomment-282085568)
 ([even though the docs still mention it](https://lunarmodules.github.io/busted/#async-tests)) so you could install
 busted v1 but I haven't tested that.
+
+#### Q: Why is `neotest-busted` tested using plenary?
+
+The test could be run via `neotest-busted` itself but I decided to use plenary
+instead to use another test runner so that bugs in `neotest-busted` won't affect
+its own tests.
 
 ## Inspiration
 

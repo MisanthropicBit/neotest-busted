@@ -4,17 +4,24 @@
 ---@field busted_paths string[]?
 ---@field busted_cpaths string[]?
 ---@field minimal_init string?
+---@field local_luarocks_only boolean?
 
----@class neotest-busted.BustedCommand
+---@class neotest-busted.BustedCommandConfig
 ---@field type "config" | "project" | "user" | "global"
 ---@field command string
 ---@field lua_paths string[]
 ---@field lua_cpaths string[]
 
----@class neotest-busted.BustedCommandOptions
----@field output_handler string?
----@field output_handler_options string[]?
----@field extra_busted_args string[]?
+---@class neotest-busted.TestCommandOptions
+---@field busted_output_handler string?
+---@field busted_output_handler_options string[]?
+---@field quote_strings boolean
+
+---@class neotest-busted.TestCommandConfig
+---@field nvim_command string
+---@field arguments string[]
+---@field paths string[]
+---@field cpaths string[]
 
 ---@class neotest-busted.BustedTrace
 ---@field what string
@@ -47,6 +54,11 @@
 ---@field message string
 ---@field trace neotest-busted.BustedTrace
 ---@field element neotest-busted.BustedElement
+
+---@class neotest-busted.BustedErrorResult
+---@field isError true
+---@field message string
+---@field name string
 
 ---@class neotest-busted.BustedResultObject
 ---@field errors neotest-busted.BustedFailureResult[]

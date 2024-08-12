@@ -1,0 +1,206 @@
+*neotest-busted.txt*Neotest adapter for running tests using busted with neovim as the lua interpreter.
+
+==============================================================================
+Table of Contents                           *neotest-busted-table-of-contents*
+
+  - Requirements                                 |neotest-busted-requirements|
+  - Configuration                               |neotest-busted-configuration|
+  - Defining tests                             |neotest-busted-defining-tests|
+  - Luarocks and Busted                   |neotest-busted-luarocks-and-busted|
+  - Running from the command line|neotest-busted-running-from-the-command-line|
+  - Debugging tests                           |neotest-busted-debugging-tests|
+  - FAQ                                                   |neotest-busted-faq|
+  - Inspiration                                   |neotest-busted-inspiration|
+
+
+
+
+REQUIREMENTS                                     *neotest-busted-requirements*
+
+- Neovim 0.9.0+ for the |`-l`| option.
+- Neotest <https://github.com/nvim-neotest/neotest> 4.0.0+ (which requires neovim 0.9.0+).
+- `busted` <https://github.com/lunarmodules/busted> installed (in a project-local, user, or global location, see |neotest-busted-here|).
+
+
+CONFIGURATION                                   *neotest-busted-configuration*
+
+Setup with neotest. Leave values as `nil` to leave them unspecified.
+
+>lua
+    require("neotest").setup({
+        adapters = {
+            require("neotest-busted")({
+                -- Leave as nil to let neotest-busted automatically find busted
+                busted_command = "<path to a busted executable>",
+                -- Extra arguments to busted
+                busted_args = { "--shuffle-files" },
+                -- List of paths to add to package.path in neovim before running busted
+                busted_paths = { "my/custom/path/?.lua" },
+                -- List of paths to add to package.cpath in neovim before running busted
+                busted_cpaths = { "my/custom/path/?.so" },
+                -- Custom config to load via -u to set up testing.
+                -- If nil, will look for a 'minimal_init.lua' file
+                minimal_init = "custom_init.lua",
+                -- Only use a luarocks installation in the project's directory. If
+                -- true, installations in $HOME and global installations will be
+                -- ignored. Useful for isolating the test environment
+                local_luarocks_only = true,
+            }),
+        },
+    })
+<
+
+
+DEFINING TESTS                                 *neotest-busted-defining-tests*
+
+Please refer to the official busted documentation
+<https://lunarmodules.github.io/busted/>.
+
+
+ASYNC TESTS ~
+
+Running an asynchronous test is done by wrapping the test function in a call to
+`async`. This also works for `before_each` and `after_each`.
+
+>lua
+    local async = require("neotest-busted.async")
+    local control = require("neotest.async").control
+    
+    describe("async", function()
+        before_each(async(function()
+            vim.print("async before_each")
+        end))
+    
+        it("async test", async(function()
+            local timer = vim.loop.new_timer()
+            local event = control.event()
+    
+            -- Print a message after 2 seconds
+            timer:start(2000, 0, function()
+                timer:stop()
+                timer:close()
+                vim.print("Hello from async test")
+                event.set()
+            end)
+    
+            -- Wait for the timer to complete
+            event.wait()
+        end))
+    end)
+<
+
+The `async` function takes an optional second timeout argument in milliseconds.
+If omitted, uses the numerical value of either the
+`NEOTEST_BUSTED_ASYNC_TEST_TIMEOUT` or `PLENARY_TEST_TIMEOUT` environment
+variables or a default timeout of 2000 milliseconds.
+
+
+LUAROCKS AND BUSTED                       *neotest-busted-luarocks-and-busted*
+
+Install luarocks from the website <https://luarocks.org/>. `neotest-busted`
+will try to find a `busted` executable automatically at the different locations
+listed below and in that priority (i.e. a directory-local install takes
+precedence over a global install). You can check the installation by running
+`luarocks list busted`.
+
+
+  [!WARNING] If you have set `busted_command` to a non-nil value in the `setup`
+  function, `neotest-busted` will not know where to look for appropriate lua
+  paths and will not look for installations as specified below to avoid setting
+  up paths for a different busted installation.
+  In this case, you should set `busted_paths` and `busted_cpaths` to appropriate
+  paths.
+
+DIRECTORY-LOCAL INSTALL ~
+
+You can install busted in your project’s directory by running the following
+commands.
+
+>shell
+    > cd <your_project>
+    > luarocks init
+    > luarocks config --scope project lua_version 5.1
+    > luarocks install busted
+<
+
+
+USER HOME DIRECTORY INSTALL ~
+
+
+  [!IMPORTANT] You need to set `local_luarocks_only` to `false` for
+  `neotest-busted` to find your home directory installation.
+The following command will install busted in your home directory.
+
+>shell
+    > luarocks install --local busted
+<
+
+
+GLOBAL INSTALL ~
+
+
+  [!IMPORTANT] You need to set `local_luarocks_only` to `false` for
+  `neotest-busted` to find your global installation.
+>shell
+    > luarocks install busted
+<
+
+
+RUNNING FROM THE COMMAND LINE   *neotest-busted-running-from-the-command-line*
+
+A `test-runner.lua` script is provided in the `scripts/` folder for running
+tests via the command line. This is useful for running all tests during CI for
+example.
+
+If you do not provide a `minimal_init.lua` to set up your test environment, the
+script will look for one and source it. If you don’t specify any tests to
+run, the command will automatically try to find your tests in a `spec/`,
+`test/`, or `tests/` directory.
+
+>shell
+    $ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
+<
+
+
+DEBUGGING TESTS                               *neotest-busted-debugging-tests*
+
+`neotest-busted` has support for debugging tests via
+`local-lua-debugger-vscode`
+<https://github.com/tomblind/local-lua-debugger-vscode> which can be set up via
+`nvim-dap`
+<https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#lua>.
+Once set up, you can set a breakpoint and run the test with the `dap` strategy.
+Please refer to the `neotest` <https://github.com/nvim-neotest/neotest>
+documentation for more information.
+
+
+FAQ                                                       *neotest-busted-faq*
+
+
+Q: CAN I RUN ASYNC TESTS WITH NEOTEST-BUSTED?
+
+Yes. Please see the instructions |neotest-busted-here|.
+
+Busted removed support for async testing in version 2
+<https://github.com/lunarmodules/busted/issues/545#issuecomment-282085568>
+(even though the docs still mention it
+<https://lunarmodules.github.io/busted/#async-tests>) so you could install
+busted v1 but I haven’t tested that.
+
+
+Q: WHY IS NEOTEST-BUSTED TESTED USING PLENARY?
+
+The test could be run via `neotest-busted` itself but I decided to use plenary
+instead to use another test runner so that bugs in `neotest-busted` won’t
+affect its own tests.
+
+
+INSPIRATION                                       *neotest-busted-inspiration*
+
+- Using Neovim as Lua interpreter with Luarocks <https://zignar.net/2023/01/21/using-luarocks-as-lua-interpreter-with-luarocks/>
+- nlua <https://github.com/mfussenegger/nlua>
+- Test your Neovim plugins with luarocks & busted <https://mrcjkb.dev/posts/2023-06-06-luarocks-test.html>
+
+Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
+
+vim:tw=78:ts=8:noet:ft=help:norl:

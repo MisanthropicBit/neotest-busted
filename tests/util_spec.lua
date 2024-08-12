@@ -28,6 +28,7 @@ describe("util", function()
                 "lua/neotest-busted/health.lua",
                 "lua/neotest-busted/init.lua",
                 "lua/neotest-busted/output_handler.lua",
+                "lua/neotest-busted/start_debug.lua",
                 "lua/neotest-busted/types.lua",
                 "lua/neotest-busted/util.lua",
             })

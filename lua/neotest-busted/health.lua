@@ -25,7 +25,7 @@ function health.check()
         vim.health.report_error("neotest-busted requires at least neovim " .. min_neovim_version)
     end
 
-    -- NOTE: We cannot check the neotest version because it isn't avertised as
+    -- NOTE: We cannot check the neotest version because it isn't advertised as
     -- part of its public api
     check_module_installed("neotest")
     check_module_installed("nio")
@@ -38,6 +38,8 @@ function health.check()
         vim.health.report_error("config has errors: " .. error)
     end
 
+    -- We skip looking for a local luarocks installation as the healthcheck
+    -- could have been invoked from anywhere
     local busted = adapter.find_busted_command(true)
 
     if busted then

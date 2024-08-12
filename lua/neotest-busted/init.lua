@@ -6,24 +6,34 @@ local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local types = require("neotest.types")
 
-local function get_strategy_config(strategy)
-    local strategy_configs = {
-        dap = nil, -- TODO: Add dap config
-    }
-    if strategy_configs[strategy] then
-        return strategy_configs[strategy]()
-    end
-end
+local log_methods = {
+    "debug",
+    "info",
+    "warn",
+    "error",
+}
 
----@type neotest.Adapter
-local BustedNeotestAdapter = { name = "neotest-busted" }
+---@param message string
+---@param level 1 | 2 | 3 | 4
+local function log_and_notify(message, level)
+    local log_method = log_methods[level]
+
+    if not log_method then
+        return
+    end
+
+    vim.schedule(function()
+        logger[log_method](message)
+        vim.notify(message, level)
+    end)
+end
 
 ---@type neotest.Adapter
 local BustedNeotestAdapter = { name = "neotest-busted" }
 
 --- Find busted command and additional paths
 ---@param ignore_local? boolean
----@return neotest-busted.BustedCommand?
+---@return neotest-busted.BustedCommandConfig?
 function BustedNeotestAdapter.find_busted_command(ignore_local)
     if config.busted_command and #config.busted_command > 0 then
         logger.debug("Using busted command from config")
@@ -59,6 +69,11 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         end
     end
 
+    -- Only skip checking further installations if we are not doing the healthcheck
+    if not ignore_local and config.local_luarocks_only == true then
+        return nil
+    end
+
     -- Try to find a local (user home directory) busted executable
     local user_globs =
         util.glob(util.create_path("~", ".luarocks", "lib", "luarocks", "**", "bin", "busted"))
@@ -67,7 +82,7 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         logger.debug("Using local (~/.luarocks) busted executable")
 
         return {
-            type = "local",
+            type = "user",
             command = user_globs[1],
             lua_paths = {
                 util.create_path("~", ".luarocks", "share", "lua", "5.1", "?.lua"),
@@ -123,6 +138,11 @@ local function get_reporter_path()
     return table.concat({ script_path(), "output_handler.lua" })
 end
 
+---@return string
+local function get_debug_start_script()
+    return table.concat({ script_path(), "start_debug.lua" })
+end
+
 --- Escape special characters in a lua pattern
 ---@param filter string
 ---@return string
@@ -144,21 +164,27 @@ local function escape_test_pattern_filter(filter)
     )
 end
 
----@param results_path string
+---@param string string
+local function quote_string(string)
+    return '"' .. string .. '"'
+end
+
+---@param results_path string?
 ---@param paths string[]
 ---@param filters string[]
----@param options neotest-busted.BustedCommandOptions?
----@return neotest-busted.BustedCommand?
-function BustedNeotestAdapter.create_busted_command(results_path, paths, filters, options)
+---@param options neotest-busted.TestCommandOptions?
+---@return neotest-busted.TestCommandConfig?
+function BustedNeotestAdapter.create_test_command(results_path, paths, filters, options)
     local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
+        log_and_notify("Could not find busted executable", vim.log.levels.ERROR)
         return
     end
 
     -- stylua: ignore start
-    local command = {
-        vim.loop.exepath(),
+    ---@type string[]
+    local arguments = {
         "--headless",
         "-i", "NONE", -- no shada
         "-n", -- no swapfile, always in-memory
@@ -169,6 +195,7 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
     ---@type string[], string[]
     local lua_paths, lua_cpaths = {}, {}
 
+    -- TODO: Should paths be quoted? Try seeing if a path with a space works
     -- Append custom paths from config
     if vim.tbl_islist(config.busted_paths) then
         vim.list_extend(lua_paths, config.busted_paths)
@@ -187,8 +214,8 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
     vim.list_extend(lua_cpaths, busted.lua_cpaths)
 
     -- Create '-c' arguments for updating package paths in neovim
-    vim.list_extend(command, util.create_package_path_argument("package.path", lua_paths))
-    vim.list_extend(command, util.create_package_path_argument("package.cpath", lua_cpaths))
+    vim.list_extend(arguments, util.create_package_path_argument("package.path", lua_paths))
+    vim.list_extend(arguments, util.create_package_path_argument("package.cpath", lua_cpaths))
 
     local _options = options or {}
 
@@ -201,19 +228,21 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
         "--verbose",
     }
 
-    vim.list_extend(busted_command, _options.extra_busted_args or {})
-
-    if _options.output_handler then
+    if _options.busted_output_handler then
         vim.list_extend(busted_command, {
             "--output",
-            _options.output_handler,
+            _options.busted_output_handler,
         })
 
-        if _options.output_handler_options then
+        if _options.busted_output_handler_options then
             table.insert(busted_command, "-Xoutput")
-            vim.list_extend(busted_command, _options.output_handler_options)
+            vim.list_extend(busted_command, _options.busted_output_handler_options)
         end
     else
+        if not results_path then
+            error("Results path expected but not set")
+        end
+
         vim.list_extend(busted_command, {
             "--output",
             get_reporter_path(),
@@ -222,25 +251,88 @@ function BustedNeotestAdapter.create_busted_command(results_path, paths, filters
         })
     end
 
-    vim.list_extend(command, busted_command)
+    vim.list_extend(arguments, busted_command)
 
     if vim.tbl_islist(config.busted_args) and #config.busted_args > 0 then
-        vim.list_extend(command, config.busted_args)
+        vim.list_extend(arguments, config.busted_args)
     end
 
     -- Add test filters
     for _, filter in ipairs(filters) do
-        vim.list_extend(command, { "--filter", escape_test_pattern_filter(filter) })
+        local escaped_filter = escape_test_pattern_filter(filter)
+
+        if _options.quote_strings then
+            escaped_filter = quote_string(escaped_filter)
+        end
+
+        vim.list_extend(arguments, { "--filter", escaped_filter })
     end
 
     -- Add test files
-    vim.list_extend(command, paths)
+    if _options.quote_strings then
+        vim.list_extend(arguments, vim.tbl_map(quote_string, paths))
+    else
+        vim.list_extend(arguments, paths)
+    end
 
     return {
-        command = command,
-        path = lua_paths,
-        cpath = lua_cpaths,
+        nvim_command = vim.loop.exepath(),
+        arguments = arguments,
+        paths = lua_paths,
+        cpaths = lua_cpaths,
     }
+end
+
+---@param strategy string
+---@param results_path string
+---@param paths string[]
+---@param filters string[]
+---@return table?
+local function get_strategy_config(strategy, results_path, paths, filters)
+    if strategy == "dap" then
+        vim.list_extend(paths, { "--helper", get_debug_start_script() }, 1)
+
+        local test_command_info = BustedNeotestAdapter.create_test_command(
+            results_path,
+            paths,
+            filters,
+            -- NOTE: When run via dap, passing arguments such as the one for
+            -- busted's '--filter' need to be escaped since the command is run
+            -- using node's child_process.spawn with { shell: true } that will
+            -- run via a shell and split arguments on spaces. This will break
+            -- the command if a filter contains spaces.
+            --
+            -- On the other hand, we don't need to quote when running the integrated
+            -- strategy (through vim.fn.jobstart) because it runs with command as a
+            -- list which does not run through a shell
+            { quote_strings = true }
+        )
+
+        if not test_command_info then
+            log_and_notify("Failed to construct test command for debugging", vim.log.levels.ERROR)
+            return nil
+        end
+
+        local lua_paths = util.normalize_and_create_lua_path(unpack(test_command_info.paths))
+        local lua_cpaths = util.normalize_and_create_lua_path(unpack(test_command_info.cpaths))
+
+        return {
+            name = "Debug busted tests",
+            type = "local-lua",
+            cwd = "${workspaceFolder}",
+            request = "launch",
+            env = {
+                LUA_PATH = lua_paths,
+                LUA_CPATH = lua_cpaths,
+            },
+            program = {
+                command = test_command_info.nvim_command,
+            },
+            args = test_command_info.arguments,
+        }
+    end
+
+    return nil
 end
 
 BustedNeotestAdapter.root =
@@ -380,27 +472,29 @@ function BustedNeotestAdapter.build_spec(args)
     end
 
     local results_path = async.fn.tempname() .. ".json"
-    local busted = BustedNeotestAdapter.create_busted_command(results_path, paths, filters)
+    local test_command = BustedNeotestAdapter.create_test_command(results_path, paths, filters)
 
-    if not busted then
-        local message = "Could not find a busted executable"
-        logger.error(message)
-        vim.notify(message, vim.log.levels.ERROR)
-
+    if not test_command then
+        log_and_notify("Could not find a busted executable", vim.log.levels.ERROR)
         return
     end
 
+    ---@type string[]
+    local command = vim.list_extend({ test_command.nvim_command }, test_command.arguments)
+
+    -- Extra arguments for busted
     if vim.tbl_islist(args.extra_args) then
-        vim.list_extend(busted.command, args.extra_args)
+        vim.list_extend(command, args.extra_args)
     end
 
     return {
-        command = busted.command,
+        command = command,
         context = {
             results_path = results_path,
             pos = pos,
             position_ids = position_ids,
         },
+        strategy = get_strategy_config(args.strategy, results_path, paths, filters),
     }
 end
 
@@ -423,11 +517,19 @@ local function create_error_info(test_result)
     return nil
 end
 
----@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult
+---@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
 ---@param status neotest.ResultStatus
 ---@param output string
 ---@param is_error boolean
 local function test_result_to_neotest_result(test_result, status, output, is_error)
+    if test_result.isError == true then
+        -- This is an internal error in busted, not a test that threw
+        return nil, {
+            message = test_result.message,
+            line = 0,
+        }
+    end
+
     local pos_id = create_pos_id_key(
         test_result.element.trace.source:sub(2), -- Strip the "@" from the source path
         test_result.name,
@@ -441,6 +543,7 @@ local function test_result_to_neotest_result(test_result, status, output, is_err
     }
 
     if is_error then
+        ---@cast test_result -neotest-busted.BustedErrorResult
         result.errors = create_error_info(test_result)
     end
 
@@ -458,7 +561,10 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     local ok, data = pcall(lib.files.read, results_path)
 
     if not ok then
-        logger.error("Failed to read json test output file ", results_path, " with error: ", data)
+        log_and_notify(
+            ("Failed to read json test output file %s with error: %s"):format(results_path, data),
+            vim.log.levels.ERROR
+        )
         return {}
     end
 
@@ -466,11 +572,9 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     local json_ok, parsed = pcall(vim.json.decode, data, { luanil = { object = true } })
 
     if not json_ok then
-        logger.error(
-            "Failed to parse json test output file ",
-            results_path,
-            " with error: ",
-            parsed
+        log_and_notify(
+            ("Failed to parse json test output file %s with error: %s"):format(results_path, parsed),
+            vim.log.levels.ERROR
         )
         return {}
     end
@@ -502,7 +606,10 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
             local pos_id = position_ids[pos_id_key]
 
             if not pos_id then
-                logger.error("Failed to find matching position id for key ", pos_id_key)
+                log_and_notify(
+                    ("Failed to find matching position id for key %s"):format(pos_id_key),
+                    vim.log.levels.ERROR
+                )
             else
                 results[position_ids[pos_id_key]] = result
             end

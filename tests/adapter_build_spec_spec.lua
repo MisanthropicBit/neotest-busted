@@ -30,6 +30,11 @@ describe("adapter.build_spec", function()
                     vim.endswith(spec_command[idx], "lua/neotest-busted/output_handler.lua")
                 )
                 idx = idx + 1
+            elseif item == '"--helper"' then
+                assert.is_true(
+                    vim.endswith(spec_command[idx], 'lua/neotest-busted/start_debug.lua"')
+                )
+                idx = idx + 1
             end
         end
     end
@@ -286,6 +291,7 @@ describe("adapter.build_spec", function()
             },
         })
     end)
+
     async.it("escapes special characters in pattern in command", function()
         package.loaded["neotest-busted"] = nil
 
@@ -333,6 +339,108 @@ describe("adapter.build_spec", function()
                 ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
             },
         })
+    end)
+
+    async.it("builds command for debugging file test", function()
+        package.loaded["neotest-busted"] = nil
+
+        local busted_paths = { "~/.luarocks/share/lua/5.1/?.lua" }
+        local busted_cpaths = { "~/.luarocks/lib/lua/5.1/?.so" }
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            busted_args = { "--shuffle-lists" },
+            busted_paths = busted_paths,
+            busted_cpaths = busted_cpaths,
+            minimal_init = nil,
+        })
+        local tree = create_tree(adapter)
+        local spec = adapter.build_spec({ tree = tree, strategy = "dap" })
+
+        assert.is_not_nil(spec)
+
+        local lua_paths = table.concat({
+            vim.fs.normalize(busted_paths[1]),
+            "lua/?.lua",
+            "lua/?/init.lua",
+        }, ";")
+
+        local arguments = {
+            "--headless",
+            "-i",
+            "NONE",
+            "-n",
+            "-u",
+            "tests/minimal_init.lua",
+            "-c",
+            ("lua package.path = '%s;' .. package.path"):format(lua_paths),
+            "-c",
+            ("lua package.cpath = '%s;' .. package.cpath"):format(
+                vim.fs.normalize(busted_cpaths[1])
+            ),
+            "-l",
+            "./busted",
+            "--verbose",
+            "--output",
+            "./lua/neotest-busted/output_handler.lua",
+            "-Xoutput",
+            "test-output.json",
+            "--shuffle-lists",
+            "./test_files/test1_spec.lua",
+        }
+
+        assert_spec_command(spec.command, vim.list_extend({ vim.loop.exepath() }, arguments))
+
+        assert.are.same(spec.context, {
+            results_path = "test-output.json",
+            pos = {
+                id = "./test_files/test1_spec.lua",
+                name = "test1_spec.lua",
+                path = "./test_files/test1_spec.lua",
+                range = { 0, 0, 21, 0 },
+                type = "file",
+            },
+            position_ids = {
+                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::7"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::18"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
+            },
+        })
+
+        local debug_arguments = vim.list_slice(arguments, 1, #arguments - 1)
+        vim.list_extend(debug_arguments, {
+            '"./test_files/test1_spec.lua"',
+            '"--helper"',
+            '"./lua/neotest-busted/start_debug.lua"',
+        })
+
+        local strategy_keys = vim.tbl_keys(spec.strategy)
+        table.sort(strategy_keys)
+
+        assert.are.same(strategy_keys, {
+            "args",
+            "cwd",
+            "env",
+            "name",
+            "program",
+            "request",
+            "type",
+        })
+
+        assert.are.same(spec.strategy.name, "Debug busted tests")
+        assert.are.same(spec.strategy.type, "local-lua")
+        assert.are.same(spec.strategy.cwd, "${workspaceFolder}")
+        assert.are.same(spec.strategy.request, "launch")
+        assert.are.same(spec.strategy.env, {
+            LUA_PATH = lua_paths,
+            LUA_CPATH = vim.fs.normalize(busted_cpaths[1]),
+        })
+        assert.are.same(spec.strategy.program, {
+            command = vim.loop.exepath(),
+        })
+
+        assert_spec_command(spec.strategy.args, debug_arguments)
     end)
 
     -- async.it("handles failure to find a busted command", function()
