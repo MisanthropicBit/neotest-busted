@@ -191,9 +191,9 @@ You can also provide a `.busted` config file and run your tests using busted.
 Learn more about busted configuration files from the [official
 docs](https://lunarmodules.github.io/busted/#usage) or take a look at the example [here](/.busted.example).
 
-https://github.com/MisanthropicBit/neotest-busted/blob/use-busted-directly/.busted.example#L1-L14
+https://github.com/MisanthropicBit/neotest-busted/blob/afda05822be747991a97d62e80d925111e7811e4/.busted.example#L1-L14
 
-https://github.com/MisanthropicBit/neotest-busted/blob/use-busted-directly/.busted.example#L1-L14?plain=1
+https://github.com/MisanthropicBit/neotest-busted/blob/afda05822be747991a97d62e80d925111e7811e4/.busted.example#L1-L14?plain=1
 
 Pass extra arguments to `neotest` to run a specific task. For example, to run
 the `"integration"` task in a test file:
