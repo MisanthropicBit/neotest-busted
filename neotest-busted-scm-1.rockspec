@@ -33,5 +33,6 @@ build = {
 }
 
 test = {
-    type = "busted",
+    type = "command",
+    command = "./tests/run_tests.sh",
 }
