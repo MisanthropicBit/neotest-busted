@@ -125,7 +125,11 @@ local function parse_args()
         busted_args = {},
     }
 
-    for idx, arg in ipairs(_G.arg) do
+    -- Start from the third argument to skip busted executable and "--ignore-lua" flag
+    -- TODO: Should we just use them instead of skipping them?
+    for idx = 3, #_G.arg do
+        local arg = _G.arg[idx]
+
         if arg == "-h" or arg == "--help" then
             parsed_args.help = true
         elseif arg == "--" then
@@ -185,25 +189,27 @@ local function run()
         return
     end
 
-    local paths = parsed_args.paths or collect_tests()
+    local paths = #parsed_args.paths > 0 and parsed_args.paths or collect_tests()
 
-    local busted = adapter_or_error.create_busted_command(nil, paths, {}, {
-        output_handler = "utfTerminal",
-        output_handler_options = { "--color" },
+    local test_command = adapter_or_error.create_test_command(nil, paths, {}, {
+        busted_output_handler = "utfTerminal",
+        busted_output_handler_options = { "--color" },
         -- If we don't add --ignore-lua the subsequent busted command (run via
         -- neovim) will use the .busted config file and use the 'lua' option
         -- for running the tests which will cause an infinite process spawning
         -- loop
-        extra_busted_args = vim.list_extend({ "--ignore-lua" }, parsed_args.busted_args),
+        busted_arguments = vim.list_extend({ "--ignore-lua" }, parsed_args.busted_args),
     })
 
-    if not busted then
+    if not test_command then
         print_level("Could not find a busted executable", vim.log.levels.ERROR)
         return
     end
 
+    local command = vim.list_extend({ test_command.nvim_command }, test_command.arguments)
+
     io.stdout:write(
-        vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, busted.command), " "))
+        vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, command), " "))
     )
 end
 

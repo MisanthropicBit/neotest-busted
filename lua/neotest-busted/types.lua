@@ -13,6 +13,7 @@
 ---@field lua_cpaths string[]
 
 ---@class neotest-busted.TestCommandOptions
+---@field busted_arguments string[]?
 ---@field busted_output_handler string?
 ---@field busted_output_handler_options string[]?
 ---@field quote_strings boolean
