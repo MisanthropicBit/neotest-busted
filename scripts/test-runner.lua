@@ -192,7 +192,7 @@ local function run()
     if not adapter_or_error then
         print_level(
             "neotest-busted could not be loaded. Set up 'runtimepath', provide a minimal configuration via '-u', or create a 'minimal_init.lua' file: "
-            .. adapter_or_error,
+                .. adapter_or_error,
             vim.log.levels.ERROR
         )
         return
@@ -224,9 +224,7 @@ local function run()
 
     local command = vim.list_extend({ test_command.nvim_command }, test_command.arguments)
 
-    io.stdout:write(
-        vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, command), " "))
-    )
+    io.stdout:write(vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, command), " ")))
 end
 
 run()
