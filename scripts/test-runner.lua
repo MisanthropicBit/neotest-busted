@@ -121,18 +121,6 @@ local function find_minimal_init()
     return glob_matches[1]
 end
 
----@param module_name string
----@return any
-local function require_checked(module_name)
-    local ok, module_or_error = pcall(require, module_name)
-
-    if not ok then
-        return nil
-    end
-
-    return module_or_error
-end
-
 ---@return ParsedArgs
 local function parse_args()
     local parsed_args = {
@@ -187,9 +175,9 @@ local function run()
 
     vim.cmd.source(minimal_init)
 
-    local adapter_or_error = require_checked("neotest-busted")
+    local ok, adapter_or_error = pcall(require, "neotest-busted")
 
-    if not adapter_or_error then
+    if not ok then
         print_level(
             "neotest-busted could not be loaded. Set up 'runtimepath', provide a minimal configuration via '-u', or create a 'minimal_init.lua' file: "
                 .. adapter_or_error,
@@ -212,8 +200,8 @@ local function run()
         busted_output_handler_options = { "--color" },
         -- If we don't add --ignore-lua the subsequent busted command (run via
         -- neovim) will use the .busted config file and use the 'lua' option
-        -- for running the tests which will cause an infinite process spawning
-        -- loop
+        -- again for running the tests (this script) which will cause an
+        -- infinite process spawning loop
         busted_arguments = vim.list_extend({ "--ignore-lua" }, parsed_args.busted_args),
     })
 
