@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-nvim -l ./scripts/test-runner.lua "$@"
