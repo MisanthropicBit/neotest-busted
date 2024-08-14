@@ -16,7 +16,7 @@
 ---@field busted_arguments string[]?
 ---@field busted_output_handler string?
 ---@field busted_output_handler_options string[]?
----@field quote_strings boolean
+---@field quote_strings boolean?
 
 ---@class neotest-busted.TestCommandConfig
 ---@field nvim_command string
