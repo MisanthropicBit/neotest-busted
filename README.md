@@ -88,10 +88,17 @@ Please refer to the [official busted documentation](https://lunarmodules.github.
 
 ## Parametric tests
 
+> [!IMPORTANT]
+> Supporting parametric tests requires extra computation to find them so support
+> is disabled by default. You need to set `parametric_test_discovery` to `true`
+> if you want neotest-busted to find parametric tests.
+
 `neotest-busted` supports parametric tests that are generated at runtime as
 opposed to being defined entirely at source-level as shown below. `describe`'s
-can also be parametric and are also supported. Parametric tests will also
-be shown in the neotest summary.
+can also be parametric and are also supported.
+
+Due to technical limitations, parametric tests won't be shown in the neotest
+summary until they have been run.
 
 ```lua
 describe("parametric tests", function()
@@ -102,11 +109,6 @@ describe("parametric tests", function()
     end
 end)
 ```
-
-> [!IMPORTANT]
-> Supporting parametric tests requires extra computation to collect them so
-> support is disabled by default. You need to set `parametric_test_discovery`
-> to `true` if you want neotest-busted to find parametric tests.
 
 ## Debugging tests
 
