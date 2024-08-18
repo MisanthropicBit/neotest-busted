@@ -5,6 +5,7 @@ local types = require("neotest.types")
 local stub = require("luassert.stub")
 
 local adapter = require("neotest-busted")()
+local config = require("neotest-busted.config")
 
 describe("adapter.results", function()
     local test_path = "/Users/user/vim/project/tests/test_spec.lua"
@@ -29,71 +30,73 @@ describe("adapter.results", function()
         output = "test_console_output",
     }
 
+    local test_json = [[{
+        "pendings": [
+            {
+                "name": "namespace tests a pending test",
+                "element": {
+                    "name": "tests a pending test",
+                    "trace": {
+                        "source": "@/Users/user/vim/project/tests/test_spec.lua",
+                        "currentline": 5
+                    }
+                },
+                "trace": {
+                    "message": ""
+                }
+            }
+        ],
+        "successes": [
+            {
+                "name": "namespace tests a passing test",
+                "element": {
+                    "name": "tests a passing test",
+                    "trace": {
+                        "source": "@/Users/user/vim/project/tests/test_spec.lua",
+                        "currentline": 6
+                    }
+                },
+                "trace": {
+                    "message": ""
+                }
+            }
+        ],
+        "failures": [
+            {
+                "name": "namespace tests a failing test",
+                "element": {
+                    "name": "tests a failing test",
+                    "trace": {
+                        "source": "@/Users/user/vim/project/tests/test_spec.lua",
+                        "currentline": 7
+                    }
+                },
+                "message": "Test failed at test_spec.lua:8: ...",
+                "trace": {
+                    "message": "Assert failed"
+                }
+            }
+        ],
+        "errors": [
+            {
+                "name": "namespace tests an erroneous test",
+                "element": {
+                    "name": "tests an erroneous test",
+                    "trace": {
+                        "source": "@/Users/user/vim/project/tests/test_spec.lua",
+                        "currentline": 10
+                    }
+                },
+                "message": "Something went wrong in test_spec.lua:12: ...",
+                "trace": {
+                    "message": "Oh noes"
+                }
+            }
+        ]
+    }]]
+
     before_each(function()
-        local test_json = [[{
-    "pendings": [
-        {
-            "name": "namespace tests a pending test",
-            "element": {
-                "name": "tests a pending test",
-                "trace": {
-                    "source": "@/Users/user/vim/project/tests/test_spec.lua",
-                    "currentline": 5
-                }
-            },
-            "trace": {
-                "message": ""
-            }
-        }
-    ],
-    "successes": [
-        {
-            "name": "namespace tests a passing test",
-            "element": {
-                "name": "tests a passing test",
-                "trace": {
-                    "source": "@/Users/user/vim/project/tests/test_spec.lua",
-                    "currentline": 6
-                }
-            },
-            "trace": {
-                "message": ""
-            }
-        }
-    ],
-    "failures": [
-        {
-            "name": "namespace tests a failing test",
-            "element": {
-                "name": "tests a failing test",
-                "trace": {
-                    "source": "@/Users/user/vim/project/tests/test_spec.lua",
-                    "currentline": 7
-                }
-            },
-            "message": "Test failed at test_spec.lua:8: ...",
-            "trace": {
-                "message": "Assert failed"
-            }
-        }
-    ],
-    "errors": [
-        {
-            "name": "namespace tests an erroneous test",
-            "element": {
-                "name": "tests an erroneous test",
-                "trace": {
-                    "source": "@/Users/user/vim/project/tests/test_spec.lua",
-                    "currentline": 10
-                }
-            },
-            "message": "Something went wrong in test_spec.lua:12: ...",
-            "trace": {
-                "message": "Oh noes"
-            }
-        }
-    ]
-}]]
+        config.configure({})
 
         stub(lib.files, "read", test_json)
         stub(logger, "error")

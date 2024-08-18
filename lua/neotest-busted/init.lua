@@ -1,3 +1,4 @@
+local Cache = require("neotest-busted.cache")
 local config = require("neotest-busted.config")
 local logging = require("neotest-busted.logging")
 local util = require("neotest-busted.util")
@@ -350,6 +351,8 @@ function BustedNeotestAdapter.filter_dir(name)
     }, name)
 end
 
+local parametric_test_cache = Cache.new()
+
 ---@async
 ---@return neotest.Tree | nil
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -379,7 +382,12 @@ function BustedNeotestAdapter.discover_positions(path)
     local tree = lib.treesitter.parse_positions(path, query, { nested_namespaces = true })
 
     if config.parametric_test_discovery == true then
-        require("neotest-busted.busted-util").add_parametric_tests(tree)
+        local busted_util = require("neotest-busted.busted-util")
+        local parametric_tests = busted_util.discover_parametric_tests(tree)
+
+        for id, tests in pairs(parametric_tests) do
+            parametric_test_cache:update(id, tests)
+        end
     end
 
     return tree
@@ -390,13 +398,8 @@ end
 ---@param stripped_pos_id string neotest position id stripped of "::"
 ---@return string
 local function create_pos_id_key_from_position(position, stripped_pos_id)
-    local lnum = position.range and position.range[1] + 1 or nil
-
     ---@diagnostic disable-next-line: undefined-field
-    if not lnum and position.real_range then
-        ---@diagnostic disable-next-line: undefined-field
-        lnum = position.real_range[1] + 1
-    end
+    local lnum = position.range and position.range[1] + 1 or position.lnum
 
     return ("%s::%s::%d"):format(position.path, stripped_pos_id, lnum)
 end
@@ -410,6 +413,13 @@ local function create_pos_id_key(path, stripped_pos_id, lnum_start)
     return ("%s::%s::%d"):format(path, stripped_pos_id, lnum_start)
 end
 
+---@param position neotest.Position
+---@return boolean
+local function is_parametric_test(position)
+    ---@diagnostic disable-next-line: undefined-field
+    return position.lnum
+end
+
 --- Extract test info from a position
 ---@param pos neotest.Position
 ---@return string
@@ -418,7 +428,7 @@ local function extract_test_info(pos)
     -- Busted creates test names concatenated with spaces so we can't recreate the
     -- position id using "::". Instead create a key stripped of "::" like the one
     -- from busted along with the path and test range to uniquely identify the test
-    local stripped_pos_id = util.strip_position_id(pos.id)
+    local _, stripped_pos_id = util.strip_position_id(pos.id)
 
     return stripped_pos_id, create_pos_id_key_from_position(pos, stripped_pos_id)
 end
@@ -438,17 +448,33 @@ local function generate_test_info_for_nodes(tree)
         table.insert(filters, "^" .. escape_test_pattern_filter(filter) .. "$")
     end
 
+    ---@diagnostic disable-next-line: undefined-field
+    if is_parametric_test(position) then
+        -- This is a parametric test. Running one directly like this can occur
+        -- when it is run from the neotest summary after being added to the tree
+        local filter, pos_id_key = extract_test_info(position)
+        add_filter(filter)
+        position_id_mapping[pos_id_key] = position.id
+
+        return filters, position_id_mapping
+    end
+
     for _, node in tree:iter_nodes() do
         local pos = node:data()
 
         if pos.type == types.PositionType.test then
-            local filter, pos_id_key = extract_test_info(pos)
+            local parametric_tests = parametric_test_cache:get(pos.id)
+            local tests = parametric_tests or { pos }
 
-            if gen_filters then
-                add_filter(filter)
+            for _, test in ipairs(tests) do
+                local filter, pos_id_key = extract_test_info(test)
+
+                if gen_filters then
+                    add_filter(filter)
+                end
+
+                position_id_mapping[pos_id_key] = test.id
             end
-
-            position_id_mapping[pos_id_key] = pos.id
         end
     end
 
@@ -524,11 +550,12 @@ local function create_error_info(test_result)
     return nil
 end
 
----@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
 ---@param status neotest.ResultStatus
+---@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
 ---@param output string
----@param is_error boolean
-local function test_result_to_neotest_result(test_result, status, output, is_error)
+---@return string?
+---@return neotest.Result
+local function test_result_to_neotest_result(status, test_result, output)
     if test_result.isError == true then
         -- This is an internal error in busted, not a test that threw
         return nil, {
@@ -549,12 +576,107 @@ local function test_result_to_neotest_result(test_result, status, output, is_err
         output = output,
     }
 
-    if is_error then
+    if status == ResultStatus.failed then
         ---@cast test_result -neotest-busted.BustedErrorResult
         result.errors = create_error_info(test_result)
     end
 
     return pos_id, result
+end
+
+--- Convert busted test results to neotest test results
+---@param test_results_json neotest-busted.BustedResultObject
+---@param output string
+---@param position_id_mapping table<string, string>
+---@return table<string, neotest.Result>
+---@return table<string, string>
+local function convert_test_results_to_neotest(test_results_json, output, position_id_mapping)
+    local results = {}
+    local pos_id_to_test_name = {}
+
+    ---@type table<neotest-busted.BustedResultKey, neotest.ResultStatus>
+    local test_types = {
+        [BustedResultKey.successes] = ResultStatus.passed,
+        [BustedResultKey.pendings] = ResultStatus.skipped,
+        [BustedResultKey.failures] = ResultStatus.failed,
+        [BustedResultKey.errors] = ResultStatus.failed,
+    }
+
+    for busted_result_key, test_results in pairs(test_results_json) do
+        if busted_result_key == "duration" then
+            goto continue
+        end
+
+        ---@cast busted_result_key neotest-busted.BustedResultKey
+
+        for _, test_result in ipairs(test_results) do
+            ---@cast test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult
+
+            local pos_id_key, result =
+                test_result_to_neotest_result(test_types[busted_result_key], test_result, output)
+            local pos_id = position_id_mapping[pos_id_key]
+
+            if not pos_id then
+                logging.error("Failed to find matching position id for key %s", nil, pos_id_key)
+            else
+                results[pos_id] = result
+                pos_id_to_test_name[pos_id] = test_result.element.name
+            end
+        end
+
+        ::continue::
+    end
+
+    return results, pos_id_to_test_name
+end
+
+--- Add any parametric tests that were run to the tree if they have not already been added
+---@param tree neotest.Tree
+---@param pos_id_to_test_name table<string, string>
+local function update_parametric_tests_in_tree(tree, pos_id_to_test_name)
+    local position = tree:data()
+    local parametric_tests = parametric_test_cache:get(position.id) or {}
+
+    if not parametric_tests then
+        -- We did not find anything in the cache which can happen when a
+        -- namespace test (describe) was run as we only cache per test position
+        for _, node in tree:iter_nodes() do
+            local pos = node:data()
+
+            if pos.type == types.PositionType.test then
+                local cache_result = parametric_test_cache:get(pos.id)
+
+                if cache_result then
+                    vim.list_extend(parametric_tests, cache_result)
+                end
+            end
+        end
+    end
+
+    if parametric_tests then
+        local node = tree:get_key(position.id)
+        ---@cast node -nil
+
+        -- Iterate all parametric tests and add them as range-less (range = nil) children
+        -- of the unexpanded test if not already in the tree
+        --
+        -- https://github.com/nvim-neotest/neotest/pull/172
+        for _, parametric_test in ipairs(parametric_tests) do
+            local pos_id = parametric_test.id
+
+            if not tree:get_key(pos_id) then
+                parametric_test.name = pos_id_to_test_name[pos_id]
+
+                -- WARNING: The following code relies on neotest internals
+
+                ---@diagnostic disable-next-line: invisible
+                local new_tree = types.Tree:new(parametric_test, {}, tree._key, nil, nil)
+
+                ---@diagnostic disable-next-line: invisible
+                node:add_child(pos_id, new_tree)
+            end
+        end
+    end
 end
 
 ---@async
@@ -577,91 +699,29 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     end
 
     ---@diagnostic disable-next-line: cast-local-type
-    local json_ok, test_results = pcall(vim.json.decode, data, { luanil = { object = true } })
+    local json_ok, test_results_json = pcall(vim.json.decode, data, { luanil = { object = true } })
 
     if not json_ok then
         logging.error(
             "Failed to parse json test output file %s with error: %s",
             nil,
             results_path,
-            test_results
+            test_results_json
         )
         return {}
     end
 
-    ---@cast test_results neotest-busted.BustedResultObject
+    ---@cast test_results_json neotest-busted.BustedResultObject
 
-    ---@type neotest-busted.BustedResultObject
-    ---@diagnostic disable-next-line: assign-type-mismatch
+    local results, pos_id_to_test_name = convert_test_results_to_neotest(
+        test_results_json,
+        strategy_result.output,
+        spec.context.position_id_mapping
+    )
 
-    local results = {}
-    local output = strategy_result.output
-    local position_id_mapping = spec.context.position_id_mapping
-
-    ---@type { [1]: neotest-busted.BustedResultKey, [2]: neotest.ResultStatus }[]
-    local test_types = {
-        { BustedResultKey.successes, ResultStatus.passed },
-        { BustedResultKey.pendings, ResultStatus.skipped },
-        { BustedResultKey.failures, ResultStatus.failed },
-        { BustedResultKey.errors, ResultStatus.failed },
-    }
-
-    for _, test_type in ipairs(test_types) do
-        local test_key, result_status = test_type[1], test_type[2]
-        local is_error = test_key == BustedResultKey.failures or test_key == BustedResultKey.errors
-
-        for _, value in pairs(test_results[test_key]) do
-            local pos_id_key, result =
-                test_result_to_neotest_result(value, result_status, output, is_error)
-            local pos_id = position_id_mapping[pos_id_key]
-
-            if not pos_id then
-                logging.error("Failed to find matching position id for key %s", nil, pos_id_key)
-            else
-                results[pos_id] = result
-            end
-        end
+    if config.parametric_test_discovery == true then
+        update_parametric_tests_in_tree(tree, pos_id_to_test_name)
     end
-
-    -- local unexpanded_tests = spec.context.unexpanded_tests
-
-    -- -- Unexpanded tests (parametric tests in source code) won't a
-    -- -- representation at runtime so instead generate the results
-    -- -- manually based on the results of the expanded tests
-    -- if unexpanded_tests and vim.tbl_count(unexpanded_tests) > 0 then
-    --     for unexpanded_key, parametric_tests in pairs(spec.context.unexpanded_tests) do
-    --         local status = ResultStatus.passed
-
-    --         for _, test in ipairs(parametric_tests) do
-    --             local new_status = results[test.id].status
-
-    --             if new_status ~= ResultStatus.passed then
-    --                 status = new_status
-    --             end
-
-    --             local temp = vim.split(unexpanded_key, "::")
-    --             local name = temp[#temp]
-
-    --             results[unexpanded_key] = {
-    --                 status = status,
-    --                 short = ("%s: %s"):format(name, status),
-    --                 output = output,
-    --             }
-    --         end
-    --     end
-    -- end
-
-    -- If the test itself was parametric and all tests passed then mark it
-    -- as passed as well so neotest will mark it as passed
-    -- if spec.context.is_parametric and all_pass then
-    --     local pos = tree:data()
-
-    --     results[pos.id] = {
-    --         status = ResultStatus.passed,
-    --         short = ("%s: %s"):format(pos.name, ResultStatus.passed),
-    --         output = output,
-    --     }
-    -- end
 
     return results
 end

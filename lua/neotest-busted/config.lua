@@ -8,7 +8,7 @@ local default_config = {
     busted_cpaths = nil,
     minimal_init = nil,
     local_luarocks_only = true,
-    parametric_test_discovery = true,
+    parametric_test_discovery = false,
 }
 
 local _user_config = default_config

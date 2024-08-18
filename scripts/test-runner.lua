@@ -151,9 +151,7 @@ local function run()
 
     local command = vim.list_extend({ busted.nvim_command }, busted.arguments)
 
-    io.stdout:write(
-        vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, command), " "))
-    )
+    io.stdout:write(vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, command), " ")))
 end
 
 run()
