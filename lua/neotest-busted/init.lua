@@ -721,7 +721,26 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     if config.parametric_test_discovery == true then
         update_parametric_tests_in_tree(tree, pos_id_to_test_name)
+
+        local status = ResultStatus.passed
+
+        -- Aggregate result status and create a fake result for the target position
+        for _, result in pairs(results) do
+            if result.status ~= ResultStatus.passed then
+                status = result.status
+            end
+        end
+
+        local position = tree:data()
+
+        results[position.id] = {
+            status = status,
+            short = ("%s: %s"):format(position.name, status),
+            output = strategy_result.output,
+        }
     end
+
+    vim.print(vim.inspect(results))
 
     return results
 end

@@ -136,7 +136,7 @@ function busted_util.discover_parametric_tests(tree)
 
         if pos.type == types.PositionType.test then
             local path, stripped = util.strip_position_id(pos.id, "::")
-            local normalized_id = ("%s::%s"):format(path, stripped)
+            local normalized_id = ("%s::%s"):format(path, table.concat(vim.split(stripped, " "), "::"))
 
             if runtime_test_info[normalized_id] then
                 -- The tree position appears in the runtime test information
