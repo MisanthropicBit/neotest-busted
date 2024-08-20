@@ -32,7 +32,7 @@ function Cache:clear()
     self._cache = {}
 end
 
-function Cache:__len()
+function Cache:size()
     return vim.tbl_count(self._cache)
 end
 
