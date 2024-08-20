@@ -60,7 +60,7 @@ local function is_windows()
 
         return os ~= "linux" and os ~= "osx" and os ~= "bsd" and os ~= "posix" and os ~= "other"
     else
-        return package.config:sub(1, 1) ~= "/"
+        return package.config:sub(1, 1) == "\\"
     end
 end
 
