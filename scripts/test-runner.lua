@@ -56,9 +56,7 @@ local level_options = {
 
 local function is_windows()
     if jit then
-        local os = string.lower(jit.os)
-
-        return os ~= "linux" and os ~= "osx" and os ~= "bsd" and os ~= "posix" and os ~= "other"
+        return not vim.tbl_contains({ "linux", "osx", "bsd", "posix", "other" }, jit.os:lower())
     else
         return package.config:sub(1, 1) == "\\"
     end
