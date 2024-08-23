@@ -379,7 +379,10 @@ function BustedNeotestAdapter.discover_positions(path)
     ) (#match? @func_name "^it$")) @test.definition
 ]]
 
-    local tree = lib.treesitter.parse_positions(path, query, { nested_namespaces = true })
+    -- Lua-ls does not understand that neotest.lib.treesitter.ParseOptions
+    -- inherits from neotest.lib.positions.ParseOptions
+    ---@diagnostic disable-next-line: missing-fields
+    local tree = lib.treesitter.parse_positions(path, query, { nested_tests = true })
 
     if config.parametric_test_discovery == true then
         local busted_util = require("neotest-busted.busted-util")
