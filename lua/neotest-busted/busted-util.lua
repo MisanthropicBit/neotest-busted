@@ -64,7 +64,7 @@ local function get_runtime_test_info(tree)
     ---@type table<string, neotest-busted.RuntimeTestInfo>
     local tests = {}
 
-    -- 'busted --list' outputs to stderr and apparently uses carriage return
+    -- 'busted --list' outputs to stderr and uses carriage return
     for line in vim.gsplit(results.stderr, "\r\n", { plain = true, trimempty = true }) do
         local lnum, rest = process_runtime_test_line(line)
         local test = { path = path, in_tree = false }
