@@ -101,7 +101,9 @@ local function get_runtime_test_info(tree)
             -- 'describe' where only the test name is listed by busted
             --
             -- https://github.com/lunarmodules/busted/issues/743
-            logger.warn("Top-level 'it' found which is not currently supported for parametric tests")
+            logger.warn(
+                "Top-level 'it' found which is not currently supported for parametric tests"
+            )
         end
     end
 
