@@ -97,8 +97,11 @@ local function get_runtime_test_info(tree)
 
             tests[position_id] = test
         else
-            -- FIX: This can happen for 'it' tests outside of a 'describe'
-            -- where only the test name is listed
+            -- NOTE: This can happen for top-level 'it' tests outside of a
+            -- 'describe' where only the test name is listed by busted
+            --
+            -- https://github.com/lunarmodules/busted/issues/743
+            logger.warn("Top-level 'it' found which is not currently supported for parametric tests")
         end
     end
 
