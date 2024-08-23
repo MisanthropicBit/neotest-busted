@@ -740,8 +740,6 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
         }
     end
 
-    vim.print(vim.inspect(results))
-
     return results
 end
 
