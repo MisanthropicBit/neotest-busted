@@ -4,7 +4,6 @@ local adapter = require("neotest-busted")
 local logging = require("neotest-busted.logging")
 local util = require("neotest-busted.util")
 
-local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local nio = require("nio")
 local types = require("neotest.types")
@@ -46,26 +45,45 @@ local function get_runtime_test_info(tree)
         return {}
     end
 
-    local command = vim.list_extend({ command_info.nvim_command }, command_info.arguments)
-    logger.debug("Running command to list tests: ", command)
+    logger.debug(
+        "Running command ",
+        command_info.nvim_command,
+        " to list tests with arguments ",
+        command_info.arguments
+    )
 
-    local code, results = lib.process.run(command, { stdout = true, stderr = true })
+    local process, err = nio.process.run({
+        cmd = command_info.nvim_command,
+        args = command_info.arguments,
+    })
 
-    if code ~= 0 then
-        logging.error(
-            "Failed to discover parametric tests via busted (code: %d): %s",
-            nil,
-            code,
-            results.stderr
-        )
+    if err then
+        logging.error("Failed to list tests via busted: %s", nil, err)
         return {}
     end
+
+    ---@cast process nio.process.Process
+    local stderr, read_err = process.stderr.read()
+
+    if read_err then
+        logging.error("Got error when reading output from busted: %s", nil, read_err)
+        return {}
+    end
+
+    local code = process.result()
+
+    if code ~= 0 then
+        logging.error("Failed to list tests via busted (code: %d)", nil, code)
+        return {}
+    end
+
+    ---@cast stderr -nil
 
     ---@type table<string, neotest-busted.RuntimeTestInfo>
     local tests = {}
 
     -- 'busted --list' outputs to stderr and uses carriage return
-    for line in vim.gsplit(results.stderr, "\r\n", { plain = true, trimempty = true }) do
+    for line in vim.gsplit(stderr, "\r\n", { plain = true, trimempty = true }) do
         local lnum, rest = process_runtime_test_line(line)
         local test = { path = path, in_tree = false }
 
