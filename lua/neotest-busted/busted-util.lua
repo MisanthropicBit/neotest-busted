@@ -131,6 +131,7 @@ local function find_overlapping_position(tree, runtime_test)
     if not position then
         logging.error(
             "Failed to find a matching position for runtime test. This can happen if neotest-busted cannot parse some tests (you are using neotest's async.it instead of neotest-busted's async function) so busted cannot list the tests properly",
+            nil,
             {
                 runtime_test = runtime_test,
             }
