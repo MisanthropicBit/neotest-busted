@@ -353,6 +353,14 @@ end
 
 local parametric_test_cache = Cache.new()
 
+--- Only use in testing
+---@package
+---@return neotest-busted.Cache
+---@diagnostic disable-next-line: inject-field
+function BustedNeotestAdapter.get_parametric_test_cache()
+    return parametric_test_cache
+end
+
 ---@async
 ---@return neotest.Tree | nil
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -748,6 +756,7 @@ end
 
 setmetatable(BustedNeotestAdapter, {
     ---@param user_config neotest-busted.Config?
+    ---@return neotest.Adapter
     __call = function(_, user_config)
         config.configure(user_config)
 

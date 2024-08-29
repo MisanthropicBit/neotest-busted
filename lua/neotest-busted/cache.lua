@@ -1,14 +1,14 @@
 -- NOTE: Generic classes are not just supported by luals:
 -- https://github.com/LuaLS/lua-language-server/issues/1861
 
----@class Cache
+---@class neotest-busted.Cache
 ---@field _cache table<string, unknown>
 local Cache = {}
 
 Cache.__index = Cache
 
 ---@param values table<string, unknown>?
----@return Cache
+---@return neotest-busted.Cache
 function Cache.new(values)
     local cache = setmetatable({
         _cache = values or {},
@@ -32,6 +32,7 @@ function Cache:clear()
     self._cache = {}
 end
 
+-- NOTE: __len on tables requires 5.2 or luajit/5.1 compiled to support it
 function Cache:size()
     return vim.tbl_count(self._cache)
 end
