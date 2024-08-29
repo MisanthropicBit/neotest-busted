@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         - Documentation ([vimdoc](https://github.com/MisanthropicBit/neotest-busted/blob/master/README.md) or [readme](https://github.com/MisanthropicBit/neotest-busted/blob/master/README.md))
-        - [Existing issues](https://github.com/MisanthropicBit/neotest-busted/issues).
+        - [Existing issues](https://github.com/MisanthropicBit/neotest-busted/issues)
   - type: checkboxes
     attributes:
       label: Did you check docs and existing issues?

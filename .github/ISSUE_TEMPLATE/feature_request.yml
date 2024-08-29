@@ -3,12 +3,19 @@ description: Suggest a new feature
 title: "feature: "
 labels: [enhancement]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        - Documentation ([vimdoc](https://github.com/MisanthropicBit/neotest-busted/blob/master/README.md) or [readme](https://github.com/MisanthropicBit/neotest-busted/blob/master/README.md))
+        - [Existing pull requests](https://github.com/MisanthropicBit/neotest-busted/pulls)
   - type: checkboxes
     attributes:
-      label: Did you check the docs?
+      label: Did you check the docs and existing pull requests?
       description: Please make sure you read all the docs before submitting a feature request
       options:
-        - label: I have read all the docs
+        - label: I have read the documentation
+          required: true
+        - label: I have searched the existing pull requests
           required: true
   - type: textarea
     validations:
