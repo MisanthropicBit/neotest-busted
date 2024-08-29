@@ -6,13 +6,14 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Before** reporting an issue, please make sure to read the [documentation](https://github.com/MisanthropicBit/neotest-busted/blob/master/doc/neotest-busted.txt) and [readme](https://github.com/MisanthropicBit/neotest-busted/blob/master/README.md) and search [existing issues](https://github.com/MisanthropicBit/neotest-busted/issues).
+        - Documentation ([vimdoc](https://github.com/MisanthropicBit/neotest-busted/blob/master/README.md) or [readme](https://github.com/MisanthropicBit/neotest-busted/blob/master/README.md))
+        - [Existing issues](https://github.com/MisanthropicBit/neotest-busted/issues).
   - type: checkboxes
     attributes:
       label: Did you check docs and existing issues?
       description: Please make sure you checked all of the below before submitting an issue
       options:
-        - label: I have read all the docs
+        - label: I have read the documentation
           required: true
         - label: I have searched the existing issues
           required: true
@@ -40,36 +41,33 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: Output of `:checkhealth neotest-busted` if relevant
-      description: Healthcheck output for neotest-busted.
-    validations:
-      required: false
-  - type: textarea
-    attributes:
-      label: neotest-busted debug log output if relevant
-      description: Debug log output for neotest-busted.
-    validations:
-      required: false
-  - type: textarea
-    attributes:
-      label: Steps To Reproduce
-      description: Steps to reproduce the behavior.
-      placeholder: |
-        1.
-        2. 
-        3.
-    validations:
-      required: true
-  - type: textarea
-    attributes:
       label: Expected Behavior
       description: A concise description of what you expected to happen.
     validations:
       required: true
   - type: textarea
     attributes:
+      label: Output of `:checkhealth neotest-busted` if relevant
+      description: Healthcheck output for neotest-busted.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: neotest log output if relevant
+      description: Debug log output for neotest-busted.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: Steps to reproduce the behavior or `repro.lua`.
+      placeholder: |
+        1.
+        2. 
+        3.
+    attributes:
       label: Repro
       description: Minimal `init.lua` to reproduce this issue. Save as `repro.lua` and run with `nvim -u repro.lua`
       render: Lua
     validations:
-      required: false
+      required: true
