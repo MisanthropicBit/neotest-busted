@@ -30,6 +30,11 @@ build = {
         "doc",
         "scripts",
     },
+    install = {
+        bin = {
+            neobusted = "scripts/neobusted",
+        },
+    },
 }
 
 test = {
