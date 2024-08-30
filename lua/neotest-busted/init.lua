@@ -646,9 +646,11 @@ end
 ---@param pos_id_to_test_name table<string, string>
 local function update_parametric_tests_in_tree(tree, pos_id_to_test_name)
     local position = tree:data()
-    local parametric_tests = parametric_test_cache:get(position.id) or {}
+    local parametric_tests = parametric_test_cache:get(position.id)
 
     if not parametric_tests then
+        parametric_tests = {}
+
         -- We did not find anything in the cache which can happen when a
         -- namespace test (describe) was run as we only cache per test position
         for _, node in tree:iter_nodes() do
@@ -664,7 +666,7 @@ local function update_parametric_tests_in_tree(tree, pos_id_to_test_name)
         end
     end
 
-    if parametric_tests then
+    if #parametric_tests > 0 then
         local node = tree:get_key(position.id)
         ---@cast node -nil
 
