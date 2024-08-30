@@ -253,8 +253,16 @@ function BustedNeotestAdapter.create_test_command(results_path, paths, filters, 
 
     vim.list_extend(arguments, busted_command)
 
-    if vim.tbl_islist(config.busted_args) and #config.busted_args > 0 then
+    if vim.tbl_islist(config.busted_args) then
         vim.list_extend(arguments, config.busted_args)
+    end
+
+    if vim.tbl_islist(_options.busted_arguments) then
+        for _, busted_arg in ipairs(_options.busted_arguments) do
+            local arg = _options.quote_strings and quote_string(busted_arg) or busted_arg
+
+            table.insert(arguments, arg)
+        end
     end
 
     -- Add test filters

@@ -185,6 +185,19 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 $ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
 ```
 
+### Using busted directly
+
+You can also provide a `.busted` config file and run your tests using busted.
+Learn more about busted configuration files from the [official
+docs](https://lunarmodules.github.io/busted/#usage) or take a look at the example [here](/.busted.example).
+
+Pass extra arguments to `neotest` to run a specific task. For example, to run
+the `"integration"` task in a test file:
+
+```lua
+require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integration" } })
+```
+
 ## Debugging tests
 
 `neotest-busted` has support for debugging tests via [`local-lua-debugger-vscode`](https://github.com/tomblind/local-lua-debugger-vscode)

@@ -1,3 +1,18 @@
+local help_message = [[test-runner [...options] [...test_files] [-- [...busted_options]
+
+Run tests using neotest-busted from the commandline. Options given after '--'
+are forwarded to busted.
+
+Usage:
+
+    -h, --help   Show this help message.
+]]
+
+---@class ParsedArgs
+---@field help boolean
+---@field paths string[]
+---@field busted_args string[]
+
 ---@enum Color
 local Color = {
     Red = 31,
@@ -32,7 +47,22 @@ local level_options = {
         color = Color.White,
         hl_group = "MoreMsg",
     },
+    [vim.log.levels.OFF] = {
+        name = "",
+        color = Color.Reset,
+        hl_group = "",
+    },
 }
+
+local function is_windows()
+    if jit then
+        return not vim.tbl_contains({ "linux", "osx", "bsd", "posix", "other" }, jit.os:lower())
+    else
+        return package.config:sub(1, 1) == "\\"
+    end
+end
+
+local _is_windows = is_windows()
 
 local function is_headless()
     return #vim.api.nvim_list_uis() == 0
@@ -41,26 +71,37 @@ end
 ---@param color integer
 ---@return string
 local function color_code(color)
+    if _is_windows then
+        return ""
+    end
+
     return ("\x1b[%dm"):format(color)
 end
 
 ---@param message string
 ---@param level vim.log.levels?
 local function print_level(message, level)
-    local options = level_options[level] or level_options[vim.log.levels.ERROR]
+    local _level = level or vim.log.levels.OFF
+    local options = level_options[_level]
+    local prefix = ""
 
     if is_headless() then
-        io.stderr:write(
-            ("%s%s%s: %s\n"):format(
+        if _level ~= vim.log.levels.OFF then
+            prefix = ("%s%s%s: "):format(
                 color_code(options.color),
                 options.name,
-                color_code(Color.Reset),
-                message
+                color_code(Color.Reset)
             )
-        )
+        end
+
+        io.stderr:write(("%s%s\n"):format(prefix, message))
     else
+        if _level ~= vim.log.levels.OFF then
+            prefix = ("[neotest-busted:%s]: "):format(options.name)
+        end
+
         vim.api.nvim_echo({
-            { ("[neotest-busted:%s]: "):format(options.name), options.hl_group },
+            { prefix, options.hl_group },
             { message },
         }, true, {})
     end
@@ -68,32 +109,40 @@ end
 
 ---@return string?
 local function find_minimal_init()
-    -- NOTE: Do not use util.glob as we haven't loaded neotest-busted at this point
     local glob_matches = vim.fn.glob("**/minimal_init.lua", false, true)
 
     if #glob_matches == 0 then
-        print_level("Could not find minimal_init.lua")
+        print_level("Could not find minimal_init.lua", vim.log.levels.ERROR)
         return
     end
 
     return glob_matches[1]
 end
 
----@param module_name string
----@return any
-local function require_checked(module_name)
-    local ok, module_or_error = pcall(require, module_name)
+---@return ParsedArgs
+local function parse_args()
+    local parsed_args = {
+        help = false,
+        paths = {},
+        busted_args = {},
+    }
 
-    if not ok then
-        return nil
+    -- Start from the third argument to skip busted executable and "--ignore-lua" flag
+    -- TODO: Should we just use them instead of skipping them?
+    for idx = 3, #_G.arg do
+        local arg = _G.arg[idx]
+
+        if arg == "-h" or arg == "--help" then
+            parsed_args.help = true
+        elseif arg == "--" then
+            vim.list_extend(parsed_args.busted_args, _G.arg, idx + 1)
+            break
+        else
+            table.insert(parsed_args.paths, arg)
+        end
     end
 
-    return module_or_error
-end
-
----@return string[]
-local function parse_args()
-    return vim.list_slice(_G.arg, 1)
+    return parsed_args
 end
 
 ---@return string[]
@@ -101,24 +150,24 @@ local function collect_tests()
     local tests = {}
     local util = require("neotest-busted.util")
 
-    vim.list_extend(tests, util.glob("./test/**/*_spec.lua"))
-    vim.list_extend(tests, util.glob("./tests/**/*_spec.lua"))
-    vim.list_extend(tests, util.glob("./spec/**/*_spec.lua"))
+    -- TODO: Support other test file patterns (via .busted)
+    vim.list_extend(tests, util.glob("test/**/*_spec.lua"))
+    vim.list_extend(tests, util.glob("tests/**/*_spec.lua"))
+    vim.list_extend(tests, util.glob("spec/**/*_spec.lua"))
 
     return tests
 end
 
 local function run()
     if not is_headless() then
-        print_level("Script must be run from the command line")
+        print_level("Script must be run from the command line", vim.log.levels.ERROR)
         return
     end
 
-    local paths = parse_args()
     local minimal_init = find_minimal_init()
 
     if not minimal_init then
-        print_level("Could not find a minimal_init.lua file")
+        print_level("Could not find a minimal_init.lua file", vim.log.levels.ERROR)
         return
     end
 
@@ -135,25 +184,33 @@ local function run()
         return
     end
 
-    if #paths == 0 then
-        paths = collect_tests()
-    end
+    local parsed_args = parse_args()
 
-    local busted = adapter_or_error.create_test_command(nil, paths, {}, {
-        busted_output_handler = "utfTerminal",
-        busted_output_handler_options = { "--color" },
-    })
-
-    if not busted then
-        print_level("Could not find a busted executable")
+    if parsed_args.help then
+        print_level(help_message)
         return
     end
 
-    local command = vim.list_extend({ busted.nvim_command }, busted.arguments)
+    local paths = #parsed_args.paths > 0 and parsed_args.paths or collect_tests()
 
-    io.stdout:write(
-        vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, command), " "))
-    )
+    local test_command = adapter_or_error.create_test_command(nil, paths, {}, {
+        busted_output_handler = "utfTerminal",
+        busted_output_handler_options = { "--color" },
+        -- If we don't add --ignore-lua the subsequent busted command (run via
+        -- neovim) will use the .busted config file and use the 'lua' option
+        -- again for running the tests (this script) which will cause an
+        -- infinite process spawning loop
+        busted_arguments = vim.list_extend({ "--ignore-lua" }, parsed_args.busted_args),
+    })
+
+    if not test_command then
+        print_level("Could not find a busted executable", vim.log.levels.ERROR)
+        return
+    end
+
+    local command = vim.list_extend({ test_command.nvim_command }, test_command.arguments)
+
+    io.stdout:write(vim.fn.system(table.concat(vim.tbl_map(vim.fn.shellescape, command), " ")))
 end
 
 run()
