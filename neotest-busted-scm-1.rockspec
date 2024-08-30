@@ -32,7 +32,7 @@ build = {
     },
     install = {
         bin = {
-            neobusted = "scripts/neobusted",
+            neobusted = "lua/neotest-busted/runner.lua",
         },
     },
 }
