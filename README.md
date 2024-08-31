@@ -86,35 +86,6 @@ require("neotest").setup({
 
 Please refer to the [official busted documentation](https://lunarmodules.github.io/busted/).
 
-## Parametric tests
-
-> [!IMPORTANT]
-> Supporting parametric tests requires extra computation to find them so support
-> is disabled by default. You need to set `parametric_test_discovery` to `true`
-> if you want neotest-busted to find parametric tests.
-
-`neotest-busted` supports parametric tests that are generated at runtime as
-opposed to being defined entirely at source-level as shown below. `describe`'s
-can also be parametric and are also supported.
-
-Due to technical limitations, parametric tests won't be shown in the neotest
-summary until they have been run.
-
-```lua
-describe("parametric tests", function()
-    for i = 1, 3 do
-        it(("test %d"):format(i), function()
-            assert.are.same(i, i)
-        end)
-    end
-end)
-```
-
-## Debugging tests
-
-`neotest-busted` has support for debugging tests via [`local-lua-debugger-vscode`](https://github.com/tomblind/local-lua-debugger-vscode)
-which can be set up via [`nvim-dap`](https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#lua). Once set up, you can set a breakpoint and run the test with the `dap` strategy. Please refer to the [`neotest`](https://github.com/nvim-neotest/neotest) documentation for more information.
-
 ### Async tests
 
 Running an asynchronous test is done by wrapping the test function in a call to
@@ -151,6 +122,35 @@ The `async` function takes an optional second timeout argument in milliseconds.
 If omitted, uses the numerical value of either the
 `NEOTEST_BUSTED_ASYNC_TEST_TIMEOUT` or `PLENARY_TEST_TIMEOUT` environment
 variables or a default timeout of 2000 milliseconds.
+
+## Parametric tests
+
+> [!IMPORTANT]
+> Supporting parametric tests requires extra computation to find them so support
+> is disabled by default. You need to set `parametric_test_discovery` to `true`
+> if you want neotest-busted to find parametric tests.
+
+`neotest-busted` supports parametric tests that are generated at runtime as
+opposed to being defined entirely at source-level as shown below. `describe`'s
+can also be parametric and are also supported.
+
+Due to technical limitations, parametric tests won't be shown in the neotest
+summary until they have been run.
+
+```lua
+describe("parametric tests", function()
+    for i = 1, 3 do
+        it(("test %d"):format(i), function()
+            assert.are.same(i, i)
+        end)
+    end
+end)
+```
+
+## Debugging tests
+
+`neotest-busted` has support for debugging tests via [`local-lua-debugger-vscode`](https://github.com/tomblind/local-lua-debugger-vscode)
+which can be set up via [`nvim-dap`](https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#lua). Once set up, you can set a breakpoint and run the test with the `dap` strategy. Please refer to the [`neotest`](https://github.com/nvim-neotest/neotest) documentation for more information.
 
 ## Luarocks and Busted
 
@@ -215,6 +215,19 @@ the command will automatically try to find your tests in a `spec/`, `test/`, or
 
 ```shell
 $ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
+```
+
+### Using busted directly
+
+You can also provide a `.busted` config file and run your tests using busted.
+Learn more about busted configuration files from the [official
+docs](https://lunarmodules.github.io/busted/#usage) or take a look at the example [here](/.busted.example).
+
+Pass extra arguments to `neotest` to run a specific task. For example, to run
+the `"integration"` task in a test file:
+
+```lua
+require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integration" } })
 ```
 
 ## FAQ

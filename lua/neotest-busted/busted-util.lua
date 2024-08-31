@@ -36,7 +36,7 @@ end
 local function get_runtime_test_info(tree)
     local position = tree:data()
     local path = position.path
-    local command_info = adapter.create_busted_command({ path }, {
+    local command_info = adapter.create_test_command({ path }, {
         busted_arguments = { "--list" },
     })
 

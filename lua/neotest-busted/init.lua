@@ -158,7 +158,7 @@ end
 ---@param options neotest-busted.TestCommandOptions?
 ---@return neotest-busted.TestCommandConfig?
 ---@diagnostic disable-next-line: inject-field
-function BustedNeotestAdapter.create_busted_command(paths, options)
+function BustedNeotestAdapter.create_test_command(paths, options)
     local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
@@ -234,7 +234,7 @@ function BustedNeotestAdapter.create_busted_command(paths, options)
 
     vim.list_extend(arguments, busted_command)
 
-    if vim.tbl_islist(config.busted_args) and #config.busted_args > 0 then
+    if vim.tbl_islist(config.busted_args) then
         for _, busted_arg in ipairs(config.busted_args) do
             local arg = _options.quote_strings and '"' .. busted_arg .. '"' or busted_arg
 
@@ -245,6 +245,14 @@ function BustedNeotestAdapter.create_busted_command(paths, options)
     if vim.tbl_islist(_options.busted_arguments) and #_options.busted_arguments > 0 then
         for _, busted_arg in ipairs(_options.busted_arguments) do
             local arg = _options.quote_strings and '"' .. busted_arg .. '"' or busted_arg
+
+            table.insert(arguments, arg)
+        end
+    end
+
+    if vim.tbl_islist(_options.busted_arguments) then
+        for _, busted_arg in ipairs(_options.busted_arguments) do
+            local arg = _options.quote_strings and quote_string(busted_arg) or busted_arg
 
             table.insert(arguments, arg)
         end
@@ -283,7 +291,7 @@ end
 ---@return table?
 local function get_strategy_config(strategy, results_path, paths, filters)
     if strategy == "dap" then
-        local test_command_info = BustedNeotestAdapter.create_busted_command(
+        local test_command_info = BustedNeotestAdapter.create_test_command(
             paths,
             -- NOTE: When run via dap, passing arguments such as the one for
             -- busted's '--filter' need to be escaped since the command is run
@@ -513,7 +521,7 @@ function BustedNeotestAdapter.build_spec(args)
 
     local paths = { pos.path }
     local results_path = async.fn.tempname() .. ".json"
-    local test_command = BustedNeotestAdapter.create_busted_command(paths, {
+    local test_command = BustedNeotestAdapter.create_test_command(paths, {
         results_path = results_path,
         filters = filters,
         busted_arguments = { "--verbose" },
