@@ -5,24 +5,36 @@ local config = require("neotest-busted.config")
 
 local min_neovim_version = "0.9.0"
 
+local report_start = vim.health.report_start
+local report_ok = vim.health.report_ok
+local report_error = vim.health.report_error
+local report_warn = vim.health.report_warn
+
+if vim.fn.has("nvim-0.10") == 1 then
+    report_start = vim.health.start
+    report_ok = vim.health.ok
+    report_error = vim.health.error
+    report_warn = vim.health.warn
+end
+
 ---@param module_name string
 local function check_module_installed(module_name)
     local installed, _ = pcall(require, module_name)
 
     if installed then
-        vim.health.report_ok(("`%s` is installed"):format(module_name))
+        report_ok(("`%s` is installed"):format(module_name))
     else
-        vim.health.report_error(("`%s` is not installed"):format(module_name))
+        report_error(("`%s` is not installed"):format(module_name))
     end
 end
 
 function health.check()
-    vim.health.report_start("neotest-busted")
+    report_start("neotest-busted")
 
     if vim.fn.has("nvim-" .. min_neovim_version) == 1 then
-        vim.health.report_ok(("has neovim %s+"):format(min_neovim_version))
+        report_ok(("has neovim %s+"):format(min_neovim_version))
     else
-        vim.health.report_error("neotest-busted requires at least neovim " .. min_neovim_version)
+        report_error("neotest-busted requires at least neovim " .. min_neovim_version)
     end
 
     -- NOTE: We cannot check the neotest version because it isn't advertised as
@@ -33,9 +45,9 @@ function health.check()
     local ok, error = config.validate(config)
 
     if ok then
-        vim.health.report_ok("found no errors in config")
+        report_ok("found no errors in config")
     else
-        vim.health.report_error("config has errors: " .. error)
+        report_error("config has errors: " .. error)
     end
 
     -- We skip looking for a local luarocks installation as the healthcheck
@@ -43,14 +55,14 @@ function health.check()
     local busted = adapter.find_busted_command(true)
 
     if busted then
-        vim.health.report_ok(
+        report_ok(
             ("found `busted` (type: %s) at\n%s"):format(
                 busted.type,
                 vim.loop.fs_realpath(busted.command)
             )
         )
     else
-        vim.health.report_warn(
+        report_warn(
             "could not find busted executable globally or in user home folder",
             "if not already installed locally, please install busted using luarocks (https://luarocks.org/)"
         )
