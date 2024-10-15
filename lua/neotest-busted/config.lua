@@ -98,6 +98,9 @@ end
 function config.configure(user_config)
     _user_config = vim.tbl_deep_extend("keep", user_config or {}, default_config)
 
+    -- Skip checking the executable when running setup to avoid the error
+    -- message as neotest loads all adapters so users will see an error in a
+    -- non-lua/neovim directory with a relative path in `busted_command`
     local ok, error = config.validate(_user_config, true)
 
     if not ok then
