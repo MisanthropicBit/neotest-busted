@@ -51,6 +51,10 @@ describe("config", function()
                 config = { local_luarocks_only = 1 },
                 error_message = "expected boolean, got number",
             },
+            {
+                config = { local_luarocks_only = 1 },
+                error_message = "expected boolean, got number",
+            },
         }
 
         stub(vim.api, "nvim_echo")
@@ -71,6 +75,7 @@ describe("config", function()
             }, true, {})
         end
 
+        ---@diagnostic disable-next-line: undefined-field
         vim.api.nvim_echo:revert()
     end)
 
@@ -82,6 +87,7 @@ describe("config", function()
             busted_cpaths = {},
             minimal_init = "some_init_file.lua",
             local_luarocks_only = false,
+            parametric_test_discovery = true,
         })
 
         assert.is_true(ok)
