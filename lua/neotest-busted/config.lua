@@ -83,11 +83,9 @@ function config.validate(_config, skip_executable_check)
         return ok, error
     end
 
-    if not skip_executable_check then
-        if type(_config.busted_command) == "string" then
-            if vim.fn.executable(_config.busted_command) == 0 then
-                return false, "busted command in configuration is not executable"
-            end
+    if not skip_executable_check and type(_config.busted_command) == "string" then
+        if vim.fn.executable(_config.busted_command) == 0 then
+            return false, "busted command in configuration is not executable"
         end
     end
 
