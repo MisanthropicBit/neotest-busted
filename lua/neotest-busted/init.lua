@@ -242,14 +242,6 @@ function BustedNeotestAdapter.create_test_command(paths, options)
         end
     end
 
-    if vim.tbl_islist(_options.busted_arguments) and #_options.busted_arguments > 0 then
-        for _, busted_arg in ipairs(_options.busted_arguments) do
-            local arg = _options.quote_strings and '"' .. busted_arg .. '"' or busted_arg
-
-            table.insert(arguments, arg)
-        end
-    end
-
     if vim.tbl_islist(_options.busted_arguments) then
         for _, busted_arg in ipairs(_options.busted_arguments) do
             local arg = _options.quote_strings and quote_string(busted_arg) or busted_arg
