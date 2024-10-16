@@ -41,9 +41,10 @@ end
 
 --- Validate a config
 ---@param _config neotest-busted.Config
+---@param skip_executable_check? boolean
 ---@return boolean
 ---@return any?
-function config.validate(_config)
+function config.validate(_config, skip_executable_check)
     -- stylua: ignore start
     local ok, error = pcall(vim.validate, {
         busted_command = {
@@ -82,7 +83,7 @@ function config.validate(_config)
         return ok, error
     end
 
-    if type(_config.busted_command) == "string" then
+    if not skip_executable_check and type(_config.busted_command) == "string" then
         if vim.fn.executable(_config.busted_command) == 0 then
             return false, "busted command in configuration is not executable"
         end
@@ -97,7 +98,10 @@ end
 function config.configure(user_config)
     _user_config = vim.tbl_deep_extend("keep", user_config or {}, default_config)
 
-    local ok, error = config.validate(_user_config)
+    -- Skip checking the executable when running setup to avoid the error
+    -- message as neotest loads all adapters so users will see an error in a
+    -- non-lua/neovim directory with a relative path in `busted_command`
+    local ok, error = config.validate(_user_config, true)
 
     if not ok then
         vim.api.nvim_echo({
