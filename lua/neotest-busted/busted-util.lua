@@ -16,7 +16,7 @@ local types = require("neotest.types")
 ---@field lnum integer
 ---@field in_tree boolean
 
---- Process a line from the output 'busted --list'
+--- Process a line from the output of 'busted --list'
 ---@param line string
 ---@return string?
 ---@return string?
@@ -31,6 +31,7 @@ local function process_runtime_test_line(line)
     return lnum, rest
 end
 
+---@async
 ---@param tree neotest.Tree
 ---@return table<string, neotest-busted.RuntimeTestInfo>
 local function get_runtime_test_info(tree)
@@ -62,6 +63,7 @@ local function get_runtime_test_info(tree)
         return {}
     end
 
+    -- 'busted --list' outputs to stderr
     ---@cast process nio.process.Process
     local stderr, read_err = process.stderr.read()
 
@@ -82,7 +84,7 @@ local function get_runtime_test_info(tree)
     ---@type table<string, neotest-busted.RuntimeTestInfo>
     local tests = {}
 
-    -- 'busted --list' outputs to stderr and uses carriage return
+    -- 'busted --list' output contains carriage returns
     for line in vim.gsplit(stderr, "\r\n", { plain = true, trimempty = true }) do
         local lnum, rest = process_runtime_test_line(line)
         local test = { path = path, in_tree = false }
@@ -127,7 +129,6 @@ local function find_overlapping_position(tree, runtime_test)
         end
     end
 
-    -- FIX: This still triggers, probably for namespaces etc.
     if not position then
         logging.error(
             "Failed to find a matching position for runtime test. This can happen if neotest-busted cannot parse some tests (you are using neotest's async.it instead of neotest-busted's async function) so busted cannot list the tests properly",
@@ -152,9 +153,10 @@ function busted_util.discover_parametric_tests(tree)
     -- be done in fast calls
     nio.scheduler()
 
-    -- Iterate all positions and find those not in 'busted --list' output as they
-    -- are the original unexpanded parametric tests that should not be run because
-    -- they won't be found
+    -- Iterate all positions and find those not in the 'busted --list' output
+    -- as they are the original unexpanded parametric tests
+    -- TODO: Can't we just save the mapping between unexpanded tests and
+    -- parametric tests here?
     for _, node in tree:iter_nodes() do
         local pos = node:data()
 
@@ -179,10 +181,6 @@ function busted_util.discover_parametric_tests(tree)
     -- tree (source) itself
     for _, test in pairs(runtime_test_info) do
         if not test.in_tree then
-            -- Create an extra 'real_range' property for generating position id keys
-            -- later on for parametric tests since we need to set 'range' to nil to
-            -- mark it as a range-less child test:
-            -- https://github.com/nvim-neotest/neotest/pull/172
             local pos = find_overlapping_position(tree, test)
 
             if pos then

@@ -1,4 +1,4 @@
--- NOTE: Generic classes are not just supported by luals:
+-- NOTE: Generic classes are not yet supported by luals:
 -- https://github.com/LuaLS/lua-language-server/issues/1861
 
 ---@class neotest-busted.Cache
