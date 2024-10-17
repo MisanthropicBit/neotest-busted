@@ -193,7 +193,7 @@ local function run()
 
     local paths = #parsed_args.paths > 0 and parsed_args.paths or collect_tests()
 
-    local test_command = adapter_or_error.create_test_command(nil, paths, {}, {
+    local test_command = adapter_or_error.create_test_command(paths, {
         busted_output_handler = "utfTerminal",
         busted_output_handler_options = { "--color" },
         -- If we don't add --ignore-lua the subsequent busted command (run via
