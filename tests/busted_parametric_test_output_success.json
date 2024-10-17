@@ -4,11 +4,11 @@
   "successes": [
     {
       "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:4: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:2>\n",
+        "traceback": "\nstack traceback:\n\t.../parametric_tests_spec.lua:4: in function <.../parametric_tests_spec.lua:2>\n",
         "linedefined": 2,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
+        "source": "@/test_files/parametric_tests_spec.lua",
         "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
+        "short_src": ".../test_files/parametric_tests_spec.lua",
         "message": "test 1",
         "currentline": 4,
         "lastlinedefined": 12
@@ -20,7 +20,7 @@
         "trace": {
           "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:4: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:2>\n",
           "linedefined": 2,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
+          "source": "@/test_files/parametric_tests_spec.lua",
           "what": "Lua",
           "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
           "message": "test 1",
@@ -53,7 +53,7 @@
         "trace": {
           "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:4: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:2>\n",
           "linedefined": 2,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
+          "source": "@/test_files/parametric_tests_spec.lua",
           "what": "Lua",
           "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
           "message": "test 2",
@@ -66,303 +66,6 @@
         "starttime": 1724878294.459,
         "attributes": [],
         "endtick": 1299051.078989
-      }
-    },
-    {
-      "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:9: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:2>\n",
-        "linedefined": 2,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "message": "test 3",
-        "currentline": 9,
-        "lastlinedefined": 12
-      },
-      "name": "namespace 1 nested namespace 1 test 3",
-      "element": {
-        "duration": 2.0999927073717e-05,
-        "descriptor": "it",
-        "trace": {
-          "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:9: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:2>\n",
-          "linedefined": 2,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "what": "Lua",
-          "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "message": "test 3",
-          "currentline": 9,
-          "lastlinedefined": 12
-        },
-        "starttick": 1299051.079048,
-        "endtime": 1724878294.4591,
-        "name": "test 3",
-        "starttime": 1724878294.4591,
-        "attributes": [],
-        "endtick": 1299051.079069
-      }
-    },
-    {
-      "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:18: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-        "linedefined": 17,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "message": "test 1",
-        "currentline": 18,
-        "lastlinedefined": 27
-      },
-      "name": "namespace 2 nested namespace 2 - 1 test 1",
-      "element": {
-        "duration": 2.2999942302704e-05,
-        "descriptor": "it",
-        "trace": {
-          "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:18: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-          "linedefined": 17,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "what": "Lua",
-          "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "message": "test 1",
-          "currentline": 18,
-          "lastlinedefined": 27
-        },
-        "starttick": 1299051.07966,
-        "endtime": 1724878294.4597,
-        "name": "test 1",
-        "starttime": 1724878294.4597,
-        "attributes": [],
-        "endtick": 1299051.079683
-      }
-    },
-    {
-      "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-        "linedefined": 17,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "message": "test 1",
-        "currentline": 23,
-        "lastlinedefined": 27
-      },
-      "name": "namespace 2 nested namespace 2 - 1 test 1",
-      "element": {
-        "duration": 4.3000094592571e-05,
-        "descriptor": "it",
-        "trace": {
-          "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-          "linedefined": 17,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "what": "Lua",
-          "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "message": "test 1",
-          "currentline": 23,
-          "lastlinedefined": 27
-        },
-        "starttick": 1299051.079778,
-        "endtime": 1724878294.4599,
-        "name": "test 1",
-        "starttime": 1724878294.4598,
-        "attributes": [],
-        "endtick": 1299051.079821
-      }
-    },
-    {
-      "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-        "linedefined": 17,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "message": "test 2",
-        "currentline": 23,
-        "lastlinedefined": 27
-      },
-      "name": "namespace 2 nested namespace 2 - 1 test 2",
-      "element": {
-        "duration": 6.9000059738755e-05,
-        "descriptor": "it",
-        "trace": {
-          "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-          "linedefined": 17,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "what": "Lua",
-          "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "message": "test 2",
-          "currentline": 23,
-          "lastlinedefined": 27
-        },
-        "starttick": 1299051.079901,
-        "endtime": 1724878294.46,
-        "name": "test 2",
-        "starttime": 1724878294.4599,
-        "attributes": [],
-        "endtick": 1299051.07997
-      }
-    },
-    {
-      "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-        "linedefined": 17,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "message": "test 3",
-        "currentline": 23,
-        "lastlinedefined": 27
-      },
-      "name": "namespace 2 nested namespace 2 - 1 test 3",
-      "element": {
-        "duration": 3.4000026062131e-05,
-        "descriptor": "it",
-        "trace": {
-          "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-          "linedefined": 17,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "what": "Lua",
-          "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "message": "test 3",
-          "currentline": 23,
-          "lastlinedefined": 27
-        },
-        "starttick": 1299051.080182,
-        "endtime": 1724878294.4603,
-        "name": "test 3",
-        "starttime": 1724878294.4602,
-        "attributes": [],
-        "endtick": 1299051.080216
-      }
-    },
-    {
-      "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:18: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-        "linedefined": 17,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "message": "test 1",
-        "currentline": 18,
-        "lastlinedefined": 27
-      },
-      "name": "namespace 2 nested namespace 2 - 2 test 1",
-      "element": {
-        "duration": 2.4999957531691e-05,
-        "descriptor": "it",
-        "trace": {
-          "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:18: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-          "linedefined": 17,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "what": "Lua",
-          "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "message": "test 1",
-          "currentline": 18,
-          "lastlinedefined": 27
-        },
-        "starttick": 1299051.080762,
-        "endtime": 1724878294.4608,
-        "name": "test 1",
-        "starttime": 1724878294.4608,
-        "attributes": [],
-        "endtick": 1299051.080787
-      }
-    },
-    {
-      "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-        "linedefined": 17,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "message": "test 1",
-        "currentline": 23,
-        "lastlinedefined": 27
-      },
-      "name": "namespace 2 nested namespace 2 - 2 test 1",
-      "element": {
-        "duration": 2.2999942302704e-05,
-        "descriptor": "it",
-        "trace": {
-          "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-          "linedefined": 17,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "what": "Lua",
-          "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "message": "test 1",
-          "currentline": 23,
-          "lastlinedefined": 27
-        },
-        "starttick": 1299051.080859,
-        "endtime": 1724878294.4609,
-        "name": "test 1",
-        "starttime": 1724878294.4609,
-        "attributes": [],
-        "endtick": 1299051.080882
-      }
-    },
-    {
-      "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-        "linedefined": 17,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "message": "test 2",
-        "currentline": 23,
-        "lastlinedefined": 27
-      },
-      "name": "namespace 2 nested namespace 2 - 2 test 2",
-      "element": {
-        "duration": 2.199993468821e-05,
-        "descriptor": "it",
-        "trace": {
-          "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-          "linedefined": 17,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "what": "Lua",
-          "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "message": "test 2",
-          "currentline": 23,
-          "lastlinedefined": 27
-        },
-        "starttick": 1299051.08098,
-        "endtime": 1724878294.461,
-        "name": "test 2",
-        "starttime": 1724878294.461,
-        "attributes": [],
-        "endtick": 1299051.081002
-      }
-    },
-    {
-      "trace": {
-        "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-        "linedefined": 17,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "what": "Lua",
-        "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-        "message": "test 3",
-        "currentline": 23,
-        "lastlinedefined": 27
-      },
-      "name": "namespace 2 nested namespace 2 - 2 test 3",
-      "element": {
-        "duration": 4.0999846532941e-05,
-        "descriptor": "it",
-        "trace": {
-          "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:23: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:17>\n",
-          "linedefined": 17,
-          "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "what": "Lua",
-          "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
-          "message": "test 3",
-          "currentline": 23,
-          "lastlinedefined": 27
-        },
-        "starttick": 1299051.081072,
-        "endtime": 1724878294.4612,
-        "name": "test 3",
-        "starttime": 1724878294.4611,
-        "attributes": [],
-        "endtick": 1299051.081113
       }
     }
   ],
