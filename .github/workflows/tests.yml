@@ -29,11 +29,11 @@ jobs:
           git clone --depth 1 https://github.com/nvim-neotest/neotest ~/.local/share/nvim/site/pack/vendor/start/neotest
           git clone --depth 1 https://github.com/nvim-neotest/nvim-nio ~/.local/share/nvim/site/pack/vendor/start/nvim-nio
           ln -s "$(pwd)" ~/.local/share/nvim/site/pack/vendor/start
-      - name: Prepare test dependencies (busted)
-        uses: leafo/gh-actions-lua@v10
+      - uses: leafo/gh-actions-lua@v10
         with:
           luaVersion: "5.1"
       - uses: leafo/gh-actions-luarocks@v4.0.0
+      - name: Install busted
         run: luarocks install busted 2.2.0
       - name: Setup neovim
         uses: rhysd/action-setup-vim@v1
