@@ -15,7 +15,7 @@ end)
 describe("namespace 2", function()
     for i = 1, 2 do
         describe("nested namespace 2 - " .. tostring(i), function()
-            it("test 1", function()
+            it("some test", function()
                 assert.is_true(true)
             end)
 

@@ -6,7 +6,7 @@
       "trace": {
         "traceback": "\nstack traceback:\n\t.../parametric_tests_spec.lua:4: in function <.../parametric_tests_spec.lua:2>\n",
         "linedefined": 2,
-        "source": "@/test_files/parametric_tests_spec.lua",
+        "source": "@./test_files/parametric_tests_spec.lua",
         "what": "Lua",
         "short_src": ".../test_files/parametric_tests_spec.lua",
         "message": "test 1",
@@ -20,7 +20,7 @@
         "trace": {
           "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:4: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:2>\n",
           "linedefined": 2,
-          "source": "@/test_files/parametric_tests_spec.lua",
+          "source": "@./test_files/parametric_tests_spec.lua",
           "what": "Lua",
           "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
           "message": "test 1",
@@ -39,7 +39,7 @@
       "trace": {
         "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:4: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:2>\n",
         "linedefined": 2,
-        "source": "@/Users/user/projects/vim/neotest-busted/test_files/parametric_tests_spec.lua",
+        "source": "@./test_files/parametric_tests_spec.lua",
         "what": "Lua",
         "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
         "message": "test 2",
@@ -53,7 +53,7 @@
         "trace": {
           "traceback": "\nstack traceback:\n\t.../vim/neotest-busted/test_files/parametric_tests_spec.lua:4: in function <.../vim/neotest-busted/test_files/parametric_tests_spec.lua:2>\n",
           "linedefined": 2,
-          "source": "@/test_files/parametric_tests_spec.lua",
+          "source": "@./test_files/parametric_tests_spec.lua",
           "what": "Lua",
           "short_src": ".../vim/neotest-busted/test_files/parametric_tests_spec.lua",
           "message": "test 2",

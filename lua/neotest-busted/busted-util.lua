@@ -34,6 +34,7 @@ end
 ---@async
 ---@param tree neotest.Tree
 ---@return table<string, neotest-busted.RuntimeTestInfo>
+---@return table<string>
 local function get_runtime_test_info(tree)
     local position = tree:data()
     local path = position.path
@@ -83,6 +84,7 @@ local function get_runtime_test_info(tree)
 
     ---@type table<string, neotest-busted.RuntimeTestInfo>
     local tests = {}
+    local ordered_pos_ids = {}
 
     -- 'busted --list' output contains carriage returns
     for line in vim.gsplit(stderr, "\r\n", { plain = true, trimempty = true }) do
@@ -98,6 +100,7 @@ local function get_runtime_test_info(tree)
             test.lnum = tonumber(lnum)
 
             tests[position_id] = test
+            table.insert(ordered_pos_ids, position_id)
         else
             -- NOTE: This can happen for top-level 'it' tests outside of a
             -- 'describe' where only the test name is listed by busted
@@ -109,7 +112,7 @@ local function get_runtime_test_info(tree)
         end
     end
 
-    return tests
+    return tests, ordered_pos_ids
 end
 
 ---@param tree neotest.Tree
@@ -147,7 +150,7 @@ end
 ---@param tree neotest.Tree
 ---@return table<string, neotest.Position[]>
 function busted_util.discover_parametric_tests(tree)
-    local runtime_test_info = get_runtime_test_info(tree)
+    local runtime_test_info, ordered_pos_ids = get_runtime_test_info(tree)
 
     -- Await the scheduler since calling vimL functions like vim.split cannot
     -- be done in fast calls
@@ -178,8 +181,12 @@ function busted_util.discover_parametric_tests(tree)
 
     -- Iterate runtime test info and mark those positions not in the tree as
     -- parametric tests because they only existed at runtime but not in the
-    -- tree (source) itself
-    for _, test in pairs(runtime_test_info) do
+    -- tree (source) itself. Iterate using the ordered position ids so that
+    -- the parametric tests are created in the tree in the order they appear
+    -- in the file
+    for _, pos_id in ipairs(ordered_pos_ids) do
+        local test = runtime_test_info[pos_id]
+
         if not test.in_tree then
             local pos = find_overlapping_position(tree, test)
 
