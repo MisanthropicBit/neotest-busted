@@ -34,7 +34,10 @@ jobs:
           luaVersion: "5.1"
       - uses: leafo/gh-actions-luarocks@v4.0.0
       - name: Install busted
-        run: luarocks install busted 2.2.0
+        run: |
+          luarocks init
+          luarocks config --scope project lua_version 5.1
+          luarocks install busted 2.2.0
       - name: Setup neovim
         uses: rhysd/action-setup-vim@v1
         with:
