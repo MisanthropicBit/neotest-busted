@@ -123,96 +123,103 @@ describe("adapter.results", function()
         assert.stub(logger.error).was_not_called()
     end)
 
-    async.it("creates neotest results for successful parametric tests and updates tree (test)", function()
-        config.configure({ parametric_test_discovery = true })
+    async.it(
+        "creates neotest results for successful parametric tests and updates tree (test)",
+        function()
+            config.configure({ parametric_test_discovery = true })
 
-        -- Stub nio process functions since running `busted --list` appears to be broken
-        stub(nio.process, "run",
-            -- Fake process object
-            {
-                stderr = {
-                    read = function()
-                        return table.concat(stderr_output, "\r\n"), nil
-                    end
-                },
-                result = function()
-                    return 0
-                end
+            -- Stub nio process functions since running `busted --list` appears to be broken
+            stub(
+                nio.process,
+                "run",
+                -- Fake process object
+                {
+                    stderr = {
+                        read = function()
+                            return table.concat(stderr_output, "\r\n"), nil
+                        end,
+                    },
+                    result = function()
+                        return 0
+                    end,
+                }
+            )
+
+            -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so temporarily revert it
+            ---@diagnostic disable-next-line: undefined-field
+            lib.files.read:revert()
+
+            local path = parametric_test_path
+            local tree = adapter.discover_positions(path)
+            ---@cast tree -nil
+
+            local parametric_test_json = table.concat(
+                vim.fn.readfile("./tests/parametric_test_output_success_test.json"),
+                "\n"
+            )
+
+            stub(lib.files, "read", parametric_test_json)
+
+            -- Get the subtree rooted at the the first parametric test in the file
+            local subtree = tree:children()[1]:children()[1]:children()[1]
+
+            assert.is_not_nil(subtree)
+            ---@cast subtree -nil
+
+            local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
+            local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
+
+            spec.context.position_id_mapping = {
+                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
+                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
             }
-        )
 
-        -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so temporarily revert it
-        ---@diagnostic disable-next-line: undefined-field
-        lib.files.read:revert()
+            local neotest_results = adapter.results(spec, strategy_result, subtree)
 
-        local path = parametric_test_path
-        local tree = adapter.discover_positions(path)
-        ---@cast tree -nil
+            assert.are.same(neotest_results, {
+                [path .. '::"namespace 1"::"nested namespace 1"::("test %d"):format(i)'] = {
+                    status = types.ResultStatus.passed,
+                    short = '("test %d"):format(i): passed',
+                    output = strategy_result.output,
+                },
+                [parametric_pos_id_key1] = {
+                    status = types.ResultStatus.passed,
+                    short = "namespace 1 nested namespace 1 test 1: passed",
+                    output = strategy_result.output,
+                },
+                [parametric_pos_id_key2] = {
+                    status = types.ResultStatus.passed,
+                    short = "namespace 1 nested namespace 1 test 2: passed",
+                    output = strategy_result.output,
+                },
+            })
 
-        local parametric_test_json = table.concat(
-            vim.fn.readfile("./tests/parametric_test_output_success_test.json"),
-            "\n"
-        )
+            local expected_tree = require("./test_files/expected_tree4")
 
-        stub(lib.files, "read", parametric_test_json)
+            assert.are.same(tree:to_list(), expected_tree)
 
-        -- Get the subtree rooted at the the first parametric test in the file
-        local subtree = tree:children()[1]:children()[1]:children()[1]
-
-        assert.is_not_nil(subtree)
-        ---@cast subtree -nil
-
-        local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
-        local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-
-        spec.context.position_id_mapping = {
-            [path .. '::namespace 1 nested namespace 1 test 1::4'] = parametric_pos_id_key1,
-            [path .. '::namespace 1 nested namespace 1 test 2::4'] = parametric_pos_id_key2,
-        }
-
-        local neotest_results = adapter.results(spec, strategy_result, subtree)
-
-        assert.are.same(neotest_results, {
-            [path .. '::"namespace 1"::"nested namespace 1"::("test %d"):format(i)'] = {
-                status = types.ResultStatus.passed,
-                short = '("test %d"):format(i): passed',
-                output = strategy_result.output,
-            },
-            [parametric_pos_id_key1] = {
-                status = types.ResultStatus.passed,
-                short = "namespace 1 nested namespace 1 test 1: passed",
-                output = strategy_result.output,
-            },
-            [parametric_pos_id_key2] = {
-                status = types.ResultStatus.passed,
-                short = "namespace 1 nested namespace 1 test 2: passed",
-                output = strategy_result.output,
-            },
-        })
-
-        local expected_tree = require("./test_files/expected_tree4")
-
-        assert.are.same(tree:to_list(), expected_tree)
-
-        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was_not_called()
-    end)
+            assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+            assert.stub(logger.error).was_not_called()
+        end
+    )
 
     async.it("creates neotest results for parametric tests and updates tree (namespace)", function()
         config.configure({ parametric_test_discovery = true })
 
         -- Stub nio process functions since running `busted --list` appears to be broken
-        stub(nio.process, "run",
+        stub(
+            nio.process,
+            "run",
             -- Fake process object
             {
                 stderr = {
                     read = function()
                         return table.concat(stderr_output, "\r\n"), nil
-                    end
+                    end,
                 },
                 result = function()
                     return 0
-                end
+                end,
             }
         )
 
@@ -237,8 +244,10 @@ describe("adapter.results", function()
         assert.is_not_nil(subtree)
         ---@cast subtree -nil
 
-        local parametric_pos_id_key1 = path .. "::namespace::2::nested::namespace::2::-::1::some::test"
-        local parametric_pos_id_key2 = path .. "::namespace::2::nested::namespace::2::-::2::some::test"
+        local parametric_pos_id_key1 = path
+            .. "::namespace::2::nested::namespace::2::-::1::some::test"
+        local parametric_pos_id_key2 = path
+            .. "::namespace::2::nested::namespace::2::-::2::some::test"
 
         spec.context.position_id_mapping = {
             [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key1,

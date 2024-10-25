@@ -46,24 +46,25 @@ describe("adapter.discover_positions", function()
         }
 
         -- Stub nio process functions since running `busted --list` appears to be broken
-        stub(nio.process, "run",
+        stub(
+            nio.process,
+            "run",
             -- Fake process object
             {
                 stderr = {
                     read = function()
                         return table.concat(stderr_output, "\r\n"), nil
-                    end
+                    end,
                 },
                 result = function()
                     return 0
-                end
+                end,
             }
         )
 
         config.configure({ parametric_test_discovery = true })
 
-        local positions =
-            adapter.discover_positions(path):to_list()
+        local positions = adapter.discover_positions(path):to_list()
 
         local expected_tree = require("./test_files/expected_tree2")
         assert.are.same(positions, expected_tree)
@@ -73,9 +74,8 @@ describe("adapter.discover_positions", function()
 
         assert.are.same(cache:size(), 4)
 
-        local result1 = cache:get(
-            path .. '::"namespace 1"::"nested namespace 1"::("test %d"):format(i)'
-        )
+        local result1 =
+            cache:get(path .. '::"namespace 1"::"nested namespace 1"::("test %d"):format(i)')
 
         sort_parametric_results(result1)
 
@@ -96,9 +96,7 @@ describe("adapter.discover_positions", function()
             },
         })
 
-        local result2 = cache:get(
-            path .. '::"namespace 1"::"nested namespace 1"::"test " .. "3"'
-        )
+        local result2 = cache:get(path .. '::"namespace 1"::"nested namespace 1"::"test " .. "3"')
 
         assert.are.same(result2, {
             {
@@ -153,14 +151,14 @@ describe("adapter.discover_positions", function()
 
         assert.are.same(result4, {
             {
-                id = path .. '::namespace::2::nested::namespace::2::-::1::some::test',
+                id = path .. "::namespace::2::nested::namespace::2::-::1::some::test",
                 in_tree = false,
                 lnum = 18,
                 path = path,
                 type = "test",
             },
             {
-                id = path .. '::namespace::2::nested::namespace::2::-::2::some::test',
+                id = path .. "::namespace::2::nested::namespace::2::-::2::some::test",
                 in_tree = false,
                 lnum = 18,
                 path = path,
