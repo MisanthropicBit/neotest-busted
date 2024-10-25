@@ -44,7 +44,7 @@ local function get_runtime_test_info(tree)
 
     if not command_info then
         logging.error("Could not find a busted command for listing tests")
-        return {}
+        return {}, {}
     end
 
     logger.debug(
@@ -61,7 +61,7 @@ local function get_runtime_test_info(tree)
 
     if err then
         logging.error("Failed to list tests via busted: %s", nil, err)
-        return {}
+        return {}, {}
     end
 
     -- 'busted --list' outputs to stderr
@@ -70,14 +70,14 @@ local function get_runtime_test_info(tree)
 
     if read_err then
         logging.error("Got error when reading output from busted: %s", nil, read_err)
-        return {}
+        return {}, {}
     end
 
     local code = process.result()
 
     if code ~= 0 then
         logging.error("Failed to list tests via busted (code: %d)", nil, code)
-        return {}
+        return {}, {}
     end
 
     ---@cast stderr -nil
@@ -151,6 +151,10 @@ end
 ---@return table<string, neotest.Position[]>
 function busted_util.discover_parametric_tests(tree)
     local runtime_test_info, ordered_pos_ids = get_runtime_test_info(tree)
+
+    if vim.tbl_count(runtime_test_info) == 0 then
+        return {}
+    end
 
     -- Await the scheduler since calling vimL functions like vim.split cannot
     -- be done in fast calls
