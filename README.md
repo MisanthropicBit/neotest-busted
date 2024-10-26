@@ -126,9 +126,9 @@ variables or a default timeout of 2000 milliseconds.
 ## Parametric tests
 
 > [!IMPORTANT]
-> Supporting parametric tests requires extra computation to find them so support
-> is disabled by default. You need to set `parametric_test_discovery` to `true`
-> if you want neotest-busted to find parametric tests.
+> Supporting parametric tests requires extra computation to discover them so
+> support is disabled by default. You need to set `parametric_test_discovery` to
+> `true` if you want neotest-busted to find parametric tests.
 
 `neotest-busted` supports parametric tests that are generated at runtime as
 opposed to being defined entirely at source-level as shown below. `describe`'s
