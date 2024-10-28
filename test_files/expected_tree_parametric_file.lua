@@ -1,4 +1,4 @@
-local path =  "./test_files/parametric_tests_spec.lua"
+local path = "./test_files/parametric_tests_spec.lua"
 
 return {
     {
@@ -35,7 +35,7 @@ return {
                 -- Two new nodes have been added to the tree for the two parametric tests that were run
                 {
                     {
-                        id = path .. '::namespace::1::nested::namespace::1::test::1',
+                        id = path .. "::namespace::1::nested::namespace::1::test::1",
                         in_tree = false,
                         name = "test 1",
                         lnum = 4,
@@ -45,7 +45,7 @@ return {
                 },
                 {
                     {
-                        id = path .. '::namespace::1::nested::namespace::1::test::2',
+                        id = path .. "::namespace::1::nested::namespace::1::test::2",
                         in_tree = false,
                         name = "test 2",
                         lnum = 4,
@@ -64,14 +64,14 @@ return {
                 },
                 {
                     {
-                        id = path .. '::namespace::1::nested::namespace::1::test::3',
+                        id = path .. "::namespace::1::nested::namespace::1::test::3",
                         in_tree = false,
-                        name = 'test 3',
+                        name = "test 3",
                         lnum = 9,
                         path = path,
                         type = "test",
                     },
-                }
+                },
             },
         },
     },
@@ -93,7 +93,8 @@ return {
             },
             {
                 {
-                    id = path .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)::"some test"',
+                    id = path
+                        .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)::"some test"',
                     name = '"some test"',
                     path = path,
                     range = { 17, 12, 19, 16 },
@@ -101,9 +102,9 @@ return {
                 },
                 {
                     {
-                        id = path .. '::namespace::2::nested::namespace::2::-::1::some::test',
+                        id = path .. "::namespace::2::nested::namespace::2::-::1::some::test",
                         in_tree = false,
-                        name = 'some test',
+                        name = "some test",
                         lnum = 18,
                         path = path,
                         type = "test",
@@ -111,9 +112,9 @@ return {
                 },
                 {
                     {
-                        id = path .. '::namespace::2::nested::namespace::2::-::2::some::test',
+                        id = path .. "::namespace::2::nested::namespace::2::-::2::some::test",
                         in_tree = false,
-                        name = 'some test',
+                        name = "some test",
                         lnum = 18,
                         path = path,
                         type = "test",
@@ -122,7 +123,8 @@ return {
             },
             {
                 {
-                    id = path .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)::("test %d"):format(j)',
+                    id = path
+                        .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)::("test %d"):format(j)',
                     name = '("test %d"):format(j)',
                     path = path,
                     range = { 22, 16, 24, 20 },
@@ -130,7 +132,7 @@ return {
                 },
                 {
                     {
-                        id = path .. '::namespace::2::nested::namespace::2::-::1::test::1',
+                        id = path .. "::namespace::2::nested::namespace::2::-::1::test::1",
                         in_tree = false,
                         name = "test 1",
                         lnum = 23,
@@ -140,7 +142,7 @@ return {
                 },
                 {
                     {
-                        id = path .. '::namespace::2::nested::namespace::2::-::1::test::2',
+                        id = path .. "::namespace::2::nested::namespace::2::-::1::test::2",
                         in_tree = false,
                         name = "test 2",
                         lnum = 23,
@@ -150,7 +152,7 @@ return {
                 },
                 {
                     {
-                        id = path .. '::namespace::2::nested::namespace::2::-::2::test::1',
+                        id = path .. "::namespace::2::nested::namespace::2::-::2::test::1",
                         in_tree = false,
                         name = "test 1",
                         lnum = 23,
@@ -160,7 +162,7 @@ return {
                 },
                 {
                     {
-                        id = path .. '::namespace::2::nested::namespace::2::-::2::test::2',
+                        id = path .. "::namespace::2::nested::namespace::2::-::2::test::2",
                         in_tree = false,
                         name = "test 2",
                         lnum = 23,

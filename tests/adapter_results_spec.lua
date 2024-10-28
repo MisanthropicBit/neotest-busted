@@ -223,236 +223,248 @@ describe("adapter.results", function()
         end
     )
 
-    async.it("creates neotest results for successful parametric tests and updates tree (namespace)", function()
-        config.configure({ parametric_test_discovery = true })
+    async.it(
+        "creates neotest results for successful parametric tests and updates tree (namespace)",
+        function()
+            config.configure({ parametric_test_discovery = true })
 
-        -- Stub nio process functions since running `busted --list` appears to be broken
-        stub(
-            nio.process,
-            "run",
-            -- Fake process object
-            {
-                stderr = {
-                    read = function()
-                        return table.concat(stderr_output, "\r\n"), nil
+            -- Stub nio process functions since running `busted --list` appears to be broken
+            stub(
+                nio.process,
+                "run",
+                -- Fake process object
+                {
+                    stderr = {
+                        read = function()
+                            return table.concat(stderr_output, "\r\n"), nil
+                        end,
+                    },
+                    result = function()
+                        return 0
                     end,
+                }
+            )
+
+            -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so temporarily revert it
+            ---@diagnostic disable-next-line: undefined-field
+            lib.files.read:revert()
+
+            local path = parametric_test_path
+            local tree = adapter.discover_positions(path)
+            ---@cast tree -nil
+
+            local parametric_test_json = table.concat(
+                vim.fn.readfile("./test_files/parametric_test_output_success_namespace.json"),
+                "\n"
+            )
+
+            stub(lib.files, "read", parametric_test_json)
+
+            -- Get the subtree rooted at the the first parametric namespace in the file
+            local subtree = tree:children()[2]:children()[1]
+
+            assert.is_not_nil(subtree)
+            ---@cast subtree -nil
+
+            local parametric_pos_id_key1 = path
+                .. "::namespace::2::nested::namespace::2::-::1::some::test"
+            local parametric_pos_id_key2 = path
+                .. "::namespace::2::nested::namespace::2::-::2::some::test"
+            local parametric_pos_id_key3 = path
+                .. "::namespace::2::nested::namespace::2::-::1::test::1"
+            local parametric_pos_id_key4 = path
+                .. "::namespace::2::nested::namespace::2::-::1::test::2"
+            local parametric_pos_id_key5 = path
+                .. "::namespace::2::nested::namespace::2::-::2::test::1"
+            local parametric_pos_id_key6 = path
+                .. "::namespace::2::nested::namespace::2::-::2::test::2"
+
+            spec.context.position_id_mapping = {
+                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key1,
+                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key2,
+                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key3,
+                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key4,
+                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key5,
+                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key6,
+            }
+
+            local neotest_results = adapter.results(spec, strategy_result, subtree)
+
+            assert.are.same(neotest_results, {
+                [path .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)'] = {
+                    status = types.ResultStatus.passed,
+                    short = '"nested namespace 2 - " .. tostring(i): passed',
+                    output = strategy_result.output,
                 },
-                result = function()
-                    return 0
-                end,
-            }
-        )
+                [path .. "::namespace::2::nested::namespace::2::-::1::some::test"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 1 some test: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::1::test::1"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 1 test 1: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::1::test::2"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 1 test 2: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::2::some::test"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 2 some test: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::2::test::1"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 2 test 1: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::2::test::2"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 2 test 2: passed",
+                    status = "passed",
+                },
+            })
 
-        -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so temporarily revert it
-        ---@diagnostic disable-next-line: undefined-field
-        lib.files.read:revert()
+            local expected_tree = require("test_files/expected_tree_parametric_namespace")
 
-        local path = parametric_test_path
-        local tree = adapter.discover_positions(path)
-        ---@cast tree -nil
+            assert.are.same(tree:to_list(), expected_tree)
 
-        local parametric_test_json = table.concat(
-            vim.fn.readfile("./test_files/parametric_test_output_success_namespace.json"),
-            "\n"
-        )
+            assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+            assert.stub(logger.error).was_not_called()
+        end
+    )
 
-        stub(lib.files, "read", parametric_test_json)
+    async.it(
+        "creates neotest results for successful parametric tests and updates tree (file)",
+        function()
+            config.configure({ parametric_test_discovery = true })
 
-        -- Get the subtree rooted at the the first parametric namespace in the file
-        local subtree = tree:children()[2]:children()[1]
-
-        assert.is_not_nil(subtree)
-        ---@cast subtree -nil
-
-        local parametric_pos_id_key1 = path
-            .. "::namespace::2::nested::namespace::2::-::1::some::test"
-        local parametric_pos_id_key2 = path
-            .. "::namespace::2::nested::namespace::2::-::2::some::test"
-        local parametric_pos_id_key3 = path
-            .. "::namespace::2::nested::namespace::2::-::1::test::1"
-        local parametric_pos_id_key4 = path
-            .. "::namespace::2::nested::namespace::2::-::1::test::2"
-        local parametric_pos_id_key5 = path
-            .. "::namespace::2::nested::namespace::2::-::2::test::1"
-        local parametric_pos_id_key6 = path
-            .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-        spec.context.position_id_mapping = {
-            [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key1,
-            [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key2,
-            [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key3,
-            [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key4,
-            [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key5,
-            [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key6,
-        }
-
-        local neotest_results = adapter.results(spec, strategy_result, subtree)
-
-        assert.are.same(neotest_results, {
-            [path .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)'] = {
-                status = types.ResultStatus.passed,
-                short = '"nested namespace 2 - " .. tostring(i): passed',
-                output = strategy_result.output,
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::1::some::test'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 1 some test: passed',
-                status = 'passed'
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::1::test::1'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 1 test 1: passed',
-                status = 'passed',
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::1::test::2'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 1 test 2: passed',
-                status = 'passed',
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::2::some::test'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 2 some test: passed',
-                status = 'passed'
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::2::test::1'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 2 test 1: passed',
-                status = 'passed',
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::2::test::2'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 2 test 2: passed',
-                status = 'passed',
-            }
-        })
-
-        local expected_tree = require("test_files/expected_tree_parametric_namespace")
-
-        assert.are.same(tree:to_list(), expected_tree)
-
-        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was_not_called()
-    end)
-
-    async.it("creates neotest results for successful parametric tests and updates tree (file)", function()
-        config.configure({ parametric_test_discovery = true })
-
-        -- Stub nio process functions since running `busted --list` appears to be broken
-        stub(
-            nio.process,
-            "run",
-            -- Fake process object
-            {
-                stderr = {
-                    read = function()
-                        return table.concat(stderr_output, "\r\n"), nil
+            -- Stub nio process functions since running `busted --list` appears to be broken
+            stub(
+                nio.process,
+                "run",
+                -- Fake process object
+                {
+                    stderr = {
+                        read = function()
+                            return table.concat(stderr_output, "\r\n"), nil
+                        end,
+                    },
+                    result = function()
+                        return 0
                     end,
+                }
+            )
+
+            -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so temporarily revert it
+            ---@diagnostic disable-next-line: undefined-field
+            lib.files.read:revert()
+
+            local path = parametric_test_path
+            local tree = adapter.discover_positions(path)
+            ---@cast tree -nil
+
+            local parametric_test_json = table.concat(
+                vim.fn.readfile("./test_files/parametric_test_output_success_file.json"),
+                "\n"
+            )
+
+            stub(lib.files, "read", parametric_test_json)
+
+            local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
+            local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
+            local parametric_pos_id_key3 = path .. "::namespace::1::nested::namespace::1::test::3"
+            local parametric_pos_id_key4 = path
+                .. "::namespace::2::nested::namespace::2::-::1::some::test"
+            local parametric_pos_id_key5 = path
+                .. "::namespace::2::nested::namespace::2::-::2::some::test"
+            local parametric_pos_id_key6 = path
+                .. "::namespace::2::nested::namespace::2::-::1::test::1"
+            local parametric_pos_id_key7 = path
+                .. "::namespace::2::nested::namespace::2::-::1::test::2"
+            local parametric_pos_id_key8 = path
+                .. "::namespace::2::nested::namespace::2::-::2::test::1"
+            local parametric_pos_id_key9 = path
+                .. "::namespace::2::nested::namespace::2::-::2::test::2"
+
+            spec.context.position_id_mapping = {
+                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
+                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
+                [path .. "::namespace 1 nested namespace 1 test 3::9"] = parametric_pos_id_key3,
+                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key4,
+                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key5,
+                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key6,
+                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key7,
+                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key8,
+                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key9,
+            }
+
+            local neotest_results = adapter.results(spec, strategy_result, tree)
+
+            assert.are.same(neotest_results, {
+                [path] = {
+                    output = "test_console_output",
+                    short = "parametric_tests_spec.lua: passed",
+                    status = "passed",
                 },
-                result = function()
-                    return 0
-                end,
-            }
-        )
+                [path .. "::namespace::1::nested::namespace::1::test::1"] = {
+                    status = types.ResultStatus.passed,
+                    short = "namespace 1 nested namespace 1 test 1: passed",
+                    output = strategy_result.output,
+                },
+                [path .. "::namespace::1::nested::namespace::1::test::2"] = {
+                    status = types.ResultStatus.passed,
+                    short = "namespace 1 nested namespace 1 test 2: passed",
+                    output = strategy_result.output,
+                },
+                [path .. "::namespace::1::nested::namespace::1::test::3"] = {
+                    status = types.ResultStatus.passed,
+                    short = "namespace 1 nested namespace 1 test 3: passed",
+                    output = strategy_result.output,
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::1::some::test"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 1 some test: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::1::test::1"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 1 test 1: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::1::test::2"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 1 test 2: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::2::some::test"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 2 some test: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::2::test::1"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 2 test 1: passed",
+                    status = "passed",
+                },
+                [path .. "::namespace::2::nested::namespace::2::-::2::test::2"] = {
+                    output = "test_console_output",
+                    short = "namespace 2 nested namespace 2 - 2 test 2: passed",
+                    status = "passed",
+                },
+            })
 
-        -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so temporarily revert it
-        ---@diagnostic disable-next-line: undefined-field
-        lib.files.read:revert()
+            local expected_tree = require("./test_files/expected_tree_parametric_file")
 
-        local path = parametric_test_path
-        local tree = adapter.discover_positions(path)
-        ---@cast tree -nil
+            assert.are.same(tree:to_list(), expected_tree)
 
-        local parametric_test_json = table.concat(
-            vim.fn.readfile("./test_files/parametric_test_output_success_file.json"),
-            "\n"
-        )
-
-        stub(lib.files, "read", parametric_test_json)
-
-        local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
-        local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-        local parametric_pos_id_key3 = path .. "::namespace::1::nested::namespace::1::test::3"
-        local parametric_pos_id_key4 = path .. "::namespace::2::nested::namespace::2::-::1::some::test"
-        local parametric_pos_id_key5 = path .. "::namespace::2::nested::namespace::2::-::2::some::test"
-        local parametric_pos_id_key6 = path .. "::namespace::2::nested::namespace::2::-::1::test::1"
-        local parametric_pos_id_key7 = path .. "::namespace::2::nested::namespace::2::-::1::test::2"
-        local parametric_pos_id_key8 = path .. "::namespace::2::nested::namespace::2::-::2::test::1"
-        local parametric_pos_id_key9 = path .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-        spec.context.position_id_mapping = {
-            [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
-            [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
-            [path .. "::namespace 1 nested namespace 1 test 3::9"] = parametric_pos_id_key3,
-            [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key4,
-            [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key5,
-            [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key6,
-            [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key7,
-            [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key8,
-            [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key9,
-        }
-
-        local neotest_results = adapter.results(spec, strategy_result, tree)
-
-        assert.are.same(neotest_results, {
-             [path] = {
-                output = 'test_console_output',
-                short = 'parametric_tests_spec.lua: passed',
-                status = 'passed',
-            },
-            [path .. "::namespace::1::nested::namespace::1::test::1"] = {
-                status = types.ResultStatus.passed,
-                short = "namespace 1 nested namespace 1 test 1: passed",
-                output = strategy_result.output,
-            },
-            [path .. "::namespace::1::nested::namespace::1::test::2"] = {
-                status = types.ResultStatus.passed,
-                short = "namespace 1 nested namespace 1 test 2: passed",
-                output = strategy_result.output,
-            },
-            [path .. '::namespace::1::nested::namespace::1::test::3'] = {
-                status = types.ResultStatus.passed,
-                short = "namespace 1 nested namespace 1 test 3: passed",
-                output = strategy_result.output,
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::1::some::test'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 1 some test: passed',
-                status = 'passed'
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::1::test::1'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 1 test 1: passed',
-                status = 'passed',
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::1::test::2'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 1 test 2: passed',
-                status = 'passed',
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::2::some::test'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 2 some test: passed',
-                status = 'passed'
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::2::test::1'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 2 test 1: passed',
-                status = 'passed',
-            },
-            [path .. '::namespace::2::nested::namespace::2::-::2::test::2'] = {
-                output = 'test_console_output',
-                short = 'namespace 2 nested namespace 2 - 2 test 2: passed',
-                status = 'passed',
-            }
-        })
-
-        local expected_tree = require("./test_files/expected_tree_parametric_file")
-
-        assert.are.same(tree:to_list(), expected_tree)
-
-        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was_not_called()
-    end)
+            assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+            assert.stub(logger.error).was_not_called()
+        end
+    )
 
     ---- async.it("creates neotest results for failed parametric tests and updates tree", function()
     ---- end)
