@@ -73,11 +73,9 @@ describe("adapter.results", function()
 
         stub(lib.files, "read", test_json)
         stub(logger, "error")
-        vim.print("before_each")
     end)
 
     after_each(function()
-        vim.print("after_each")
         ---@diagnostic disable-next-line: undefined-field
         lib.files.read:revert()
 
@@ -469,119 +467,119 @@ describe("adapter.results", function()
     ---- async.it("creates neotest results for failed parametric tests and updates tree", function()
     ---- end)
 
-    --it("handles failure to read json test output", function()
-    --    stub(vim, "schedule", function(func)
-    --        func()
-    --    end)
+    it("handles failure to read json test output", function()
+        stub(vim, "schedule", function(func)
+            func()
+        end)
 
-    --    stub(vim, "notify")
+        stub(vim, "notify")
 
-    --    stub(lib.files, "read", function()
-    --        error("Could not read file", 0)
-    --    end)
+        stub(lib.files, "read", function()
+            error("Could not read file", 0)
+        end)
 
-    --    ---@diagnostic disable-next-line: missing-parameter
-    --    local neotest_results = adapter.results(spec, strategy_result)
+        ---@diagnostic disable-next-line: missing-parameter
+        local neotest_results = adapter.results(spec, strategy_result)
 
-    --    assert.are.same(neotest_results, {})
+        assert.are.same(neotest_results, {})
 
-    --    assert.stub(vim.schedule).was.called()
-    --    assert.stub(vim.notify).was.called()
-    --    assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-    --    assert.stub(logger.error).was.called_with(
-    --        "Failed to read json test output file test_output.json with error: Could not read file",
-    --        nil
-    --    )
-    --    assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(vim.schedule).was.called()
+        assert.stub(vim.notify).was.called()
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was.called_with(
+            "Failed to read json test output file test_output.json with error: Could not read file",
+            nil
+        )
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
 
-    --    ---@diagnostic disable-next-line: undefined-field
-    --    vim.schedule:revert()
-    --    ---@diagnostic disable-next-line: undefined-field
-    --    vim.notify:revert()
-    --end)
+        ---@diagnostic disable-next-line: undefined-field
+        vim.schedule:revert()
+        ---@diagnostic disable-next-line: undefined-field
+        vim.notify:revert()
+    end)
 
-    --it("handles failure to decode json", function()
-    --    stub(vim, "schedule", function(func)
-    --        func()
-    --    end)
+    it("handles failure to decode json", function()
+        stub(vim, "schedule", function(func)
+            func()
+        end)
 
-    --    stub(vim, "notify")
+        stub(vim, "notify")
 
-    --    stub(vim.json, "decode", function()
-    --        error("Expected value but found invalid token at character 1", 0)
-    --    end)
+        stub(vim.json, "decode", function()
+            error("Expected value but found invalid token at character 1", 0)
+        end)
 
-    --    ---@diagnostic disable-next-line: missing-parameter
-    --    local neotest_results = adapter.results(spec, strategy_result)
+        ---@diagnostic disable-next-line: missing-parameter
+        local neotest_results = adapter.results(spec, strategy_result)
 
-    --    assert.are.same(neotest_results, {})
+        assert.are.same(neotest_results, {})
 
-    --    assert.stub(vim.schedule).was.called()
-    --    assert.stub(vim.notify).was.called()
-    --    assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-    --    assert.stub(logger.error).was.called_with(
-    --        "Failed to parse json test output file test_output.json with error: Expected value but found invalid token at character 1",
-    --        nil
-    --    )
-    --    assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(vim.schedule).was.called()
+        assert.stub(vim.notify).was.called()
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was.called_with(
+            "Failed to parse json test output file test_output.json with error: Expected value but found invalid token at character 1",
+            nil
+        )
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
 
-    --    ---@diagnostic disable-next-line: undefined-field
-    --    vim.schedule:revert()
-    --    ---@diagnostic disable-next-line: undefined-field
-    --    vim.notify:revert()
-    --    ---@diagnostic disable-next-line: undefined-field
-    --    vim.json.decode:revert()
-    --end)
+        ---@diagnostic disable-next-line: undefined-field
+        vim.schedule:revert()
+        ---@diagnostic disable-next-line: undefined-field
+        vim.notify:revert()
+        ---@diagnostic disable-next-line: undefined-field
+        vim.json.decode:revert()
+    end)
 
-    --it("logs not finding a matching position id", function()
-    --    stub(vim, "schedule", function(func)
-    --        func()
-    --    end)
+    it("logs not finding a matching position id", function()
+        stub(vim, "schedule", function(func)
+            func()
+        end)
 
-    --    stub(vim, "notify")
+        stub(vim, "notify")
 
-    --    spec.context.position_id_mapping[test_path .. "::namespace tests a failing test::7"] = nil
+        spec.context.position_id_mapping[test_path .. "::namespace tests a failing test::7"] = nil
 
-    --    ---@diagnostic disable-next-line: missing-parameter
-    --    local neotest_results = adapter.results(spec, strategy_result)
+        ---@diagnostic disable-next-line: missing-parameter
+        local neotest_results = adapter.results(spec, strategy_result)
 
-    --    assert.are.same(neotest_results, {
-    --        [test_path .. '::"namespace"::"tests a pending test"'] = {
-    --            status = types.ResultStatus.skipped,
-    --            short = "namespace tests a pending test: skipped",
-    --            output = strategy_result.output,
-    --        },
-    --        [test_path .. '::"namespace"::"tests a passing test"'] = {
-    --            status = types.ResultStatus.passed,
-    --            short = "namespace tests a passing test: passed",
-    --            output = strategy_result.output,
-    --        },
-    --        [test_path .. '::"namespace"::"tests an erroneous test"'] = {
-    --            status = types.ResultStatus.failed,
-    --            short = "namespace tests an erroneous test: failed",
-    --            output = strategy_result.output,
-    --            errors = {
-    --                {
-    --                    message = "Oh noes",
-    --                    line = 11,
-    --                },
-    --            },
-    --        },
-    --    })
+        assert.are.same(neotest_results, {
+            [test_path .. '::"namespace"::"tests a pending test"'] = {
+                status = types.ResultStatus.skipped,
+                short = "namespace tests a pending test: skipped",
+                output = strategy_result.output,
+            },
+            [test_path .. '::"namespace"::"tests a passing test"'] = {
+                status = types.ResultStatus.passed,
+                short = "namespace tests a passing test: passed",
+                output = strategy_result.output,
+            },
+            [test_path .. '::"namespace"::"tests an erroneous test"'] = {
+                status = types.ResultStatus.failed,
+                short = "namespace tests an erroneous test: failed",
+                output = strategy_result.output,
+                errors = {
+                    {
+                        message = "Oh noes",
+                        line = 11,
+                    },
+                },
+            },
+        })
 
-    --    assert.stub(vim.schedule).was.called()
-    --    assert.stub(vim.notify).was.called()
-    --    assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-    --    assert.stub(logger.error).was.called_with(
-    --        "Failed to find matching position id for key "
-    --        .. test_path
-    --        .. "::namespace tests a failing test::7",
-    --        nil
-    --    )
+        assert.stub(vim.schedule).was.called()
+        assert.stub(vim.notify).was.called()
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was.called_with(
+            "Failed to find matching position id for key "
+                .. test_path
+                .. "::namespace tests a failing test::7",
+            nil
+        )
 
-    --    ---@diagnostic disable-next-line: undefined-field
-    --    vim.schedule:revert()
-    --    ---@diagnostic disable-next-line: undefined-field
-    --    vim.notify:revert()
-    --end)
+        ---@diagnostic disable-next-line: undefined-field
+        vim.schedule:revert()
+        ---@diagnostic disable-next-line: undefined-field
+        vim.notify:revert()
+    end)
 end)
