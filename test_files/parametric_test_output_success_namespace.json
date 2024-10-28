@@ -19,9 +19,9 @@
                     "lastlinedefined": 27,
                     "linedefined": 17,
                     "message": "some test",
-                    "short_src": "test_files/parametric_tests_spec.lua",
-                    "source": "@test_files/parametric_tests_spec.lua",
-                    "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:18: in function <test_files/parametric_tests_spec.lua:17>\n",
+                    "short_src": "./test_files/parametric_tests_spec.lua",
+                    "source": "@./test_files/parametric_tests_spec.lua",
+                    "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:18: in function <./test_files/parametric_tests_spec.lua:17>\n",
                     "what": "Lua"
                 }
             },
@@ -31,9 +31,9 @@
                 "lastlinedefined": 27,
                 "linedefined": 17,
                 "message": "some test",
-                "short_src": "test_files/parametric_tests_spec.lua",
-                "source": "@test_files/parametric_tests_spec.lua",
-                "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:18: in function <test_files/parametric_tests_spec.lua:17>\n",
+                "short_src": "./test_files/parametric_tests_spec.lua",
+                "source": "@./test_files/parametric_tests_spec.lua",
+                "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:18: in function <./test_files/parametric_tests_spec.lua:17>\n",
                 "what": "Lua"
             }
         },
@@ -52,9 +52,9 @@
                     "lastlinedefined": 27,
                     "linedefined": 17,
                     "message": "test 1",
-                    "short_src": "test_files/parametric_tests_spec.lua",
-                    "source": "@test_files/parametric_tests_spec.lua",
-                    "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:23: in function <test_files/parametric_tests_spec.lua:17>\n",
+                    "short_src": "./test_files/parametric_tests_spec.lua",
+                    "source": "@./test_files/parametric_tests_spec.lua",
+                    "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:23: in function <./test_files/parametric_tests_spec.lua:17>\n",
                     "what": "Lua"
                 }
             },
@@ -64,9 +64,9 @@
                 "lastlinedefined": 27,
                 "linedefined": 17,
                 "message": "test 1",
-                "short_src": "test_files/parametric_tests_spec.lua",
-                "source": "@test_files/parametric_tests_spec.lua",
-                "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:23: in function <test_files/parametric_tests_spec.lua:17>\n",
+                "short_src": "./test_files/parametric_tests_spec.lua",
+                "source": "@./test_files/parametric_tests_spec.lua",
+                "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:23: in function <./test_files/parametric_tests_spec.lua:17>\n",
                 "what": "Lua"
             }
         },
@@ -85,9 +85,9 @@
                     "lastlinedefined": 27,
                     "linedefined": 17,
                     "message": "test 2",
-                    "short_src": "test_files/parametric_tests_spec.lua",
-                    "source": "@test_files/parametric_tests_spec.lua",
-                    "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:23: in function <test_files/parametric_tests_spec.lua:17>\n",
+                    "short_src": "./test_files/parametric_tests_spec.lua",
+                    "source": "@./test_files/parametric_tests_spec.lua",
+                    "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:23: in function <./test_files/parametric_tests_spec.lua:17>\n",
                     "what": "Lua"
                 }
             },
@@ -97,9 +97,9 @@
                 "lastlinedefined": 27,
                 "linedefined": 17,
                 "message": "test 2",
-                "short_src": "test_files/parametric_tests_spec.lua",
-                "source": "@test_files/parametric_tests_spec.lua",
-                "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:23: in function <test_files/parametric_tests_spec.lua:17>\n",
+                "short_src": "./test_files/parametric_tests_spec.lua",
+                "source": "@./test_files/parametric_tests_spec.lua",
+                "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:23: in function <./test_files/parametric_tests_spec.lua:17>\n",
                 "what": "Lua"
             }
         },
@@ -118,9 +118,9 @@
                     "lastlinedefined": 27,
                     "linedefined": 17,
                     "message": "some test",
-                    "short_src": "test_files/parametric_tests_spec.lua",
-                    "source": "@test_files/parametric_tests_spec.lua",
-                    "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:18: in function <test_files/parametric_tests_spec.lua:17>\n",
+                    "short_src": "./test_files/parametric_tests_spec.lua",
+                    "source": "@./test_files/parametric_tests_spec.lua",
+                    "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:18: in function <./test_files/parametric_tests_spec.lua:17>\n",
                     "what": "Lua"
                 }
             },
@@ -130,9 +130,9 @@
                 "lastlinedefined": 27,
                 "linedefined": 17,
                 "message": "some test",
-                "short_src": "test_files/parametric_tests_spec.lua",
-                "source": "@test_files/parametric_tests_spec.lua",
-                "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:18: in function <test_files/parametric_tests_spec.lua:17>\n",
+                "short_src": "./test_files/parametric_tests_spec.lua",
+                "source": "@./test_files/parametric_tests_spec.lua",
+                "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:18: in function <./test_files/parametric_tests_spec.lua:17>\n",
                 "what": "Lua"
             }
         },
@@ -151,9 +151,9 @@
                     "lastlinedefined": 27,
                     "linedefined": 17,
                     "message": "test 1",
-                    "short_src": "test_files/parametric_tests_spec.lua",
-                    "source": "@test_files/parametric_tests_spec.lua",
-                    "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:23: in function <test_files/parametric_tests_spec.lua:17>\n",
+                    "short_src": "./test_files/parametric_tests_spec.lua",
+                    "source": "@./test_files/parametric_tests_spec.lua",
+                    "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:23: in function <./test_files/parametric_tests_spec.lua:17>\n",
                     "what": "Lua"
                 }
             },
@@ -163,9 +163,9 @@
                 "lastlinedefined": 27,
                 "linedefined": 17,
                 "message": "test 1",
-                "short_src": "test_files/parametric_tests_spec.lua",
-                "source": "@test_files/parametric_tests_spec.lua",
-                "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:23: in function <test_files/parametric_tests_spec.lua:17>\n",
+                "short_src": "./test_files/parametric_tests_spec.lua",
+                "source": "@./test_files/parametric_tests_spec.lua",
+                "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:23: in function <./test_files/parametric_tests_spec.lua:17>\n",
                 "what": "Lua"
             }
         },
@@ -184,9 +184,9 @@
                     "lastlinedefined": 27,
                     "linedefined": 17,
                     "message": "test 2",
-                    "short_src": "test_files/parametric_tests_spec.lua",
-                    "source": "@test_files/parametric_tests_spec.lua",
-                    "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:23: in function <test_files/parametric_tests_spec.lua:17>\n",
+                    "short_src": "./test_files/parametric_tests_spec.lua",
+                    "source": "@./test_files/parametric_tests_spec.lua",
+                    "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:23: in function <./test_files/parametric_tests_spec.lua:17>\n",
                     "what": "Lua"
                 }
             },
@@ -196,9 +196,9 @@
                 "lastlinedefined": 27,
                 "linedefined": 17,
                 "message": "test 2",
-                "short_src": "test_files/parametric_tests_spec.lua",
-                "source": "@test_files/parametric_tests_spec.lua",
-                "traceback": "\nstack traceback:\n\ttest_files/parametric_tests_spec.lua:23: in function <test_files/parametric_tests_spec.lua:17>\n",
+                "short_src": "./test_files/parametric_tests_spec.lua",
+                "source": "@./test_files/parametric_tests_spec.lua",
+                "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_spec.lua:23: in function <./test_files/parametric_tests_spec.lua:17>\n",
                 "what": "Lua"
             }
         }

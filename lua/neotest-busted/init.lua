@@ -646,13 +646,15 @@ end
 ---@param pos_id_to_test_name table<string, string>
 local function update_parametric_tests_in_tree(tree, pos_id_to_test_name)
     local position = tree:data()
-    local parametric_tests = parametric_test_cache:get(position.id)
+    local parametric_test_map = {}
+    local cached_parametric_tests = parametric_test_cache:get(position.id)
 
-    if not parametric_tests then
-        parametric_tests = {}
-
+    if cached_parametric_tests then
+        parametric_test_map[position.id] = cached_parametric_tests
+    else
         -- We did not find anything in the cache which can happen when a
-        -- namespace test (describe) was run as we only cache per test position
+        -- namespace (describe) or file test was run as we only cache per test
+        -- position
         for _, node in tree:iter_nodes() do
             local pos = node:data()
 
@@ -660,33 +662,32 @@ local function update_parametric_tests_in_tree(tree, pos_id_to_test_name)
                 local cache_result = parametric_test_cache:get(pos.id)
 
                 if cache_result then
-                    vim.list_extend(parametric_tests, cache_result)
+                    parametric_test_map[pos.id] = cache_result
                 end
             end
         end
     end
 
-    if #parametric_tests > 0 then
-        local node = tree:get_key(position.id)
-        ---@cast node -nil
-
+    if vim.tbl_count(parametric_test_map) > 0 then
         -- Iterate all parametric tests and add them as range-less (range = nil) children
         -- of the unexpanded test if not already in the tree
         --
         -- https://github.com/nvim-neotest/neotest/pull/172
-        for _, parametric_test in ipairs(parametric_tests) do
-            local pos_id = parametric_test.id
+        for orig_pos_id, parametric_tests in pairs(parametric_test_map) do
+            for _, parametric_test in ipairs(parametric_tests) do
+                local pos_id = parametric_test.id
 
-            if not tree:get_key(pos_id) then
-                parametric_test.name = pos_id_to_test_name[pos_id]
+                if not tree:get_key(pos_id) then
+                    parametric_test.name = pos_id_to_test_name[pos_id]
 
-                -- WARNING: The following code relies on neotest internals
+                    -- WARNING: The following code relies on neotest internals
 
-                ---@diagnostic disable-next-line: invisible
-                local new_tree = types.Tree:new(parametric_test, {}, tree._key, nil, nil)
+                    ---@diagnostic disable-next-line: invisible
+                    local new_tree = types.Tree:new(parametric_test, {}, tree._key, nil, nil)
 
-                ---@diagnostic disable-next-line: invisible
-                node:add_child(pos_id, new_tree)
+                    ---@diagnostic disable-next-line: invisible
+                    tree:get_key(orig_pos_id):add_child(pos_id, new_tree)
+                end
             end
         end
     end

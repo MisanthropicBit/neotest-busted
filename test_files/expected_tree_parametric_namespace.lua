@@ -68,6 +68,26 @@ return {
                     range = { 17, 12, 19, 16 },
                     type = "test",
                 },
+                {
+                    {
+                        id = path .. '::namespace::2::nested::namespace::2::-::1::some::test',
+                        in_tree = false,
+                        name = 'some test',
+                        lnum = 18,
+                        path = path,
+                        type = "test",
+                    },
+                },
+                {
+                    {
+                        id = path .. '::namespace::2::nested::namespace::2::-::2::some::test',
+                        in_tree = false,
+                        name = 'some test',
+                        lnum = 18,
+                        path = path,
+                        type = "test",
+                    },
+                },
             },
             {
                 {
@@ -77,64 +97,45 @@ return {
                     range = { 22, 16, 24, 20 },
                     type = "test",
                 },
-            },
-            -- Six new nodes have been added to the tree for the four
-            -- parametric tests and two for a normal test that is now
-            -- parametric since it is in a parametric namespace
-            {
                 {
-                    id = path .. '::namespace::2::nested::namespace::2::-::1::some::test',
-                    in_tree = false,
-                    -- name = '"some test"',
-                    lnum = 18,
-                    path = path,
-                    type = "test",
+                    {
+                        id = path .. '::namespace::2::nested::namespace::2::-::1::test::1',
+                        in_tree = false,
+                        name = "test 1",
+                        lnum = 23,
+                        path = path,
+                        type = "test",
+                    },
                 },
-            },
-            {
                 {
-                    id = path .. '::namespace::2::nested::namespace::2::-::2::some::test',
-                    in_tree = false,
-                    -- name = '"some test"',
-                    lnum = 18,
-                    path = path,
-                    type = "test",
+                    {
+                        id = path .. '::namespace::2::nested::namespace::2::-::1::test::2',
+                        in_tree = false,
+                        name = "test 2",
+                        lnum = 23,
+                        path = path,
+                        type = "test",
+                    },
                 },
-            },
-            {
                 {
-                    id = path .. '::namespace::2::nested::namespace::2::-::1::test::1',
-                    in_tree = false,
-                    lnum = 23,
-                    path = path,
-                    type = "test",
+                    {
+                        id = path .. '::namespace::2::nested::namespace::2::-::2::test::1',
+                        in_tree = false,
+                        name = "test 1",
+                        lnum = 23,
+                        path = path,
+                        type = "test",
+                    },
                 },
-            },
-            {
                 {
-                    id = path .. '::namespace::2::nested::namespace::2::-::1::test::2',
-                    in_tree = false,
-                    lnum = 23,
-                    path = path,
-                    type = "test",
-                },
-            },
-            {
-                {
-                    id = path .. '::namespace::2::nested::namespace::2::-::2::test::1',
-                    in_tree = false,
-                    lnum = 23,
-                    path = path,
-                    type = "test",
-                },
-            },
-            {
-                {
-                    id = path .. '::namespace::2::nested::namespace::2::-::2::test::2',
-                    in_tree = false,
-                    lnum = 23,
-                    path = path,
-                    type = "test",
+                    {
+                        id = path .. '::namespace::2::nested::namespace::2::-::2::test::2',
+                        in_tree = false,
+                        name = "test 2",
+                        lnum = 23,
+                        path = path,
+                        type = "test",
+                    },
                 },
             },
         },

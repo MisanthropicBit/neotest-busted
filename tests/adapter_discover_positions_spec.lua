@@ -21,7 +21,7 @@ describe("adapter.discover_positions", function()
     async.it("discovers test positions", function()
         local positions = adapter.discover_positions("./test_files/test1_spec.lua"):to_list()
 
-        local expected_tree = require("./test_files/expected_tree1")
+        local expected_tree = require("./test_files/expected_tree")
         assert.are.same(positions, expected_tree)
 
         ---@diagnostic disable-next-line: undefined-field
@@ -64,10 +64,10 @@ describe("adapter.discover_positions", function()
 
         config.configure({ parametric_test_discovery = true })
 
-        local positions = adapter.discover_positions(path):to_list()
+        local tree = adapter.discover_positions(path):to_list()
 
         local expected_tree = require("./test_files/expected_tree2")
-        assert.are.same(positions, expected_tree)
+        assert.are.same(tree, expected_tree)
 
         ---@diagnostic disable-next-line: undefined-field
         local cache = adapter.get_parametric_test_cache()
