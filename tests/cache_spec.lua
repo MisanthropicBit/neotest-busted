@@ -11,12 +11,20 @@ describe("Cache", function()
         cache:update("a", 1)
         cache:update("b", 2)
 
+        local keys = cache:keys()
+        table.sort(keys)
+        assert.are.same(keys, { "a", "b" })
+
         assert.are.same(cache:size(), 2)
         assert.are.same(cache:get("a"), 1)
         assert.are.same(cache:get("b"), 2)
         assert.is_nil(cache:get("c"))
 
         cache:update("a", 3)
+
+        keys = cache:keys()
+        table.sort(keys)
+        assert.are.same(keys, { "a", "b" })
 
         assert.are.same(cache:size(), 2)
         assert.are.same(cache:get("a"), 3)
@@ -29,6 +37,10 @@ describe("Cache", function()
             a = 1,
             b = 2,
         })
+
+        local keys = cache:keys()
+        table.sort(keys)
+        assert.are.same(keys, { "a", "b" })
 
         assert.are.same(cache:size(), 2)
         cache:clear()

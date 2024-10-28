@@ -28,6 +28,10 @@ function Cache:get(key)
     return self._cache[key]
 end
 
+function Cache:keys()
+    return vim.tbl_keys(self._cache)
+end
+
 function Cache:clear()
     self._cache = {}
 end
