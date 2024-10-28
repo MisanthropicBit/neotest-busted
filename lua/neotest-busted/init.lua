@@ -428,7 +428,7 @@ end
 ---@return boolean
 local function is_parametric_test(position)
     ---@diagnostic disable-next-line: undefined-field
-    return position.lnum
+    return position.lnum ~= nil
 end
 
 --- Extract test info from a position
@@ -459,7 +459,6 @@ local function generate_test_info_for_nodes(tree)
         table.insert(filters, "^" .. escape_test_pattern_filter(filter) .. "$")
     end
 
-    ---@diagnostic disable-next-line: undefined-field
     if is_parametric_test(position) then
         -- This is a parametric test. Running one directly like this can occur
         -- when it is run from the neotest summary after being added to the tree
