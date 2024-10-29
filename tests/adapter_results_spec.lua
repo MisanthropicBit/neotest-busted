@@ -146,22 +146,22 @@ describe("adapter.results", function()
         function()
             config.configure({ parametric_test_discovery = true })
 
-            -- Stub nio process functions since running `busted --list` appears to be broken
-            stub(
-                nio.process,
-                "run",
-                -- Fake process object
-                {
-                    stderr = {
-                        read = function()
-                            return table.concat(stderr_output, "\r\n"), nil
-                        end,
-                    },
-                    result = function()
-                        return 0
-                    end,
-                }
-            )
+            -- -- Stub nio process functions since running `busted --list` appears to be broken
+            -- stub(
+            --     nio.process,
+            --     "run",
+            --     -- Fake process object
+            --     {
+            --         stderr = {
+            --             read = function()
+            --                 return table.concat(stderr_output, "\r\n"), nil
+            --             end,
+            --         },
+            --         result = function()
+            --             return 0
+            --         end,
+            --     }
+            -- )
 
             -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so temporarily revert it
             ---@diagnostic disable-next-line: undefined-field
@@ -227,21 +227,21 @@ describe("adapter.results", function()
             config.configure({ parametric_test_discovery = true })
 
             -- Stub nio process functions since running `busted --list` appears to be broken
-            stub(
-                nio.process,
-                "run",
-                -- Fake process object
-                {
-                    stderr = {
-                        read = function()
-                            return table.concat(stderr_output, "\r\n"), nil
-                        end,
-                    },
-                    result = function()
-                        return 0
-                    end,
-                }
-            )
+            -- stub(
+            --     nio.process,
+            --     "run",
+            --     -- Fake process object
+            --     {
+            --         stderr = {
+            --             read = function()
+            --                 return table.concat(stderr_output, "\r\n"), nil
+            --             end,
+            --         },
+            --         result = function()
+            --             return 0
+            --         end,
+            --     }
+            -- )
 
             -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so temporarily revert it
             ---@diagnostic disable-next-line: undefined-field
@@ -341,21 +341,21 @@ describe("adapter.results", function()
             config.configure({ parametric_test_discovery = true })
 
             -- Stub nio process functions since running `busted --list` appears to be broken
-            stub(
-                nio.process,
-                "run",
-                -- Fake process object
-                {
-                    stderr = {
-                        read = function()
-                            return table.concat(stderr_output, "\r\n"), nil
-                        end,
-                    },
-                    result = function()
-                        return 0
-                    end,
-                }
-            )
+            -- stub(
+            --     nio.process,
+            --     "run",
+            --     -- Fake process object
+            --     {
+            --         stderr = {
+            --             read = function()
+            --                 return table.concat(stderr_output, "\r\n"), nil
+            --             end,
+            --         },
+            --         result = function()
+            --             return 0
+            --         end,
+            --     }
+            -- )
 
             -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so temporarily revert it
             ---@diagnostic disable-next-line: undefined-field
