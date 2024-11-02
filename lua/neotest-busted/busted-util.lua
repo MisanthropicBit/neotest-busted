@@ -21,7 +21,6 @@ local types = require("neotest.types")
 ---@return string?
 ---@return string?
 local function process_runtime_test_line(line)
-    vim.print(line)
     -- Splitting like this accounts for colons in test names
     local iter = vim.gsplit(line, ": ?")
 
@@ -86,6 +85,8 @@ local function get_runtime_test_info(tree)
     ---@type table<string, neotest-busted.RuntimeTestInfo>
     local tests = {}
     local ordered_pos_ids = {}
+
+    vim.print(vim.inspect(stderr))
 
     -- 'busted --list' output contains carriage returns
     for line in vim.gsplit(stderr, "\r\n", { plain = true, trimempty = true }) do
