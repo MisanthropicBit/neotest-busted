@@ -49,6 +49,7 @@ describe("adapter.build_spec", function()
     ---@param adapter neotest.Adapter
     ---@return neotest.Tree
     local function create_tree(adapter)
+        -- TODO: Why not just return the tree from discover_positions?
         local positions = adapter.discover_positions("./test_files/test1_spec.lua"):to_list()
 
         return Tree.from_list(positions, function(pos)
@@ -109,9 +110,9 @@ describe("adapter.build_spec", function()
             results_path = "test-output.json",
             position_id_mapping = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::7"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::18"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
+                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::8"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
             },
         })
     end)
@@ -159,7 +160,7 @@ describe("adapter.build_spec", function()
             results_path = "test-output.json",
             position_id_mapping = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::7"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
+                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::8"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
             },
         })
     end)
@@ -298,7 +299,7 @@ describe("adapter.build_spec", function()
         assert.are.same(spec.context, {
             results_path = "test-output.json",
             position_id_mapping = {
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
             },
         })
     end)
@@ -357,9 +358,9 @@ describe("adapter.build_spec", function()
             results_path = "test-output.json",
             position_id_mapping = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::7"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::14"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::18"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
+                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::8"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
             },
         })
 
