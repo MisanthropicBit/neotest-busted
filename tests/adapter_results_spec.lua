@@ -2,7 +2,6 @@ local async = require("neotest.async").tests
 local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local types = require("neotest.types")
-local nio = require("nio")
 local stub = require("luassert.stub")
 
 ---@type neotest.Adapter
@@ -11,7 +10,6 @@ local config = require("neotest-busted.config")
 
 -- TODO: Refactor
 describe("adapter.results", function()
-    local test_path = "/Users/user/vim/project/tests/test_spec.lua"
     local parametric_test_path = "./test_files/parametric_tests_spec.lua"
     local spec = {}
     local strategy_result = {
@@ -31,39 +29,14 @@ describe("adapter.results", function()
         parametric_test_path .. ":23: namespace 2 nested namespace 2 - 2 test 2",
     }
 
-    local test_json = table.concat(vim.fn.readfile("./test_files/busted_test_output.json"), "\n")
-
-    local function stub_nio_process_run()
-        stub(
-            nio.process,
-            "run",
-            -- Fake process object
-            {
-                stderr = {
-                    read = function()
-                        return table.concat(stderr_output, "\r\n"), nil
-                    end,
-                },
-                result = function()
-                    return 0
-                end,
-            }
-        )
-    end
-
     ---@param test_path string
     ---@param json_path string
     ---@return neotest.Tree
     local function discover_positions(test_path, json_path)
-        -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read so
-        -- temporarily revert it
-        ---@diagnostic disable-next-line: undefined-field
-        lib.files.read:revert()
-
         local tree = adapter.discover_positions(test_path)
-        local parametric_test_json = table.concat(vim.fn.readfile(json_path), "\n")
+        local test_json = table.concat(vim.fn.readfile(json_path), "\n")
 
-        stub(lib.files, "read", parametric_test_json)
+        stub(lib.files, "read", test_json)
 
         ---@cast tree -nil
         return tree
@@ -75,77 +48,67 @@ describe("adapter.results", function()
         spec = {
             context = {
                 results_path = "test_output.json",
-                position_id_mapping = {
-                    [test_path .. "::namespace tests a pending test::5"] = test_path
-                        .. '::"namespace"::"tests a pending test"',
-                    [test_path .. "::namespace tests a passing test::6"] = test_path
-                        .. '::"namespace"::"tests a passing test"',
-                    [test_path .. "::namespace tests a failing test::7"] = test_path
-                        .. '::"namespace"::"tests a failing test"',
-                    [test_path .. "::namespace tests an erroneous test::10"] = test_path
-                        .. '::"namespace"::"tests an erroneous test"',
-                },
-            },
+                position_id_mapping = {},
+            }
         }
 
         config.configure()
 
-        stub(lib.files, "read", test_json)
         stub(logger, "error")
     end)
 
     after_each(function()
         ---@diagnostic disable-next-line: undefined-field
-        lib.files.read:revert()
-
-        ---@diagnostic disable-next-line: undefined-field
         logger.error:revert()
     end)
 
     async.it("creates neotest results", function()
-        -- NOTE: neotest.lib.treesitter.parse_positions uses lib.file.read
-        ---@diagnostic disable-next-line: undefined-field
-        lib.files.read:revert()
-
         local path = "./test_files/test1_spec.lua"
-        local tree = adapter.discover_positions(path)
-        ---@cast tree -nil
+        local tree = discover_positions(path, "./test_files/busted_test_output.json")
 
-        stub(lib.files, "read", test_json)
+        spec.context.position_id_mapping = {
+            [path .. "::top-level namespace 1 nested namespace 1 test 1::3"] = path
+            .. '::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+            [path .. "::top-level namespace 1 nested namespace 1 test 2::8"] = path
+            .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
+            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = path
+            .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = path
+            .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
+        }
 
         local neotest_results = adapter.results(spec, strategy_result, tree)
 
-        -- TODO: Generate the actual results and put them in the json file
         assert.are.same(neotest_results, {
-            [test_path .. '::"namespace"::"tests a pending test"'] = {
+            [path .. '::"top-level namespace 1"::"nested namespace 1"::"test 1"'] = {
                 status = types.ResultStatus.skipped,
-                short = "namespace tests a pending test: skipped",
+                short = "top-level namespace 1 nested namespace 1 test 1: skipped",
                 output = strategy_result.output,
             },
-            [test_path .. '::"namespace"::"tests a passing test"'] = {
+            [path .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"'] = {
                 status = types.ResultStatus.passed,
-                short = "namespace tests a passing test: passed",
+                short = "top-level namespace 1 nested namespace 1 test 2: passed",
                 output = strategy_result.output,
             },
-            [test_path .. '::"namespace"::"tests a failing test"'] = {
+            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"'] = {
                 status = types.ResultStatus.failed,
-                short = "namespace tests a failing test: failed",
+                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3: failed",
                 output = strategy_result.output,
                 errors = {
                     {
-                        message = "Assert failed",
-                        line = 7,
+                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                        line = 15,
                     },
                 },
             },
-            [test_path .. '::"namespace"::"tests an erroneous test"'] = {
+            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"'] = {
                 status = types.ResultStatus.failed,
-                short = "namespace tests an erroneous test: failed",
+                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4: failed",
                 output = strategy_result.output,
                 errors = {
                     {
-                        message = "Oh noes",
-                        line = 11,
+                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                        line = 19,
                     },
                 },
             },
@@ -158,29 +121,15 @@ describe("adapter.results", function()
 
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
         assert.stub(logger.error).was_not_called()
+
+        ---@diagnostic disable-next-line: undefined-field
+        lib.files.read:revert()
     end)
 
     async.it(
         "creates neotest results for successful parametric tests and updates tree (test)",
         function()
             config.configure({ parametric_test_discovery = true })
-
-            -- -- Stub nio process functions since running `busted --list` appears to be broken
-            -- stub(
-            --     nio.process,
-            --     "run",
-            --     -- Fake process object
-            --     {
-            --         stderr = {
-            --             read = function()
-            --                 return table.concat(stderr_output, "\r\n"), nil
-            --             end,
-            --         },
-            --         result = function()
-            --             return 0
-            --         end,
-            --     }
-            -- )
 
             local path = parametric_test_path
             local tree =
@@ -226,6 +175,9 @@ describe("adapter.results", function()
 
             assert.stub(lib.files.read).was.called_with(spec.context.results_path)
             assert.stub(logger.error).was_not_called()
+
+            ---@diagnostic disable-next-line: undefined-field
+            lib.files.read:revert()
         end
     )
 
@@ -233,23 +185,6 @@ describe("adapter.results", function()
         "creates neotest results for successful parametric tests and updates tree (namespace)",
         function()
             config.configure({ parametric_test_discovery = true })
-
-            -- Stub nio process functions since running `busted --list` appears to be broken
-            -- stub(
-            --     nio.process,
-            --     "run",
-            --     -- Fake process object
-            --     {
-            --         stderr = {
-            --             read = function()
-            --                 return table.concat(stderr_output, "\r\n"), nil
-            --             end,
-            --         },
-            --         result = function()
-            --             return 0
-            --         end,
-            --     }
-            -- )
 
             local path = parametric_test_path
             local tree = discover_positions(
@@ -331,6 +266,9 @@ describe("adapter.results", function()
 
             assert.stub(lib.files.read).was.called_with(spec.context.results_path)
             assert.stub(logger.error).was_not_called()
+
+            ---@diagnostic disable-next-line: undefined-field
+            lib.files.read:revert()
         end
     )
 
@@ -432,6 +370,9 @@ describe("adapter.results", function()
 
             assert.stub(lib.files.read).was.called_with(spec.context.results_path)
             assert.stub(logger.error).was_not_called()
+
+            ---@diagnostic disable-next-line: undefined-field
+            lib.files.read:revert()
         end
     )
 
@@ -439,23 +380,6 @@ describe("adapter.results", function()
         "creates neotest results for failed parametric tests and updates tree (test)",
         function()
             config.configure({ parametric_test_discovery = true })
-
-            -- Stub nio process functions since running `busted --list` appears to be broken
-            stub(
-                nio.process,
-                "run",
-                -- Fake process object
-                {
-                    stderr = {
-                        read = function()
-                            return table.concat(stderr_output, "\r\n"), nil
-                        end,
-                    },
-                    result = function()
-                        return 0
-                    end,
-                }
-            )
 
             local path = "./test_files/parametric_tests_fail_spec.lua"
             local tree =
@@ -512,7 +436,8 @@ describe("adapter.results", function()
             assert.stub(lib.files.read).was.called_with(spec.context.results_path)
             assert.stub(logger.error).was_not_called()
 
-            nio.process.run:revert()
+            ---@diagnostic disable-next-line: undefined-field
+            lib.files.read:revert()
         end
     )
 
@@ -520,23 +445,6 @@ describe("adapter.results", function()
         "creates neotest results for failed parametric tests and updates tree (namespace)",
         function()
             config.configure({ parametric_test_discovery = true })
-
-            -- Stub nio process functions since running `busted --list` appears to be broken
-            stub(
-                nio.process,
-                "run",
-                -- Fake process object
-                {
-                    stderr = {
-                        read = function()
-                            return table.concat(stderr_output, "\r\n"), nil
-                        end,
-                    },
-                    result = function()
-                        return 0
-                    end,
-                }
-            )
 
             local path = "./test_files/parametric_tests_fail_spec.lua"
             local tree =
@@ -651,7 +559,8 @@ describe("adapter.results", function()
             assert.stub(lib.files.read).was.called_with(spec.context.results_path)
             assert.stub(logger.error).was_not_called()
 
-            nio.process.run:revert()
+            ---@diagnostic disable-next-line: undefined-field
+            lib.files.read:revert()
         end
     )
 
@@ -807,6 +716,9 @@ describe("adapter.results", function()
 
             assert.stub(lib.files.read).was.called_with(spec.context.results_path)
             assert.stub(logger.error).was_not_called()
+
+            ---@diagnostic disable-next-line: undefined-field
+            lib.files.read:revert()
         end
     )
 
@@ -833,12 +745,13 @@ describe("adapter.results", function()
             "Failed to read json test output file test_output.json with error: Could not read file",
             nil
         )
-        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
 
         ---@diagnostic disable-next-line: undefined-field
         vim.schedule:revert()
         ---@diagnostic disable-next-line: undefined-field
         vim.notify:revert()
+        ---@diagnostic disable-next-line: undefined-field
+        lib.files.read:revert()
     end)
 
     it("handles failure to decode json", function()
@@ -847,10 +760,11 @@ describe("adapter.results", function()
         end)
 
         stub(vim, "notify")
+        stub(lib.files, "read", '{"a".}')
 
-        stub(vim.json, "decode", function()
-            error("Expected value but found invalid token at character 1", 0)
-        end)
+        -- stub(vim.json, "decode", function()
+        --     error("Expected value but found invalid token at character 1", 0)
+        -- end)
 
         ---@diagnostic disable-next-line: missing-parameter
         local neotest_results = adapter.results(spec, strategy_result)
@@ -861,7 +775,7 @@ describe("adapter.results", function()
         assert.stub(vim.notify).was.called()
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
         assert.stub(logger.error).was.called_with(
-            "Failed to parse json test output file test_output.json with error: Expected value but found invalid token at character 1",
+            "Failed to parse json test output file test_output.json with error: Expected colon but found invalid token at character 5",
             nil
         )
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
@@ -871,7 +785,7 @@ describe("adapter.results", function()
         ---@diagnostic disable-next-line: undefined-field
         vim.notify:revert()
         ---@diagnostic disable-next-line: undefined-field
-        vim.json.decode:revert()
+        lib.files.read:revert()
     end)
 
     it("logs not finding a matching position id", function()
@@ -881,30 +795,50 @@ describe("adapter.results", function()
 
         stub(vim, "notify")
 
-        spec.context.position_id_mapping[test_path .. "::namespace tests a failing test::7"] = nil
+        stub(lib.files, "read", function()
+            return table.concat(vim.fn.readfile("./test_files/busted_test_output.json"), "\n")
+        end)
+
+        local path = "./test_files/test1_spec.lua"
+        -- spec.context.position_id_mapping[path .. "::namespace tests a failing test::7"] = nil
+
+        spec.context.position_id_mapping = {
+            [path .. "::top-level namespace 1 nested namespace 1 test 2::8"] = path
+            .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
+            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = path
+            .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = path
+            .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
+        }
 
         ---@diagnostic disable-next-line: missing-parameter
         local neotest_results = adapter.results(spec, strategy_result)
 
         assert.are.same(neotest_results, {
-            [test_path .. '::"namespace"::"tests a pending test"'] = {
-                status = types.ResultStatus.skipped,
-                short = "namespace tests a pending test: skipped",
-                output = strategy_result.output,
-            },
-            [test_path .. '::"namespace"::"tests a passing test"'] = {
+            [path .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"'] = {
                 status = types.ResultStatus.passed,
-                short = "namespace tests a passing test: passed",
+                short = "top-level namespace 1 nested namespace 1 test 2: passed",
                 output = strategy_result.output,
             },
-            [test_path .. '::"namespace"::"tests an erroneous test"'] = {
+            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"'] = {
                 status = types.ResultStatus.failed,
-                short = "namespace tests an erroneous test: failed",
+                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3: failed",
                 output = strategy_result.output,
                 errors = {
                     {
-                        message = "Oh noes",
-                        line = 11,
+                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                        line = 15,
+                    },
+                },
+            },
+            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"'] = {
+                status = types.ResultStatus.failed,
+                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4: failed",
+                output = strategy_result.output,
+                errors = {
+                    {
+                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                        line = 19,
                     },
                 },
             },
@@ -915,8 +849,8 @@ describe("adapter.results", function()
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
         assert.stub(logger.error).was.called_with(
             "Failed to find matching position id for key "
-                .. test_path
-                .. "::namespace tests a failing test::7",
+                .. path
+                .. "::top-level namespace 1 nested namespace 1 test 1::3",
             nil
         )
 
