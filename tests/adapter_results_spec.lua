@@ -49,7 +49,7 @@ describe("adapter.results", function()
             context = {
                 results_path = "test_output.json",
                 position_id_mapping = {},
-            }
+            },
         }
 
         config.configure()
@@ -68,13 +68,13 @@ describe("adapter.results", function()
 
         spec.context.position_id_mapping = {
             [path .. "::top-level namespace 1 nested namespace 1 test 1::3"] = path
-            .. '::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+                .. '::"top-level namespace 1"::"nested namespace 1"::"test 1"',
             [path .. "::top-level namespace 1 nested namespace 1 test 2::8"] = path
-            .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
+                .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
             [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = path
-            .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
             [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = path
-            .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
+                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
         }
 
         local neotest_results = adapter.results(spec, strategy_result, tree)
@@ -804,11 +804,11 @@ describe("adapter.results", function()
 
         spec.context.position_id_mapping = {
             [path .. "::top-level namespace 1 nested namespace 1 test 2::8"] = path
-            .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
+                .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
             [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = path
-            .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
+                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
             [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = path
-            .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
+                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
         }
 
         ---@diagnostic disable-next-line: missing-parameter
