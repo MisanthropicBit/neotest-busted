@@ -87,8 +87,6 @@ local function get_runtime_test_info(tree)
     local tests = {}
     local ordered_pos_ids = {}
 
-    vim.print(vim.inspect(stderr))
-
     -- 'busted --list' output contains carriage returns
     for line in vim.gsplit(stderr, "\r\n", { plain = true, trimempty = true }) do
         local lnum, rest = process_runtime_test_line(line)

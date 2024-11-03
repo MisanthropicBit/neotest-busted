@@ -1,7 +1,5 @@
 local async = require("neotest.async").tests
 local config = require("neotest-busted.config")
-local nio = require("nio")
-local stub = require("luassert.stub")
 
 ---@type neotest.Adapter
 local adapter = require("neotest-busted")()
@@ -32,35 +30,6 @@ describe("adapter.discover_positions", function()
 
     async.it("discovers parametric test positions", function()
         local path = "./test_files/parametric_tests_spec.lua"
-
-        local stderr_output = {
-            path .. ":4: namespace 1 nested namespace 1 test 1",
-            path .. ":4: namespace 1 nested namespace 1 test 2",
-            path .. ":9: namespace 1 nested namespace 1 test 3",
-            path .. ":18: namespace 2 nested namespace 2 - 1 some test",
-            path .. ":23: namespace 2 nested namespace 2 - 1 test 1",
-            path .. ":23: namespace 2 nested namespace 2 - 1 test 2",
-            path .. ":18: namespace 2 nested namespace 2 - 2 some test",
-            path .. ":23: namespace 2 nested namespace 2 - 2 test 1",
-            path .. ":23: namespace 2 nested namespace 2 - 2 test 2",
-        }
-
-        -- Stub nio process functions since running `busted --list` appears to be broken
-        stub(
-            nio.process,
-            "run",
-            -- Fake process object
-            {
-                stderr = {
-                    read = function()
-                        return table.concat(stderr_output, "\r\n"), nil
-                    end,
-                },
-                result = function()
-                    return 0
-                end,
-            }
-        )
 
         config.configure({ parametric_test_discovery = true })
 
@@ -165,7 +134,5 @@ describe("adapter.discover_positions", function()
                 type = "test",
             },
         })
-
-        nio.process.run:revert()
     end)
 end)

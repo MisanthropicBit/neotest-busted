@@ -52,7 +52,7 @@ describe("config", function()
                 error_message = "expected boolean, got number",
             },
             {
-                config = { local_luarocks_only = 1 },
+                config = { parametric_test_discovery = 1 },
                 error_message = "expected boolean, got number",
             },
         }

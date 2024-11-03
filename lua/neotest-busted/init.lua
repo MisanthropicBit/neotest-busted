@@ -236,7 +236,7 @@ function BustedNeotestAdapter.create_test_command(paths, options)
 
     if vim.tbl_islist(config.busted_args) then
         for _, busted_arg in ipairs(config.busted_args) do
-            local arg = _options.quote_strings and '"' .. busted_arg .. '"' or busted_arg
+            local arg = _options.quote_strings and quote_string(busted_arg) or busted_arg
 
             table.insert(arguments, arg)
         end
@@ -565,7 +565,7 @@ end
 ---@param output string
 ---@return string?
 ---@return neotest.Result
-local function test_result_to_neotest_result(status, test_result, output)
+local function convert_test_result_to_neotest_result(status, test_result, output)
     if test_result.isError == true then
         -- This is an internal error in busted, not a test that threw
         return nil, {
@@ -600,7 +600,7 @@ end
 ---@param position_id_mapping table<string, string>
 ---@return table<string, neotest.Result>
 ---@return table<string, string>
-local function convert_test_results_to_neotest(test_results_json, output, position_id_mapping)
+local function convert_test_results_to_neotest_results(test_results_json, output, position_id_mapping)
     local results = {}
     local pos_id_to_test_name = {}
 
@@ -613,7 +613,7 @@ local function convert_test_results_to_neotest(test_results_json, output, positi
     }
 
     for busted_result_key, test_results in pairs(test_results_json) do
-        if busted_result_key == "duration" then
+        if busted_result_key == BustedResultKey.duration then
             goto continue
         end
 
@@ -623,7 +623,7 @@ local function convert_test_results_to_neotest(test_results_json, output, positi
             ---@cast test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult
 
             local pos_id_key, result =
-                test_result_to_neotest_result(test_types[busted_result_key], test_result, output)
+                convert_test_result_to_neotest_result(test_types[busted_result_key], test_result, output)
             local pos_id = position_id_mapping[pos_id_key]
 
             if not pos_id then
@@ -726,7 +726,7 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     ---@cast test_results_json neotest-busted.BustedResultObject
 
-    local results, pos_id_to_test_name = convert_test_results_to_neotest(
+    local results, pos_id_to_test_name = convert_test_results_to_neotest_results(
         test_results_json,
         strategy_result.output,
         spec.context.position_id_mapping

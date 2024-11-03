@@ -31,6 +31,7 @@ local types = {}
 
 ---@enum neotest-busted.BustedResultKey
 types.BustedResultKey = {
+    duration = "duration",
     successes = "successes",
     pendings = "pendings",
     failures = "failures",

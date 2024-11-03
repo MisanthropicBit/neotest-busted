@@ -8,25 +8,11 @@ local stub = require("luassert.stub")
 local adapter = require("neotest-busted")()
 local config = require("neotest-busted.config")
 
--- TODO: Refactor
 describe("adapter.results", function()
     local parametric_test_path = "./test_files/parametric_tests_spec.lua"
     local spec = {}
     local strategy_result = {
         output = "test_console_output",
-    }
-
-    -- Output from `busted --list`
-    local stderr_output = {
-        parametric_test_path .. ":4: namespace 1 nested namespace 1 test 1",
-        parametric_test_path .. ":4: namespace 1 nested namespace 1 test 2",
-        parametric_test_path .. ":9: namespace 1 nested namespace 1 test 3",
-        parametric_test_path .. ":18: namespace 2 nested namespace 2 - 1 some test",
-        parametric_test_path .. ":23: namespace 2 nested namespace 2 - 1 test 1",
-        parametric_test_path .. ":23: namespace 2 nested namespace 2 - 1 test 2",
-        parametric_test_path .. ":18: namespace 2 nested namespace 2 - 2 some test",
-        parametric_test_path .. ":23: namespace 2 nested namespace 2 - 2 test 1",
-        parametric_test_path .. ":23: namespace 2 nested namespace 2 - 2 test 2",
     }
 
     ---@param test_path string
