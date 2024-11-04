@@ -600,7 +600,11 @@ end
 ---@param position_id_mapping table<string, string>
 ---@return table<string, neotest.Result>
 ---@return table<string, string>
-local function convert_test_results_to_neotest_results(test_results_json, output, position_id_mapping)
+local function convert_test_results_to_neotest_results(
+    test_results_json,
+    output,
+    position_id_mapping
+)
     local results = {}
     local pos_id_to_test_name = {}
 
@@ -622,8 +626,11 @@ local function convert_test_results_to_neotest_results(test_results_json, output
         for _, test_result in ipairs(test_results) do
             ---@cast test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult
 
-            local pos_id_key, result =
-                convert_test_result_to_neotest_result(test_types[busted_result_key], test_result, output)
+            local pos_id_key, result = convert_test_result_to_neotest_result(
+                test_types[busted_result_key],
+                test_result,
+                output
+            )
             local pos_id = position_id_mapping[pos_id_key]
 
             if not pos_id then
