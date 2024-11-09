@@ -1,32 +1,16 @@
+local Cache = require("neotest-busted.cache")
 local config = require("neotest-busted.config")
+local logging = require("neotest-busted.logging")
 local util = require("neotest-busted.util")
 
 local async = require("neotest.async")
 local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local types = require("neotest.types")
+local nb_types = require("neotest-busted.types")
 
-local log_methods = {
-    "debug",
-    "info",
-    "warn",
-    "error",
-}
-
----@param message string
----@param level 1 | 2 | 3 | 4
-local function log_and_notify(message, level)
-    local log_method = log_methods[level]
-
-    if not log_method then
-        return
-    end
-
-    vim.schedule(function()
-        logger[log_method](message)
-        vim.notify(message, level)
-    end)
-end
+local ResultStatus = types.ResultStatus
+local BustedResultKey = nb_types.BustedResultKey
 
 ---@type neotest.Adapter
 local BustedNeotestAdapter = { name = "neotest-busted" }
@@ -34,6 +18,7 @@ local BustedNeotestAdapter = { name = "neotest-busted" }
 --- Find busted command and additional paths
 ---@param ignore_local? boolean
 ---@return neotest-busted.BustedCommandConfig?
+---@diagnostic disable-next-line: inject-field
 function BustedNeotestAdapter.find_busted_command(ignore_local)
     if config.busted_command and #config.busted_command > 0 then
         logger.debug("Using busted command from config")
@@ -169,16 +154,15 @@ local function quote_string(string)
     return '"' .. string .. '"'
 end
 
----@param results_path string?
 ---@param paths string[]
----@param filters string[]
 ---@param options neotest-busted.TestCommandOptions?
 ---@return neotest-busted.TestCommandConfig?
-function BustedNeotestAdapter.create_test_command(results_path, paths, filters, options)
+---@diagnostic disable-next-line: inject-field
+function BustedNeotestAdapter.create_test_command(paths, options)
     local busted = BustedNeotestAdapter.find_busted_command()
 
     if not busted then
-        log_and_notify("Could not find busted executable", vim.log.levels.ERROR)
+        logging.error("Could not find a busted command")
         return
     end
 
@@ -225,7 +209,6 @@ function BustedNeotestAdapter.create_test_command(results_path, paths, filters, 
     local busted_command = {
         "-l",
         busted.command,
-        "--verbose",
     }
 
     if _options.busted_output_handler then
@@ -239,22 +222,24 @@ function BustedNeotestAdapter.create_test_command(results_path, paths, filters, 
             vim.list_extend(busted_command, _options.busted_output_handler_options)
         end
     else
-        if not results_path then
-            error("Results path expected but not set")
+        if _options.results_path then
+            vim.list_extend(busted_command, {
+                "--output",
+                get_reporter_path(),
+                "-Xoutput",
+                _options.results_path,
+            })
         end
-
-        vim.list_extend(busted_command, {
-            "--output",
-            get_reporter_path(),
-            "-Xoutput",
-            results_path,
-        })
     end
 
     vim.list_extend(arguments, busted_command)
 
     if vim.tbl_islist(config.busted_args) then
-        vim.list_extend(arguments, config.busted_args)
+        for _, busted_arg in ipairs(config.busted_args) do
+            local arg = _options.quote_strings and quote_string(busted_arg) or busted_arg
+
+            table.insert(arguments, arg)
+        end
     end
 
     if vim.tbl_islist(_options.busted_arguments) then
@@ -266,14 +251,14 @@ function BustedNeotestAdapter.create_test_command(results_path, paths, filters, 
     end
 
     -- Add test filters
-    for _, filter in ipairs(filters) do
-        local escaped_filter = escape_test_pattern_filter(filter)
+    for _, filter in ipairs(_options.filters or {}) do
+        local _filter = filter
 
         if _options.quote_strings then
-            escaped_filter = quote_string(escaped_filter)
+            _filter = quote_string(filter)
         end
 
-        vim.list_extend(arguments, { "--filter", escaped_filter })
+        vim.list_extend(arguments, { "--filter", _filter })
     end
 
     -- Add test files
@@ -298,12 +283,8 @@ end
 ---@return table?
 local function get_strategy_config(strategy, results_path, paths, filters)
     if strategy == "dap" then
-        vim.list_extend(paths, { "--helper", get_debug_start_script() }, 1)
-
         local test_command_info = BustedNeotestAdapter.create_test_command(
-            results_path,
             paths,
-            filters,
             -- NOTE: When run via dap, passing arguments such as the one for
             -- busted's '--filter' need to be escaped since the command is run
             -- using node's child_process.spawn with { shell: true } that will
@@ -313,11 +294,19 @@ local function get_strategy_config(strategy, results_path, paths, filters)
             -- On the other hand, we don't need to quote when running the integrated
             -- strategy (through vim.fn.jobstart) because it runs with command as a
             -- list which does not run through a shell
-            { quote_strings = true }
+            {
+                results_path = results_path,
+                filters = filters,
+                quote_strings = true,
+                busted_arguments = {
+                    "--helper",
+                    get_debug_start_script(),
+                },
+            }
         )
 
         if not test_command_info then
-            log_and_notify("Failed to construct test command for debugging", vim.log.levels.ERROR)
+            logging.error("Failed to construct test command for debugging")
             return nil
         end
 
@@ -362,6 +351,16 @@ function BustedNeotestAdapter.filter_dir(name)
     }, name)
 end
 
+local parametric_test_cache = Cache.new()
+
+--- Only use in testing
+---@package
+---@return neotest-busted.Cache
+---@diagnostic disable-next-line: inject-field
+function BustedNeotestAdapter.get_parametric_test_cache()
+    return parametric_test_cache
+end
+
 ---@async
 ---@return neotest.Tree | nil
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -388,10 +387,36 @@ function BustedNeotestAdapter.discover_positions(path)
     ) (#match? @func_name "^it$")) @test.definition
 ]]
 
-    return lib.treesitter.parse_positions(path, query, { nested_namespaces = true })
+    -- Lua-ls does not understand that neotest.lib.treesitter.ParseOptions
+    -- inherits from neotest.lib.positions.ParseOptions
+    ---@diagnostic disable-next-line: missing-fields
+    local tree = lib.treesitter.parse_positions(path, query, { nested_tests = true })
+
+    if config.parametric_test_discovery == true then
+        local busted_util = require("neotest-busted.busted-util")
+        local parametric_tests = busted_util.discover_parametric_tests(tree)
+
+        for id, tests in pairs(parametric_tests) do
+            parametric_test_cache:update(id, tests)
+        end
+    end
+
+    return tree
+end
+
+--- Create a unique key from a position to identify a test
+---@param position neotest.Position
+---@param stripped_pos_id string neotest position id stripped of "::"
+---@return string
+local function create_pos_id_key_from_position(position, stripped_pos_id)
+    ---@diagnostic disable-next-line: undefined-field
+    local lnum = position.range and position.range[1] + 1 or position.lnum
+
+    return ("%s::%s::%d"):format(position.path, stripped_pos_id, lnum)
 end
 
 --- Create a unique key to identify a test
+---@param path string
 ---@param stripped_pos_id string neotest position id stripped of "::"
 ---@param lnum_start integer
 ---@return string
@@ -399,59 +424,71 @@ local function create_pos_id_key(path, stripped_pos_id, lnum_start)
     return ("%s::%s::%d"):format(path, stripped_pos_id, lnum_start)
 end
 
+---@param position neotest.Position
+---@return boolean
+local function is_parametric_test(position)
+    ---@diagnostic disable-next-line: undefined-field
+    return position.lnum ~= nil
+end
+
 --- Extract test info from a position
 ---@param pos neotest.Position
 ---@return string
 ---@return string
----@return string
 local function extract_test_info(pos)
-    local parts = vim.split(pos.id, "::")
-    local path = parts[1]
-    local stripped_pos_id = table.concat(
-        vim.tbl_map(function(part)
-            return util.trim(part, '"')
-        end, vim.list_slice(parts, 2)),
-        " "
-    )
-
     -- Busted creates test names concatenated with spaces so we can't recreate the
     -- position id using "::". Instead create a key stripped of "::" like the one
-    -- from busted along with the test line range to uniquely identify the test
-    local pos_id_key = create_pos_id_key(path, stripped_pos_id, pos.range[1] + 1)
+    -- from busted along with the path and test range to uniquely identify the test
+    local _, stripped_pos_id = util.strip_position_id(pos.id)
 
-    return path, stripped_pos_id, pos_id_key
+    return stripped_pos_id, create_pos_id_key_from_position(pos, stripped_pos_id)
 end
 
 --- Generate test info for the nodes in a tree
 ---@param tree neotest.Tree
----@param gen_path_filters boolean
 ---@return string[]
 ---@return string[]
----@return table<string, string>
-local function generate_test_info_for_nodes(tree, gen_path_filters)
-    local paths = {}
+local function generate_test_info_for_nodes(tree)
     local filters = {}
-    local position_ids = {}
+    local position = tree:data()
+    local position_id_mapping = {}
+    local gen_filters = position.type ~= types.PositionType.file
 
-    for _, _tree in tree:iter_nodes() do
-        local _pos = _tree:data()
+    local function add_filter(filter)
+        -- Escape filters first so we can safely add regex start/end anchors
+        table.insert(filters, "^" .. escape_test_pattern_filter(filter) .. "$")
+    end
 
-        if _pos.type == "test" then
-            local path, filter, pos_id_key = extract_test_info(_pos)
+    if is_parametric_test(position) then
+        -- This is a parametric test. Running one directly like this can occur
+        -- when it is run from the neotest summary after being added to the tree
+        local filter, pos_id_key = extract_test_info(position)
+        add_filter(filter)
+        position_id_mapping[pos_id_key] = position.id
 
-            if gen_path_filters then
-                if not vim.tbl_contains(paths, path) then
-                    table.insert(paths, path)
+        return filters, position_id_mapping
+    end
+
+    for _, node in tree:iter_nodes() do
+        local pos = node:data()
+
+        if pos.type == types.PositionType.test then
+            local parametric_tests = parametric_test_cache:get(pos.id)
+            local tests = parametric_tests or { pos }
+
+            for _, test in ipairs(tests) do
+                local filter, pos_id_key = extract_test_info(test)
+
+                if gen_filters then
+                    add_filter(filter)
                 end
 
-                table.insert(filters, filter)
+                position_id_mapping[pos_id_key] = test.id
             end
-
-            position_ids[pos_id_key] = _pos.id
         end
     end
 
-    return paths, filters, position_ids
+    return filters, position_id_mapping
 end
 
 ---@param args neotest.RunArgs
@@ -464,26 +501,25 @@ function BustedNeotestAdapter.build_spec(args)
         return
     end
 
-    local pos = args.tree:data()
+    local pos = tree:data()
 
-    if pos.type == "dir" then
+    if pos.type == types.PositionType.dir then
         return
     end
 
     -- Iterate all tests in the tree and generate position ids for them
-    local is_file_pos = pos.type == "file"
-    local paths, filters, position_ids = generate_test_info_for_nodes(args.tree, not is_file_pos)
+    local filters, position_id_mapping = generate_test_info_for_nodes(tree)
 
-    if is_file_pos then
-        -- No need for filters when we are running the entire file
-        table.insert(paths, pos.id)
-    end
-
+    local paths = { pos.path }
     local results_path = async.fn.tempname() .. ".json"
-    local test_command = BustedNeotestAdapter.create_test_command(results_path, paths, filters)
+    local test_command = BustedNeotestAdapter.create_test_command(paths, {
+        results_path = results_path,
+        filters = filters,
+        busted_arguments = { "--verbose" },
+    })
 
     if not test_command then
-        log_and_notify("Could not find a busted executable", vim.log.levels.ERROR)
+        logging.error("Could not find a busted executable")
         return
     end
 
@@ -499,8 +535,7 @@ function BustedNeotestAdapter.build_spec(args)
         command = command,
         context = {
             results_path = results_path,
-            pos = pos,
-            position_ids = position_ids,
+            position_id_mapping = position_id_mapping,
         },
         strategy = get_strategy_config(args.strategy, results_path, paths, filters),
     }
@@ -525,11 +560,12 @@ local function create_error_info(test_result)
     return nil
 end
 
----@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
 ---@param status neotest.ResultStatus
+---@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
 ---@param output string
----@param is_error boolean
-local function test_result_to_neotest_result(test_result, status, output, is_error)
+---@return string?
+---@return neotest.Result
+local function convert_test_result_to_neotest_result(status, test_result, output)
     if test_result.isError == true then
         -- This is an internal error in busted, not a test that threw
         return nil, {
@@ -550,12 +586,117 @@ local function test_result_to_neotest_result(test_result, status, output, is_err
         output = output,
     }
 
-    if is_error then
+    if status == ResultStatus.failed then
         ---@cast test_result -neotest-busted.BustedErrorResult
         result.errors = create_error_info(test_result)
     end
 
     return pos_id, result
+end
+
+--- Convert busted test results to neotest test results
+---@param test_results_json neotest-busted.BustedResultObject
+---@param output string
+---@param position_id_mapping table<string, string>
+---@return table<string, neotest.Result>
+---@return table<string, string>
+local function convert_test_results_to_neotest_results(
+    test_results_json,
+    output,
+    position_id_mapping
+)
+    local results = {}
+    local pos_id_to_test_name = {}
+
+    ---@type table<neotest-busted.BustedResultKey, neotest.ResultStatus>
+    local test_types = {
+        [BustedResultKey.successes] = ResultStatus.passed,
+        [BustedResultKey.pendings] = ResultStatus.skipped,
+        [BustedResultKey.failures] = ResultStatus.failed,
+        [BustedResultKey.errors] = ResultStatus.failed,
+    }
+
+    for busted_result_key, test_results in pairs(test_results_json) do
+        if busted_result_key == BustedResultKey.duration then
+            goto continue
+        end
+
+        ---@cast busted_result_key neotest-busted.BustedResultKey
+
+        for _, test_result in ipairs(test_results) do
+            ---@cast test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult
+
+            local pos_id_key, result = convert_test_result_to_neotest_result(
+                test_types[busted_result_key],
+                test_result,
+                output
+            )
+            local pos_id = position_id_mapping[pos_id_key]
+
+            if not pos_id then
+                logging.error("Failed to find matching position id for key %s", nil, pos_id_key)
+            else
+                results[pos_id] = result
+                pos_id_to_test_name[pos_id] = test_result.element.name
+            end
+        end
+
+        ::continue::
+    end
+
+    return results, pos_id_to_test_name
+end
+
+--- Add any parametric tests that were run to the tree if they have not already been added
+---@param tree neotest.Tree
+---@param pos_id_to_test_name table<string, string>
+local function update_parametric_tests_in_tree(tree, pos_id_to_test_name)
+    local position = tree:data()
+    local parametric_test_map = {}
+    local cached_parametric_tests = parametric_test_cache:get(position.id)
+
+    if cached_parametric_tests then
+        parametric_test_map[position.id] = cached_parametric_tests
+    else
+        -- We did not find anything in the cache which can happen when a
+        -- namespace (describe) or file test was run as we only cache per test
+        -- position
+        for _, node in tree:iter_nodes() do
+            local pos = node:data()
+
+            if pos.type == types.PositionType.test then
+                local cache_result = parametric_test_cache:get(pos.id)
+
+                if cache_result then
+                    parametric_test_map[pos.id] = cache_result
+                end
+            end
+        end
+    end
+
+    if vim.tbl_count(parametric_test_map) > 0 then
+        -- Iterate all parametric tests and add them as range-less (range = nil) children
+        -- of the unexpanded test if not already in the tree
+        --
+        -- https://github.com/nvim-neotest/neotest/pull/172
+        for orig_pos_id, parametric_tests in pairs(parametric_test_map) do
+            for _, parametric_test in ipairs(parametric_tests) do
+                local pos_id = parametric_test.id
+
+                if not tree:get_key(pos_id) then
+                    parametric_test.name = pos_id_to_test_name[pos_id]
+
+                    -- WARNING: The following code relies on neotest internals
+
+                    ---@diagnostic disable-next-line: invisible
+                    local new_tree = types.Tree:new(parametric_test, {}, tree._key, nil, nil)
+
+                    ---@diagnostic disable-next-line: invisible
+                    tree:get_key(orig_pos_id):add_child(pos_id, new_tree)
+                end
+            end
+        end
+    end
 end
 
 ---@async
@@ -564,64 +705,59 @@ end
 ---@param tree neotest.Tree
 ---@diagnostic disable-next-line: duplicate-set-field, unused-local
 function BustedNeotestAdapter.results(spec, strategy_result, tree)
-    -- TODO: Use an output stream instead if possible
     local results_path = spec.context.results_path
     local ok, data = pcall(lib.files.read, results_path)
 
     if not ok then
-        log_and_notify(
-            ("Failed to read json test output file %s with error: %s"):format(results_path, data),
-            vim.log.levels.ERROR
+        logging.error(
+            "Failed to read json test output file %s with error: %s",
+            nil,
+            results_path,
+            data
         )
         return {}
     end
 
     ---@diagnostic disable-next-line: cast-local-type
-    local json_ok, parsed = pcall(vim.json.decode, data, { luanil = { object = true } })
+    local json_ok, test_results_json = pcall(vim.json.decode, data, { luanil = { object = true } })
 
     if not json_ok then
-        log_and_notify(
-            ("Failed to parse json test output file %s with error: %s"):format(results_path, parsed),
-            vim.log.levels.ERROR
+        logging.error(
+            "Failed to parse json test output file %s with error: %s",
+            nil,
+            results_path,
+            test_results_json
         )
         return {}
     end
 
-    ---@type neotest-busted.BustedResultObject
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    local test_results = parsed
+    ---@cast test_results_json neotest-busted.BustedResultObject
 
-    local results = {}
-    local output = strategy_result.output
-    local position_ids = spec.context.position_ids
+    local results, pos_id_to_test_name = convert_test_results_to_neotest_results(
+        test_results_json,
+        strategy_result.output,
+        spec.context.position_id_mapping
+    )
 
-    ---@type { [1]: string, [2]: neotest.ResultStatus, [3]: boolean }[]
-    local test_types = {
-        { "successes", types.ResultStatus.passed, false },
-        { "pendings", types.ResultStatus.skipped, false },
-        { "failures", types.ResultStatus.failed, true },
-        { "errors", types.ResultStatus.failed, true },
-    }
+    if config.parametric_test_discovery == true then
+        update_parametric_tests_in_tree(tree, pos_id_to_test_name)
 
-    for _, test_type in ipairs(test_types) do
-        local test_key, result_status, is_error = test_type[1], test_type[2], test_type[3]
+        local status = ResultStatus.passed
 
-        ---@cast test_results neotest-busted.BustedResultObject
-        for _, value in pairs(test_results[test_key]) do
-            local pos_id_key, result =
-                test_result_to_neotest_result(value, result_status, output, is_error)
-
-            local pos_id = position_ids[pos_id_key]
-
-            if not pos_id then
-                log_and_notify(
-                    ("Failed to find matching position id for key %s"):format(pos_id_key),
-                    vim.log.levels.ERROR
-                )
-            else
-                results[position_ids[pos_id_key]] = result
+        -- Aggregate result status and create a fake result for the target position
+        for _, result in pairs(results) do
+            if result.status ~= ResultStatus.passed then
+                status = result.status
             end
         end
+
+        local position = tree:data()
+
+        results[position.id] = {
+            status = status,
+            short = ("%s: %s"):format(position.name, status),
+            output = strategy_result.output,
+        }
     end
 
     return results
@@ -629,6 +765,7 @@ end
 
 setmetatable(BustedNeotestAdapter, {
     ---@param user_config neotest-busted.Config?
+    ---@return neotest.Adapter
     __call = function(_, user_config)
         config.configure(user_config)
 

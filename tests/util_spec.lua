@@ -2,12 +2,13 @@ local util = require("neotest-busted.util")
 local lib = require("neotest.lib")
 
 describe("util", function()
-    describe("trim", function()
-        it("trims string", function()
-            assert.are.same(util.trim('"this will be trimmed"', '"'), "this will be trimmed")
+    describe("trim_quotes", function()
+        it("trims quotes", function()
+            assert.are.same(util.trim_quotes('"this will be trimmed"'), "this will be trimmed")
+
             assert.are.same(
-                util.trim('"this will not be trimmed"', "-"),
-                '"this will not be trimmed"'
+                util.trim_quotes("this will not be trimmed"),
+                "this will not be trimmed"
             )
         end)
     end)
@@ -24,9 +25,12 @@ describe("util", function()
 
             assert.are.same(util.glob(path), {
                 "lua/neotest-busted/async.lua",
+                "lua/neotest-busted/busted-util.lua",
+                "lua/neotest-busted/cache.lua",
                 "lua/neotest-busted/config.lua",
                 "lua/neotest-busted/health.lua",
                 "lua/neotest-busted/init.lua",
+                "lua/neotest-busted/logging.lua",
                 "lua/neotest-busted/output_handler.lua",
                 "lua/neotest-busted/start_debug.lua",
                 "lua/neotest-busted/types.lua",
@@ -49,6 +53,36 @@ describe("util", function()
             ---@diagnostic disable-next-line: param-type-mismatch
             assert.are.same(util.create_package_path_argument("package.path", nil), {})
             assert.are.same(util.create_package_path_argument("package.path", {}), {})
+        end)
+    end)
+
+    describe("split_position_id", function()
+        it("splits position id", function()
+            local parts = util.split_position_id('some/path::"describe"::"test"')
+
+            assert.are.same(parts, {
+                "some/path",
+                '"describe"',
+                '"test"',
+            })
+        end)
+    end)
+
+    describe("strip_position_id", function()
+        local position_id = 'some/path::"describe"::"test"'
+
+        it("strips position id with default concat", function()
+            local path, parts = util.strip_position_id(position_id)
+
+            assert.are.same(path, "some/path")
+            assert.are.same(parts, "describe test")
+        end)
+
+        it("strips position id with custom concat", function()
+            local path, parts = util.strip_position_id(position_id, "::")
+
+            assert.are.same(path, "some/path")
+            assert.are.same(parts, "describe::test")
         end)
     end)
 end)

@@ -1,0 +1,70 @@
+{
+    "duration": 0.0018740000668913,
+    "errors": [],
+    "failures": [
+        {
+            "element": {
+                "attributes": [],
+                "descriptor": "it",
+                "name": "test 1",
+                "starttick": 1288528.917024,
+                "starttime": 1730227660.4828,
+                "trace": {
+                    "currentline": 4,
+                    "lastlinedefined": 12,
+                    "linedefined": 2,
+                    "message": "test 1",
+                    "short_src": "./test_files/parametric_tests_fail_spec.lua",
+                    "source": "@./test_files/parametric_tests_fail_spec.lua",
+                    "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_fail_spec.lua:4: in function <./test_files/parametric_tests_fail_spec.lua:2>\n",
+                    "what": "Lua"
+                }
+            },
+            "message": "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+            "name": "namespace 1 nested namespace 1 test 1",
+            "trace": {
+                "currentline": 5,
+                "lastlinedefined": 6,
+                "linedefined": 4,
+                "message": "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                "short_src": "./test_files/parametric_tests_fail_spec.lua",
+                "source": "@./test_files/parametric_tests_fail_spec.lua",
+                "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_fail_spec.lua:5: in function <./test_files/parametric_tests_fail_spec.lua:4>\n",
+                "what": "Lua"
+            }
+        },
+        {
+            "element": {
+                "attributes": [],
+                "descriptor": "it",
+                "name": "test 2",
+                "starttick": 1288528.917272,
+                "starttime": 1730227660.483,
+                "trace": {
+                    "currentline": 4,
+                    "lastlinedefined": 12,
+                    "linedefined": 2,
+                    "message": "test 2",
+                    "short_src": "./test_files/parametric_tests_fail_spec.lua",
+                    "source": "@./test_files/parametric_tests_fail_spec.lua",
+                    "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_fail_spec.lua:4: in function <./test_files/parametric_tests_fail_spec.lua:2>\n",
+                    "what": "Lua"
+                }
+            },
+            "message": "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+            "name": "namespace 1 nested namespace 1 test 2",
+            "trace": {
+                "currentline": 5,
+                "lastlinedefined": 6,
+                "linedefined": 4,
+                "message": "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                "short_src": "./test_files/parametric_tests_fail_spec.lua",
+                "source": "@./test_files/parametric_tests_fail_spec.lua",
+                "traceback": "\nstack traceback:\n\t./test_files/parametric_tests_fail_spec.lua:5: in function <./test_files/parametric_tests_fail_spec.lua:4>\n",
+                "what": "Lua"
+            }
+        }
+    ],
+    "pendings": [],
+    "successes": []
+}

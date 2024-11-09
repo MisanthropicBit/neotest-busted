@@ -1,0 +1,138 @@
+{
+    "duration": 0.0015640000347048,
+    "errors": [],
+    "failures": [
+        {
+            "element": {
+                "attributes": [],
+                "descriptor": "it",
+                "name": "test 3",
+                "starttick": 1426717.279334,
+                "starttime": 1730365847.9335,
+                "trace": {
+                    "currentline": 15,
+                    "lastlinedefined": 22,
+                    "linedefined": 14,
+                    "message": "test 3",
+                    "short_src": "./test_files/test1_spec.lua",
+                    "source": "@./test_files/test1_spec.lua",
+                    "traceback": "\nstack traceback:\n\t...rojects/vim/neotest-busted/test_files/test1_spec.lua:15: in function <...rojects/vim/neotest-busted/test_files/test1_spec.lua:14>\n",
+                    "what": "Lua"
+                }
+            },
+            "message": "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+            "name": "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3",
+            "trace": {
+                "currentline": 16,
+                "lastlinedefined": 17,
+                "linedefined": 15,
+                "message": "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                "short_src": "./test_files/test1_spec.lua",
+                "source": "@./test_files/test1_spec.lua",
+                "traceback": "\nstack traceback:\n\t...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: in function <...rojects/vim/neotest-busted/test_files/test1_spec.lua:15>\n",
+                "what": "Lua"
+            }
+        },
+        {
+            "element": {
+                "attributes": [],
+                "descriptor": "it",
+                "name": "test 4",
+                "starttick": 1426717.279505,
+                "starttime": 1730365847.9337,
+                "trace": {
+                    "currentline": 19,
+                    "lastlinedefined": 22,
+                    "linedefined": 14,
+                    "message": "test 4",
+                    "short_src": "./test_files/test1_spec.lua",
+                    "source": "@./test_files/test1_spec.lua",
+                    "traceback": "\nstack traceback:\n\t...rojects/vim/neotest-busted/test_files/test1_spec.lua:19: in function <...rojects/vim/neotest-busted/test_files/test1_spec.lua:14>\n",
+                    "what": "Lua"
+                }
+            },
+            "message": "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+            "name": "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4",
+            "trace": {
+                "currentline": 20,
+                "lastlinedefined": 21,
+                "linedefined": 19,
+                "message": "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                "short_src": "./test_files/test1_spec.lua",
+                "source": "@./test_files/test1_spec.lua",
+                "traceback": "\nstack traceback:\n\t...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: in function <...rojects/vim/neotest-busted/test_files/test1_spec.lua:19>\n",
+                "what": "Lua"
+            }
+        }
+    ],
+    "pendings": [
+        {
+            "element": {
+                "attributes": [],
+                "descriptor": "it",
+                "duration": 9.2000002041459e-05,
+                "endtick": 1426717.27905,
+                "endtime": 1730365847.9332,
+                "name": "test 1",
+                "starttick": 1426717.278958,
+                "starttime": 1730365847.9331,
+                "trace": {
+                    "currentline": 3,
+                    "lastlinedefined": 11,
+                    "linedefined": 2,
+                    "message": "test 1",
+                    "short_src": "./test_files/test1_spec.lua",
+                    "source": "@./test_files/test1_spec.lua",
+                    "traceback": "\nstack traceback:\n\t...rojects/vim/neotest-busted/test_files/test1_spec.lua:3: in function <...rojects/vim/neotest-busted/test_files/test1_spec.lua:2>\n",
+                    "what": "Lua"
+                }
+            },
+            "message": "...rojects/vim/neotest-busted/test_files/test1_spec.lua:4: {\n}",
+            "name": "top-level namespace 1 nested namespace 1 test 1",
+            "trace": {
+                "currentline": 4,
+                "lastlinedefined": 6,
+                "linedefined": 3,
+                "short_src": "./test_files/test1_spec.lua",
+                "source": "@./test_files/test1_spec.lua",
+                "traceback": "\nstack traceback:\n\t...rojects/vim/neotest-busted/test_files/test1_spec.lua:4: in function <...rojects/vim/neotest-busted/test_files/test1_spec.lua:3>\n",
+                "what": "Lua"
+            }
+        }
+    ],
+    "successes": [
+        {
+            "element": {
+                "attributes": [],
+                "descriptor": "it",
+                "duration": 3.4000026062131e-05,
+                "endtick": 1426717.279141,
+                "endtime": 1730365847.9333,
+                "name": "test 2",
+                "starttick": 1426717.279107,
+                "starttime": 1730365847.9333,
+                "trace": {
+                    "currentline": 8,
+                    "lastlinedefined": 11,
+                    "linedefined": 2,
+                    "message": "test 2",
+                    "short_src": "./test_files/test1_spec.lua",
+                    "source": "@./test_files/test1_spec.lua",
+                    "traceback": "\nstack traceback:\n\t...rojects/vim/neotest-busted/test_files/test1_spec.lua:8: in function <...rojects/vim/neotest-busted/test_files/test1_spec.lua:2>\n",
+                    "what": "Lua"
+                }
+            },
+            "name": "top-level namespace 1 nested namespace 1 test 2",
+            "trace": {
+                "currentline": 8,
+                "lastlinedefined": 11,
+                "linedefined": 2,
+                "message": "test 2",
+                "short_src": "./test_files/test1_spec.lua",
+                "source": "@./test_files/test1_spec.lua",
+                "traceback": "\nstack traceback:\n\t...rojects/vim/neotest-busted/test_files/test1_spec.lua:8: in function <...rojects/vim/neotest-busted/test_files/test1_spec.lua:2>\n",
+                "what": "Lua"
+            }
+        }
+    ]
+}
