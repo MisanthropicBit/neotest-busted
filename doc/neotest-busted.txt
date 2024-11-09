@@ -6,9 +6,10 @@ Table of Contents                           *neotest-busted-table-of-contents*
   - Requirements                                 |neotest-busted-requirements|
   - Configuration                               |neotest-busted-configuration|
   - Defining tests                             |neotest-busted-defining-tests|
+  - Parametric tests                         |neotest-busted-parametric-tests|
+  - Debugging tests                           |neotest-busted-debugging-tests|
   - Luarocks and Busted                   |neotest-busted-luarocks-and-busted|
   - Running from the command line|neotest-busted-running-from-the-command-line|
-  - Debugging tests                           |neotest-busted-debugging-tests|
   - FAQ                                                   |neotest-busted-faq|
   - Inspiration                                   |neotest-busted-inspiration|
 
@@ -45,6 +46,8 @@ Setup with neotest. Leave values as `nil` to leave them unspecified.
                 -- true, installations in $HOME and global installations will be
                 -- ignored. Useful for isolating the test environment
                 local_luarocks_only = true,
+                -- Find parametric tests
+                parametric_test_discovery = false,
             }),
         },
     })
@@ -93,6 +96,43 @@ The `async` function takes an optional second timeout argument in milliseconds.
 If omitted, uses the numerical value of either the
 `NEOTEST_BUSTED_ASYNC_TEST_TIMEOUT` or `PLENARY_TEST_TIMEOUT` environment
 variables or a default timeout of 2000 milliseconds.
+
+
+PARAMETRIC TESTS                             *neotest-busted-parametric-tests*
+
+
+  [!IMPORTANT] Supporting parametric tests requires extra computation to discover
+  them so support is disabled by default. You need to set
+  `parametric_test_discovery` to `true` if you want neotest-busted to find
+  parametric tests.
+`neotest-busted` supports parametric tests that are generated at runtime as
+opposed to being defined entirely at source-level as shown below.
+`describe`’s can also be parametric and are also supported.
+
+Due to technical limitations, parametric tests won’t be shown in the neotest
+summary until they have been run.
+
+>lua
+    describe("parametric tests", function()
+        for i = 1, 3 do
+            it(("test %d"):format(i), function()
+                assert.are.same(i, i)
+            end)
+        end
+    end)
+<
+
+
+DEBUGGING TESTS                               *neotest-busted-debugging-tests*
+
+`neotest-busted` has support for debugging tests via
+`local-lua-debugger-vscode`
+<https://github.com/tomblind/local-lua-debugger-vscode> which can be set up via
+`nvim-dap`
+<https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#lua>.
+Once set up, you can set a breakpoint and run the test with the `dap` strategy.
+Please refer to the `neotest` <https://github.com/nvim-neotest/neotest>
+documentation for more information.
 
 
 LUAROCKS AND BUSTED                       *neotest-busted-luarocks-and-busted*
@@ -175,18 +215,6 @@ the `"integration"` task in a test file:
 >lua
     require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integration" } })
 <
-
-
-DEBUGGING TESTS                               *neotest-busted-debugging-tests*
-
-`neotest-busted` has support for debugging tests via
-`local-lua-debugger-vscode`
-<https://github.com/tomblind/local-lua-debugger-vscode> which can be set up via
-`nvim-dap`
-<https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#lua>.
-Once set up, you can set a breakpoint and run the test with the `dap` strategy.
-Please refer to the `neotest` <https://github.com/nvim-neotest/neotest>
-documentation for more information.
 
 
 FAQ                                                       *neotest-busted-faq*
