@@ -27,6 +27,7 @@ describe("util", function()
                 "lua/neotest-busted/async.lua",
                 "lua/neotest-busted/busted-util.lua",
                 "lua/neotest-busted/cache.lua",
+                "lua/neotest-busted/compat.lua",
                 "lua/neotest-busted/config.lua",
                 "lua/neotest-busted/health.lua",
                 "lua/neotest-busted/init.lua",
