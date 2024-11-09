@@ -1,5 +1,7 @@
 local config = {}
 
+local compat = require("neotest-busted.compat")
+
 ---@type neotest-busted.Config
 local default_config = {
     busted_command = nil,
@@ -27,7 +29,7 @@ local function is_optional_string_list(value)
         return true
     end
 
-    if not vim.tbl_islist(value) then
+    if not compat.tbl_islist(value) then
         return false, "must be a list-like table"
     end
 

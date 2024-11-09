@@ -1,4 +1,5 @@
 local Cache = require("neotest-busted.cache")
+local compat = require("neotest-busted.compat")
 local config = require("neotest-busted.config")
 local logging = require("neotest-busted.logging")
 local util = require("neotest-busted.util")
@@ -181,11 +182,11 @@ function BustedNeotestAdapter.create_test_command(paths, options)
 
     -- TODO: Should paths be quoted? Try seeing if a path with a space works
     -- Append custom paths from config
-    if vim.tbl_islist(config.busted_paths) then
+    if compat.tbl_islist(config.busted_paths) then
         vim.list_extend(lua_paths, config.busted_paths)
     end
 
-    if vim.tbl_islist(config.busted_cpaths) then
+    if compat.tbl_islist(config.busted_cpaths) then
         vim.list_extend(lua_cpaths, config.busted_cpaths)
     end
 
@@ -234,7 +235,7 @@ function BustedNeotestAdapter.create_test_command(paths, options)
 
     vim.list_extend(arguments, busted_command)
 
-    if vim.tbl_islist(config.busted_args) then
+    if compat.tbl_islist(config.busted_args) then
         for _, busted_arg in ipairs(config.busted_args) do
             local arg = _options.quote_strings and quote_string(busted_arg) or busted_arg
 
@@ -242,7 +243,7 @@ function BustedNeotestAdapter.create_test_command(paths, options)
         end
     end
 
-    if vim.tbl_islist(_options.busted_arguments) then
+    if compat.tbl_islist(_options.busted_arguments) then
         for _, busted_arg in ipairs(_options.busted_arguments) do
             local arg = _options.quote_strings and quote_string(busted_arg) or busted_arg
 
@@ -269,7 +270,8 @@ function BustedNeotestAdapter.create_test_command(paths, options)
     end
 
     return {
-        nvim_command = vim.loop.exepath(),
+        ---@diagnostic disable-next-line: undefined-field
+        nvim_command = compat.loop.exepath(),
         arguments = arguments,
         paths = lua_paths,
         cpaths = lua_cpaths,
@@ -527,7 +529,7 @@ function BustedNeotestAdapter.build_spec(args)
     local command = vim.list_extend({ test_command.nvim_command }, test_command.arguments)
 
     -- Extra arguments for busted
-    if vim.tbl_islist(args.extra_args) then
+    if compat.tbl_islist(args.extra_args) then
         vim.list_extend(command, args.extra_args)
     end
 
