@@ -42,6 +42,7 @@ neovim as the lua interpreter.
 - [Debugging tests](#debugging-tests)
 - [Luarocks and Busted](#luarocks-and-busted)
 - [Running from the command line](#running-from-the-command-line)
+- [Contributing](#contributing)
 - [FAQ](#faq)
 
 <!-- panvimdoc-ignore-end -->
@@ -229,6 +230,10 @@ the `"integration"` task in a test file:
 ```lua
 require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integration" } })
 ```
+
+## Contributing
+
+Thanks for considering to contribute. Please see the instructions [here](/CONTRIBUTING.md).
 
 ## FAQ
 
