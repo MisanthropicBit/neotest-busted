@@ -10,6 +10,7 @@ Table of Contents                           *neotest-busted-table-of-contents*
   - Debugging tests                           |neotest-busted-debugging-tests|
   - Luarocks and Busted                   |neotest-busted-luarocks-and-busted|
   - Running from the command line|neotest-busted-running-from-the-command-line|
+  - Contributing                                 |neotest-busted-contributing|
   - FAQ                                                   |neotest-busted-faq|
   - Inspiration                                   |neotest-busted-inspiration|
 
@@ -215,6 +216,12 @@ the `"integration"` task in a test file:
 >lua
     require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integration" } })
 <
+
+
+CONTRIBUTING                                     *neotest-busted-contributing*
+
+Thanks for considering to contribute. Please see the instructions here
+</CONTRIBUTING.md>.
 
 
 FAQ                                                       *neotest-busted-faq*
