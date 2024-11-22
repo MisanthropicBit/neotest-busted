@@ -16,7 +16,11 @@ local function log(level, context, message, ...)
     local args = { ... }
 
     vim.schedule(function()
-        local formatted_message = message:format(unpack(args))
+        local formatted_message = message
+
+        if #args > 0 then
+            formatted_message = message:format(unpack(args))
+        end
 
         logger[level](formatted_message, context)
         vim.notify(formatted_message, vim.log.levels[level:upper()])
