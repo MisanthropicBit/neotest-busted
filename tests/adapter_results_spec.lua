@@ -112,6 +112,44 @@ describe("adapter.results", function()
         lib.files.read:revert()
     end)
 
+    async.it("creates neotest results with single and literal quotes", function()
+        local path = "./test_files/quotes_spec.lua"
+        local tree = discover_positions(path, "./test_files/quotes_spec.json")
+
+        spec.context.position_id_mapping = {
+            [path .. "::quotes single quotes test::2"] = path
+                .. "::\"quotes\"::'single quotes test'",
+            [path .. "::quotes literal quotes test::6"] = path
+                .. '::"quotes"::[[literal quotes test]]',
+        }
+
+        local neotest_results = adapter.results(spec, strategy_result, tree)
+
+        assert.are.same(neotest_results, {
+            [path .. "::\"quotes\"::'single quotes test'"] = {
+                status = types.ResultStatus.passed,
+                short = "quotes single quotes test: passed",
+                output = strategy_result.output,
+            },
+            [path .. '::"quotes"::[[literal quotes test]]'] = {
+                status = types.ResultStatus.passed,
+                short = "quotes literal quotes test: passed",
+                output = strategy_result.output,
+            },
+        })
+
+        local expected_tree = require("./test_files/quotes_expected_tree")
+
+        -- Tree remains unchanged
+        assert.are.same(tree:to_list(), expected_tree)
+
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was_not_called()
+
+        ---@diagnostic disable-next-line: undefined-field
+        lib.files.read:revert()
+    end)
+
     async.it(
         "creates neotest results for successful parametric tests and updates tree (test)",
         function()
