@@ -5,6 +5,10 @@ describe("util", function()
     describe("trim_quotes", function()
         it("trims quotes", function()
             assert.are.same(util.trim_quotes('"this will be trimmed"'), "this will be trimmed")
+            assert.are.same(
+                util.trim_quotes("\"'[[this will be trimmed]]'\""),
+                "this will be trimmed"
+            )
 
             assert.are.same(
                 util.trim_quotes("this will not be trimmed"),
