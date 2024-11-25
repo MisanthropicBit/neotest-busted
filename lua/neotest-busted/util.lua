@@ -6,7 +6,7 @@ local lib = require("neotest.lib")
 ---@param value string
 ---@return string
 function util.trim_quotes(value)
-    return vim.fn.trim(value, '"')
+    return vim.fn.trim(value, [["']])
 end
 
 ---@param ... string
