@@ -268,7 +268,6 @@ function BustedNeotestAdapter.create_test_command(paths, options)
     else
         vim.list_extend(arguments, paths)
     end
-
     return {
         ---@diagnostic disable-next-line: undefined-field
         nvim_command = compat.loop.exepath(),
@@ -379,6 +378,12 @@ function BustedNeotestAdapter.discover_positions(path)
         name: (identifier) @func_name
         arguments: (arguments (_) @test.name (function_definition))
     ) (#match? @func_name "^it$")) @test.definition
+
+    ;; pending blocks
+    ((function_call
+        name: (identifier) @func_name
+        arguments: (arguments (_) @test.name (function_definition))
+    ) (#match? @func_name "^pending$")) @test.definition
 
     ;; custom async blocks
     ((function_call

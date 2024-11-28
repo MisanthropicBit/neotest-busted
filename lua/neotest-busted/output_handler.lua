@@ -51,6 +51,10 @@ return function(options)
             os.exit(1)
         end
 
+        for _, test in ipairs(handler.pendings) do
+            test.element.attributes.default_fn = nil -- functions cannot be encoded into json
+        end
+
         local test_results = {
             pendings = handler.pendings,
             successes = handler.successes,
@@ -59,7 +63,15 @@ return function(options)
             duration = handler.getDuration(),
         }
 
-        local ok, result = pcall(json.encode, test_results)
+        local ok, result = pcall(json.encode, test_results, {
+            exception = function(reason, value, state, default_reason)
+                local state_short = table.concat(state.buffer, "")
+                state_short = "..."
+                    .. state_short:sub(#state_short - 100)
+                    .. tostring(state.exception)
+                io.stderr:write(default_reason .. "(" .. state_short .. ")")
+            end,
+        })
 
         if ok then
             file:write(result)
@@ -67,6 +79,7 @@ return function(options)
         else
             io_write("Failed to encode test results to json: " .. result .. "\n")
             io_flush()
+            os.exit(1)
         end
 
         return nil, true

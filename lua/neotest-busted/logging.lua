@@ -16,6 +16,7 @@ local function log(level, context, message, ...)
     local args = { ... }
 
     vim.schedule(function()
+        if not unpack(args) then return end
         local formatted_message = message:format(unpack(args))
 
         logger[level](formatted_message, context)
