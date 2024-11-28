@@ -35,4 +35,11 @@ describe("logging", function()
         assert.stub(logger.error).was.called_with("Hello world", {})
         assert.stub(vim.notify).was.called_with("Hello world", vim.log.levels.ERROR)
     end)
+
+    it("logs with nil argument", function()
+        logging.error("Hello", nil, nil)
+
+        assert.stub(logger.error).was.called_with("Hello", nil)
+        assert.stub(vim.notify).was.called_with("Hello", vim.log.levels.ERROR)
+    end)
 end)
