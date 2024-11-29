@@ -1,0 +1,74 @@
+{
+    "pendings": [],
+    "successes": [
+        {
+            "element": {
+                "starttime": 1732441119.0442,
+                "endtime": 1732441119.0442,
+                "endtick": 250057.353223,
+                "duration": 2.6000023353845e-05,
+                "trace": {
+                    "source": "@./test_files/quotes_spec.lua",
+                    "lastlinedefined": 9,
+                    "what": "Lua",
+                    "short_src": "./test_files/quotes_spec.lua",
+                    "message": "single quotes test",
+                    "currentline": 2,
+                    "traceback": "\nstack traceback:\n\t./test_files/quotes_spec.lua:2: in function <./test_files/quotes_spec.lua:1>\n",
+                    "linedefined": 1
+                },
+                "name": "single quotes test",
+                "descriptor": "it",
+                "attributes": [],
+                "starttick": 250057.353197
+            },
+            "name": "quotes single quotes test",
+            "trace": {
+                "source": "@./test_files/quotes_spec.lua",
+                "lastlinedefined": 9,
+                "what": "Lua",
+                "short_src": "./test_files/quotes_spec.lua",
+                "message": "single quotes test",
+                "currentline": 2,
+                "traceback": "\nstack traceback:\n\t./test_files/quotes_spec.lua:2: in function <./test_files/quotes_spec.lua:1>\n",
+                "linedefined": 1
+            }
+        },
+        {
+            "element": {
+                "starttime": 1732441119.0444,
+                "endtime": 1732441119.0444,
+                "endtick": 250057.353353,
+                "duration": 2.2000021999702e-05,
+                "trace": {
+                    "source": "@./test_files/quotes_spec.lua",
+                    "lastlinedefined": 9,
+                    "what": "Lua",
+                    "short_src": "./test_files/quotes_spec.lua",
+                    "message": "literal quotes test",
+                    "currentline": 6,
+                    "traceback": "\nstack traceback:\n\t./test_files/quotes_spec.lua:6: in function <./test_files/quotes_spec.lua:1>\n",
+                    "linedefined": 1
+                },
+                "name": "literal quotes test",
+                "descriptor": "it",
+                "attributes": [],
+                "starttick": 250057.353331
+            },
+            "name": "quotes literal quotes test",
+            "trace": {
+                "source": "@./test_files/quotes_spec.lua",
+                "lastlinedefined": 9,
+                "what": "Lua",
+                "short_src": "./test_files/quotes_spec.lua",
+                "message": "literal quotes test",
+                "currentline": 6,
+                "traceback": "\nstack traceback:\n\t./test_files/quotes_spec.lua:6: in function <./test_files/quotes_spec.lua:1>\n",
+                "linedefined": 1
+            }
+        }
+    ],
+    "failures": [],
+    "duration": 0.00060899998061359,
+    "errors": []
+}
