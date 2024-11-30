@@ -115,15 +115,7 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
             command = global_globs[1],
             lua_paths = {
                 util.create_path("/usr", "local", "share", "lua", "5.1", "?.lua"),
-                util.create_path(
-                    "/usr",
-                    "local",
-                    "share",
-                    "lua",
-                    "5.1",
-                    "?",
-                    "init.lua"
-                ),
+                util.create_path("/usr", "local", "share", "lua", "5.1", "?", "init.lua"),
             },
             lua_cpaths = {
                 util.create_path("/usr", "local", "lib", "lua", "5.1", "?.so"),
