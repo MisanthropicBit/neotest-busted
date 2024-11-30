@@ -104,7 +104,7 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
 
     -- Try to find a global busted executable
     local global_globs = util.glob(
-        util.create_path("usr", "local", "lib", "luarocks", "rocks-5.1", "**", "bin", "busted")
+        util.create_path("/usr", "local", "lib", "luarocks", "rocks-5.1", "**", "bin", "busted")
     )
 
     if #global_globs > 0 then
@@ -114,12 +114,11 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
             type = "global",
             command = global_globs[1],
             lua_paths = {
-                util.create_path("usr", "local", "share", "luarocks", "lua", "5.1", "?.lua"),
+                util.create_path("/usr", "local", "share", "lua", "5.1", "?.lua"),
                 util.create_path(
-                    "usr",
+                    "/usr",
                     "local",
                     "share",
-                    "luarocks",
                     "lua",
                     "5.1",
                     "?",
@@ -127,8 +126,8 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
                 ),
             },
             lua_cpaths = {
-                util.create_path("usr", "local", "share", "luarocks", "lua", "5.1", "?.so"),
-                util.create_path("usr", "local", "share", "luarocks", "lua", "5.1", "?", "?.so"),
+                util.create_path("/usr", "local", "lib", "lua", "5.1", "?.so"),
+                util.create_path("/usr", "local", "lib", "lua", "5.1", "?", "?.so"),
             },
         }
     end
