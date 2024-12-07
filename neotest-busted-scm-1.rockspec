@@ -32,9 +32,3 @@ test = {
     type = "command",
     command = "./tests/run_tests.sh",
 }
-
-install = {
-    bin = {
-        ["neotest-busted"] = "lua/neotest-busted/test-runner.lua",
-    },
-}
