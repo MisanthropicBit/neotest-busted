@@ -34,8 +34,18 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
 
     if not ignore_local then
         -- Try to find a directory-local busted executable
-        local local_globs =
-            util.glob(util.create_path("lua_modules", "lib", "luarocks", "**", "bin", "busted"))
+        local local_globs = util.glob(
+            util.create_path(
+                "lua_modules",
+                "lib",
+                "luarocks",
+                "rocks-5.1",
+                "busted",
+                "**",
+                "bin",
+                "busted"
+            )
+        )
 
         if #local_globs > 0 then
             logger.debug("Using project-local busted executable")
@@ -61,8 +71,19 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
     end
 
     -- Try to find a local (user home directory) busted executable
-    local user_globs =
-        util.glob(util.create_path("~", ".luarocks", "lib", "luarocks", "**", "bin", "busted"))
+    local user_globs = util.glob(
+        util.create_path(
+            "~",
+            ".luarocks",
+            "lib",
+            "luarocks",
+            "rocks-5.1",
+            "busted",
+            "**",
+            "bin",
+            "busted"
+        )
+    )
 
     if #user_globs > 0 then
         logger.debug("Using local (~/.luarocks) busted executable")
@@ -81,15 +102,25 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         }
     end
 
-    -- Try to find busted in path
-    if vim.fn.executable("busted") == 1 then
+    -- Try to find a global busted executable
+    local global_globs = util.glob(
+        util.create_path("/usr", "local", "lib", "luarocks", "rocks-5.1", "**", "bin", "busted")
+    )
+
+    if #global_globs > 0 then
         logger.debug("Using global busted executable")
 
         return {
             type = "global",
-            command = "busted",
-            lua_paths = {},
-            lua_cpaths = {},
+            command = global_globs[1],
+            lua_paths = {
+                util.create_path("/usr", "local", "share", "lua", "5.1", "?.lua"),
+                util.create_path("/usr", "local", "share", "lua", "5.1", "?", "init.lua"),
+            },
+            lua_cpaths = {
+                util.create_path("/usr", "local", "lib", "lua", "5.1", "?.so"),
+                util.create_path("/usr", "local", "lib", "lua", "5.1", "?", "?.so"),
+            },
         }
     end
 
