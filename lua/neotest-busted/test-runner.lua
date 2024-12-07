@@ -111,12 +111,15 @@ end
 local function find_minimal_init()
     local glob_matches = vim.fn.glob("**/minimal_init.lua", false, true)
 
-    if #glob_matches == 0 then
-        print_level("Could not find minimal_init.lua", vim.log.levels.ERROR)
-        return
+    for _, match in ipairs(glob_matches) do
+        if not vim.startswith(match, "lua_modules") then
+            return match
+        end
     end
 
-    return glob_matches[1]
+    print_level("Could not find minimal_init.lua", vim.log.levels.ERROR)
+
+    return nil
 end
 
 ---@return ParsedArgs
@@ -127,18 +130,26 @@ local function parse_args()
         busted_args = {},
     }
 
-    -- Start from the third argument to skip busted executable and "--ignore-lua" flag
-    -- TODO: Should we just use them instead of skipping them?
-    for idx = 3, #_G.arg do
+    local idx = 1
+
+    while idx <= #_G.arg do
         local arg = _G.arg[idx]
 
-        if arg == "-h" or arg == "--help" then
+        -- TODO: Should we just use them instead of skipping them?
+        if vim.endswith(arg, "busted") then
+            -- Script is being invoked via a busted command, jump to the
+            -- third argument to skip the busted executable and the
+            -- '--ignore-lua' flag
+            idx = idx + 2
+        elseif arg == "-h" or arg == "--help" then
             parsed_args.help = true
+            break
         elseif arg == "--" then
             vim.list_extend(parsed_args.busted_args, _G.arg, idx + 1)
             break
         else
             table.insert(parsed_args.paths, arg)
+            idx = idx + 1
         end
     end
 
