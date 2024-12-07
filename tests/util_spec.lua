@@ -34,6 +34,7 @@ describe("util", function()
                 "lua/neotest-busted/logging.lua",
                 "lua/neotest-busted/output_handler.lua",
                 "lua/neotest-busted/start_debug.lua",
+                "lua/neotest-busted/test-runner.lua",
                 "lua/neotest-busted/types.lua",
                 "lua/neotest-busted/util.lua",
             })
