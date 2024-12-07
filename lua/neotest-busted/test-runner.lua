@@ -112,6 +112,7 @@ local function find_minimal_init()
     local glob_matches = vim.fn.glob("**/minimal_init.lua", false, true)
 
     for _, match in ipairs(glob_matches) do
+        -- Ignore any minimal_init.lua files in project-local luarocks installations
         if not vim.startswith(match, "lua_modules") then
             return match
         end
