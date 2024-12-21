@@ -9,11 +9,12 @@ on:
 jobs:
   tests:
     name: run
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         neovim_version: ['v0.9.2', 'v0.10.0', 'nightly']
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
