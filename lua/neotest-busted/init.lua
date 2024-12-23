@@ -411,23 +411,11 @@ function BustedNeotestAdapter.discover_positions(path)
         arguments: (arguments (_) @test.name (function_definition))
     ) (#match? @func_name "^it$")) @test.definition
 
-    ;; pending blocks constrained to have a describe as a parent
+    ;; pending blocks
     ((function_call
-        name: (identifier) @func_name1 (#match? @func_name1 "^describe$")
-        arguments: (arguments
-            (_) @namespace.name
-            (function_definition
-            parameters: (parameters)
-            body: (block
-                ((function_call
-                    name: (identifier) @func_name2
-                    arguments: (arguments (_) @test.name (function_definition)?)
-                ) (#match? @func_name2 "^pending$")
-                ) @test.definition
-            )
-            )
-        )
-    )) @namespace.definition
+        name: (identifier) @func_name
+        arguments: (arguments (string) @test.name)
+    ) (#match? @func_name "^pending$")) @test.definition
 
     ;; custom async blocks
     ((function_call
