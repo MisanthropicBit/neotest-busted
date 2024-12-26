@@ -57,7 +57,7 @@ describe("config", function()
             },
         }
 
-        stub(vim.api, "nvim_echo")
+        stub(vim, "notify_once")
 
         for _, invalid_config_test in ipairs(invalid_config_tests) do
             local ok, error = config.configure(invalid_config_test.config)
@@ -68,15 +68,13 @@ describe("config", function()
 
             assert.is_false(ok)
 
-            assert.stub(vim.api.nvim_echo).was.called_with({
-                { "[neotest-busted]: ", "ErrorMsg" },
-                { "Invalid config: " },
-                { error },
-            }, true, {})
+            assert
+                .stub(vim.notify_once).was
+                .called_with("[neotest-busted]: Invalid config: " .. tostring(error), vim.log.levels.ERROR)
         end
 
         ---@diagnostic disable-next-line: undefined-field
-        vim.api.nvim_echo:revert()
+        vim.notify_once:revert()
     end)
 
     it("throws no errors for a valid config", function()
