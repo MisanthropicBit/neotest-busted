@@ -111,11 +111,10 @@ function config.configure(user_config)
     local ok, error = config.validate(_user_config, true)
 
     if not ok then
-        vim.api.nvim_echo({
-            { "[neotest-busted]: ", "ErrorMsg" },
-            { "Invalid config: " },
-            { error },
-        }, true, {})
+        vim.notify_once(
+            "[neotest-busted]: Invalid config: " .. tostring(error),
+            vim.log.levels.ERROR
+        )
     end
 
     return ok, error

@@ -7,14 +7,11 @@ local async = _async.tests
 
 describe("adapter.build_spec", function()
     before_each(function()
-        stub(vim.api, "nvim_echo")
         stub(_async.fn, "tempname", "test-output")
         stub(vim, "notify")
     end)
 
     after_each(function()
-        ---@diagnostic disable-next-line: undefined-field
-        vim.api.nvim_echo:revert()
         ---@diagnostic disable-next-line: undefined-field
         vim.notify:revert()
 
