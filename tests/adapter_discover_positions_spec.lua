@@ -28,6 +28,18 @@ describe("adapter.discover_positions", function()
         assert.are.same(cache:size(), 0)
     end)
 
+    async.it("discovers pending tests", function()
+        local positions = adapter.discover_positions("./test_files/pending_spec.lua"):to_list()
+
+        local expected_tree = require("./test_files/expected_pending_tree")
+        assert.are.same(positions, expected_tree)
+
+        ---@diagnostic disable-next-line: undefined-field
+        local cache = adapter.get_parametric_test_cache()
+
+        assert.are.same(cache:size(), 0)
+    end)
+
     async.it("discovers parametric test positions", function()
         local path = "./test_files/parametric_tests_spec.lua"
 
