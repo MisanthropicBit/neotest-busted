@@ -26,10 +26,6 @@ source = {
 
 build = {
     type = "builtin",
-    copy_directories = {
-        "doc",
-        "scripts",
-    },
 }
 
 test = {
