@@ -2,11 +2,23 @@ local util = {}
 
 local lib = require("neotest.lib")
 
---- Strip quotes from a string
+local trim_chars = { "'", '"' }
+
+--- Trim quotes from a string
 ---@param value string
 ---@return string
 function util.trim_quotes(value)
-    return vim.fn.trim(value, "\"'[]")
+    for _, trim_char in ipairs(trim_chars) do
+        if value:sub(1, 1) == trim_char and value:sub(#value, #value) == trim_char then
+            return value:sub(2, #value - 1)
+        end
+    end
+
+    if vim.startswith(value, "[[") and vim.endswith(value, "]]") then
+        return value:sub(3, #value - 3)
+    end
+
+    return value
 end
 
 ---@param ... string

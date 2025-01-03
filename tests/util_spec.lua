@@ -7,9 +7,12 @@ describe("util", function()
             assert.are.same(util.trim_quotes('"this will be trimmed"'), "this will be trimmed")
             assert.are.same(
                 util.trim_quotes("\"'[[this will be trimmed]]'\""),
-                "this will be trimmed"
+                "'[[this will be trimmed]]'"
             )
-
+            assert.are.same(
+                util.trim_quotes('"[brackets will not be trimmed]"'),
+                "[brackets will not be trimmed]"
+            )
             assert.are.same(
                 util.trim_quotes("this will not be trimmed"),
                 "this will not be trimmed"
