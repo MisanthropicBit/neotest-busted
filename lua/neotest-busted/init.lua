@@ -411,6 +411,12 @@ function BustedNeotestAdapter.discover_positions(path)
         arguments: (arguments (_) @test.name (function_definition))
     ) (#match? @func_name "^it$")) @test.definition
 
+    ;; pending blocks
+    ((function_call
+        name: (identifier) @func_name
+        arguments: (arguments (string) @test.name)
+    ) (#match? @func_name "^pending$")) @test.definition
+
     ;; custom async blocks
     ((function_call
         name: (identifier) @func_name
