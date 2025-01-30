@@ -215,6 +215,12 @@ The following command will install busted in your home directory.
 While neotest-busted itself does not support this, there are several ways to run
 your tests from the command line.
 
+> [!WARNING]
+> Running busted with neovim as the lua interpreter means that the same neovim
+> instance is used in all your tests which could break test isolation. For
+> example, setting `_G.foo = 10` in a test that runs before a test containing
+> `vim.print(_G.foo)` will print 10.
+
 <details>
 <summary>Using `plenary.nvim`</summary>
 
@@ -228,13 +234,9 @@ as the lua interpreter (see below).
 See the GitHub repo or run `:help plenary-test` if you already have it
 installed.
 
-</details>
+---
 
-> [!WARNING]
-> Running busted with neovim as the lua interpreter means that the same neovim
-> instance is used in all your tests which could break test isolation. For
-> example, setting `_G.foo = 10` in a test that runs before a test containing
-> `vim.print(_G.foo)` will print 10.
+</details>
 
 <details>
 <summary>Using a busted configuration file</summary>
@@ -246,6 +248,7 @@ docs](https://lunarmodules.github.io/busted/#usage) or take a look at the exampl
 ```lua
 return {
     _all = {
+        -- Use neovim as the lua interpreter for all tasks
         lua = "nvim -l",
         -- Ensures that your plugin and tests (or test helper files) will be found
         lpath = "lua/?.lua;lua/?/init.lua;tests/?.lua",
@@ -270,6 +273,8 @@ the `"integration"` task in a test file:
 require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integration" } })
 ```
 
+---
+
 </details>
 
 <details>
@@ -277,7 +282,7 @@ require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integr
 
 Luarocks allows you to specify a test command in the rockspec which can be run
 using `luarocks test`. Additionally, you can specify `test_dependencies` and
-they will automatically be installed before running the test.
+they will automatically be installed before running tests.
 
 ```lua
 rockspec_format = "3.0"
@@ -295,15 +300,14 @@ test_dependencies = {
 }
 
 test = {
-    type = "command",
-    command = "nvim -l ./run-tests.lua",
+    type = "busted",
 }
 ```
 
 This will work if you use a [user-](#user-home-directory-install) or
 [system-level](#global-install) luarocks installation but if you want to use a
-[project-level](#directory-local-install) luarocks installation, you can use a
-small script to correctly set up the paths.
+[project-level](#directory-local-install) luarocks installation, you can use
+this small script to correctly set up the paths.
 
 ```lua
 ---@param command_name string
@@ -335,7 +339,7 @@ package.cpath = package.cpath .. ";" .. lua_cpath
 require("busted.runner")({ standalone = false })
 ```
 
-Then change the test command to the following.
+Then change the test command in your rockspec to the following.
 
 ```lua
 test = {
@@ -343,6 +347,8 @@ test = {
     command = "nvim -l ./run-tests.lua",
 }
 ```
+
+---
 
 </details>
 
@@ -356,33 +362,9 @@ The `lazy.nvim` package manager directly provides a way to run busted tests.
 See the [official docs](https://lazy.folke.io/developers#minit-minimal-init) for
 more information.
 
+---
+
 </details>
-
-A `test-runner.lua` script is provided in the `scripts/` folder for running
-tests via the command line. This is useful for running all tests during CI for
-example.
-
-If you do not provide a `minimal_init.lua` to set up your test environment, the
-script will look for one and source it. If you don't specify any tests to run,
-the command will automatically try to find your tests in a `spec/`, `test/`, or
-`tests/` directory.
-
-```shell
-$ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
-```
-
-### Using busted directly
-
-You can also provide a `.busted` config file and run your tests using busted.
-Learn more about busted configuration files from the [official
-docs](https://lunarmodules.github.io/busted/#usage) or take a look at the example [here](/.busted.example).
-
-Pass extra arguments to `neotest` to run a specific task. For example, to run
-the `"integration"` task in a test file:
-
-```lua
-require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integration" } })
-```
 
 ## Contributing
 
