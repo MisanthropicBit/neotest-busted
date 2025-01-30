@@ -266,6 +266,10 @@ return {
 }
 ```
 
+Then run your tests using either `busted <test_dir>` or use `luarocks test
+--test-type busted <test_dir>` (or omit `--test-type busted` if you set up a
+test command in the rockspec, see below).
+
 Pass extra arguments to `neotest` to run a specific task. For example, to run
 the `"integration"` task in a test file:
 
