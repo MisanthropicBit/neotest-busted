@@ -212,8 +212,7 @@ The following command will install busted in your home directory.
 
 ## Running from the command line
 
-While neotest-busted itself does not support this, there are several ways to run
-your tests from the command line.
+There are several ways to run your tests from the command line.
 
 > [!WARNING]
 > Running busted with neovim as the lua interpreter means that the same neovim
@@ -222,16 +221,16 @@ your tests from the command line.
 > `vim.print(_G.foo)` will print 10.
 
 <details>
-<summary>Using `plenary.nvim`</summary>
+<summary>**Using plenary.nvim**</summary>
 
 This repo uses [`plenary.nvim`](https://github.com/nvim-lua/plenary.nvim) to run
 its tests so feel free to use the setup in your own projects.
 
 Running tests this way has the benefit that a separate neovim instance is used
 for each test file giving better test isolation than running busted with neovim
-as the lua interpreter (see below).
+as the lua interpreter.
 
-See the GitHub repo or run `:help plenary-test` if you already have it
+See `plenary.nvim`'s GitHub repo or run `:help plenary-test` if you already have it
 installed.
 
 ---
@@ -239,18 +238,18 @@ installed.
 </details>
 
 <details>
-<summary>Using a busted configuration file</summary>
+<summary><h3>Using a busted configuration file</h3></summary>
 
-You can also provide a `.busted` config file and run your tests using busted.
+You can provide a `.busted` config file and run your tests using busted.
 Learn more about busted configuration files from the [official
-docs](https://lunarmodules.github.io/busted/#usage) or take a look at the example [here](/.busted.example).
+docs](https://lunarmodules.github.io/busted/#usage).
 
 ```lua
 return {
     _all = {
         -- Use neovim as the lua interpreter for all tasks
         lua = "nvim -l",
-        -- Ensures that your plugin and tests (or test helper files) will be found
+        -- Ensures that your plugin and test files will be found
         lpath = "lua/?.lua;lua/?/init.lua;tests/?.lua",
     },
     -- Default task to run if no task was specified
@@ -287,6 +286,10 @@ require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integr
 Luarocks allows you to specify a test command in the rockspec which can be run
 using `luarocks test`. Additionally, you can specify `test_dependencies` and
 they will automatically be installed before running tests.
+
+If your tests do not need to run in a neovim context the rockspec below should
+suffice, otherwise you can use a `.busted` config file to setup this up (see
+above).
 
 ```lua
 rockspec_format = "3.0"
@@ -359,12 +362,10 @@ test = {
 </details>
 
 <details>
-<summary>Using `lazy.nvim`</summary>
+<summary>Using lazy.nvim</summary>
 
 The `lazy.nvim` package manager directly provides a way to run busted tests.
-
-See the [official docs](https://lazy.folke.io/developers#minit-minimal-init) for
-more information.
+Please see the [official docs](https://lazy.folke.io/developers#minit-minimal-init).
 
 ---
 
