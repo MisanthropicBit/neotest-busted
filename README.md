@@ -221,7 +221,7 @@ There are several ways to run your tests from the command line.
 > `vim.print(_G.foo)` will print 10.
 
 <details>
-<summary><h4>Using plenary.nvim</h4></summary>
+<summary>Using plenary.nvim</summary>
 
 This repo uses [`plenary.nvim`](https://github.com/nvim-lua/plenary.nvim) to run
 its tests so feel free to use the setup in your own projects.
@@ -238,7 +238,7 @@ installed.
 </details>
 
 <details>
-<summary><h4>Using a busted configuration file</h4></summary>
+<summary>Using a busted configuration file</summary>
 
 You can provide a `.busted` config file and run your tests using busted.
 Learn more about busted configuration files from the [official
@@ -281,7 +281,7 @@ require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integr
 </details>
 
 <details>
-<summary><h4>Using luarocks</h4></summary>
+<summary>Using luarocks</summary>
 
 Luarocks allows you to specify a test command in the rockspec which can be run
 using `luarocks test`. Additionally, you can specify `test_dependencies` and
@@ -362,7 +362,7 @@ test = {
 </details>
 
 <details>
-<summary><h4>Using</h4> lazy.nvim</summary>
+<summary>Using lazy.nvim</summary>
 
 The `lazy.nvim` package manager directly provides a way to run busted tests.
 Please see the [official docs](https://lazy.folke.io/developers#minit-minimal-init).
