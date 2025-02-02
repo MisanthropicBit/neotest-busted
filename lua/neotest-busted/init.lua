@@ -21,9 +21,17 @@ local BustedNeotestAdapter = { name = "neotest-busted" }
 ---@return neotest-busted.BustedCommandConfig?
 ---@diagnostic disable-next-line: inject-field
 function BustedNeotestAdapter.find_busted_command(ignore_local)
+    -- NOTE: We could alternatively just run `luarocks path --lr-path` and
+    -- `luarocks path --lr-cpath` and get the correct paths in the correct
+    -- filesystem context but they fall back to user-local and system-level
+    -- installations so we might not want to do that
+
     if config.busted_command and #config.busted_command > 0 then
         logger.debug("Using busted command from config")
 
+        -- We do not know what kind of luarocks installation the user-provided
+        -- busted command belongs to, it might not even be installed via
+        -- luarocks, so for now we just return empty paths
         return {
             type = "config",
             command = config.busted_command,
@@ -33,7 +41,9 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
     end
 
     if not ignore_local then
-        -- Try to find a directory-local busted executable
+        -- Try to find a directory-local busted executable. Assume busted is
+        -- installed if we can find the script
+        -- NOTE: We could also run `luarocks list busted --porcelain` instead
         local local_globs = util.glob(
             util.create_path(
                 "lua_modules",
@@ -52,7 +62,6 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
 
             return {
                 type = "project",
-                command = local_globs[1],
                 lua_paths = {
                     util.create_path("lua_modules", "share", "lua", "5.1", "?.lua"),
                     util.create_path("lua_modules", "share", "lua", "5.1", "?", "init.lua"),
@@ -70,7 +79,8 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         return nil
     end
 
-    -- Try to find a local (user home directory) busted executable
+    -- Try to find a local (user home directory) busted executable. Assume
+    -- busted is installed if we can find the script
     local user_globs = util.glob(
         util.create_path(
             "~",
@@ -90,7 +100,6 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
 
         return {
             type = "user",
-            command = user_globs[1],
             lua_paths = {
                 util.create_path("~", ".luarocks", "share", "lua", "5.1", "?.lua"),
                 util.create_path("~", ".luarocks", "share", "lua", "5.1", "?", "init.lua"),
@@ -102,7 +111,8 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         }
     end
 
-    -- Try to find a global busted executable
+    -- Try to find a global busted executable. Assume busted is installed if we
+    -- can find the script
     local global_globs = util.glob(
         util.create_path("/usr", "local", "lib", "luarocks", "rocks-5.1", "**", "bin", "busted")
     )
@@ -112,7 +122,6 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
 
         return {
             type = "global",
-            command = global_globs[1],
             lua_paths = {
                 util.create_path("/usr", "local", "share", "lua", "5.1", "?.lua"),
                 util.create_path("/usr", "local", "share", "lua", "5.1", "?", "init.lua"),
@@ -150,14 +159,10 @@ local function script_path()
     return str:match(util.create_path("(.*", ")"))
 end
 
+---@param filename string
 ---@return string
-local function get_reporter_path()
-    return table.concat({ script_path(), "output_handler.lua" })
-end
-
----@return string
-local function get_debug_start_script()
-    return table.concat({ script_path(), "start_debug.lua" })
+local function get_path_to_plugin_file(filename)
+    return table.concat({ script_path(), filename })
 end
 
 --- Escape special characters in a lua pattern
@@ -191,10 +196,10 @@ end
 ---@return neotest-busted.TestCommandConfig?
 ---@diagnostic disable-next-line: inject-field
 function BustedNeotestAdapter.create_test_command(paths, options)
-    local busted = BustedNeotestAdapter.find_busted_command()
+    local busted_config = BustedNeotestAdapter.find_busted_command()
 
-    if not busted then
-        logging.error("Could not find a busted command")
+    if not busted_config then
+        logging.error("Could not find a busted installation")
         return
     end
 
@@ -226,45 +231,46 @@ function BustedNeotestAdapter.create_test_command(paths, options)
     table.insert(lua_paths, util.create_path("lua", "?", "init.lua"))
 
     -- Add paths for busted
-    vim.list_extend(lua_paths, busted.lua_paths)
-    vim.list_extend(lua_cpaths, busted.lua_cpaths)
+    vim.list_extend(lua_paths, busted_config.lua_paths)
+    vim.list_extend(lua_cpaths, busted_config.lua_cpaths)
 
     -- Create '-c' arguments for updating package paths in neovim
     vim.list_extend(arguments, util.create_package_path_argument("package.path", lua_paths))
     vim.list_extend(arguments, util.create_package_path_argument("package.cpath", lua_cpaths))
 
     local _options = options or {}
+    local busted_command = busted_config.command or get_path_to_plugin_file("busted-cli-runner.lua")
 
     -- Create a busted command invocation string using neotest-busted's own
     -- output handler and run busted with neovim ('-l' stops parsing arguments
     -- for neovim)
-    local busted_command = {
+    local busted_command_args = {
         "-l",
-        busted.command,
+        busted_command,
     }
 
     if _options.busted_output_handler then
-        vim.list_extend(busted_command, {
+        vim.list_extend(busted_command_args, {
             "--output",
             _options.busted_output_handler,
         })
 
         if _options.busted_output_handler_options then
-            table.insert(busted_command, "-Xoutput")
-            vim.list_extend(busted_command, _options.busted_output_handler_options)
+            table.insert(busted_command_args, "-Xoutput")
+            vim.list_extend(busted_command_args, _options.busted_output_handler_options)
         end
     else
         if _options.results_path then
-            vim.list_extend(busted_command, {
+            vim.list_extend(busted_command_args, {
                 "--output",
-                get_reporter_path(),
+                get_path_to_plugin_file("output_handler.lua" ),
                 "-Xoutput",
                 _options.results_path,
             })
         end
     end
 
-    vim.list_extend(arguments, busted_command)
+    vim.list_extend(arguments, busted_command_args)
 
     if compat.tbl_islist(config.busted_args) then
         for _, busted_arg in ipairs(config.busted_args) do
@@ -333,7 +339,7 @@ local function get_strategy_config(strategy, results_path, paths, filters)
                 quote_strings = true,
                 busted_arguments = {
                     "--helper",
-                    get_debug_start_script(),
+                    get_path_to_plugin_file("start_debug.lua"),
                 },
             }
         )
