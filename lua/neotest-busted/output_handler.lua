@@ -1,22 +1,34 @@
-local json = require("dkjson")
-
 local io_write = io.write
 local io_flush = io.flush
 
--- return function(options)
---      local utfTerminalHandler = require("busted.outputHandlers.utfTerminal")(options)
---      utfTerminalHandler:subscribe(options)
-
---      table.insert(options.arguments, 1, "test-output.json")
---      local jsonOutputHandler = require("busted.outputHandlers.json")(options)
---      jsonOutputHandler:subscribe(options)
-
---      return jsonOutputHandler
---  end
+local status_to_test_object_name = {
+    success = "successes",
+    pending = "pendings",
+    failure = "failures",
+    error = "errors",
+}
 
 return function(options)
     local busted = require("busted")
+    local json = require("dkjson")
     local handler = require("busted.outputHandlers.base")()
+
+    --- A copy of the "getFullName" function in busted's base output handler that
+    --- separates the full test name by the neotest position id separator "::"
+    ---@param element neotest-busted.BustedElement
+    local function get_full_neotest_name(element)
+        local parent = busted.parent(element)
+        local names = { (element.name or element.descriptor) }
+
+        while parent and (parent.name or parent.descriptor) and
+            parent.descriptor ~= "file" do
+
+            table.insert(names, 1, parent.name or parent.descriptor)
+            parent = busted.parent(parent)
+        end
+
+        return table.concat(names, "::")
+    end
 
     -- Copy options and remove arguments so the utfTerminal handler can parse
     -- them without error
@@ -36,6 +48,17 @@ return function(options)
     if not output_file then
         io.stderr:write("No valid json output file passed to output handler\n")
         os.exit(1)
+    end
+
+    -- Inject a neotest_name (separated by "::") into the test element
+    ---@diagnostic disable-next-line: unused-local
+    handler.testEnd = function(element, parent, status, trace)
+        local test_object_name = status_to_test_object_name[status]
+        local test_element = handler[test_object_name][#handler[test_object_name]]
+
+        test_element.neotest_name = get_full_neotest_name(element)
+
+        return nil, true
     end
 
     handler.suiteEnd = function()
@@ -77,6 +100,7 @@ return function(options)
         return nil, true
     end
 
+    busted.subscribe({ "test", "end" }, handler.testEnd, { predicate = handler.cancelOnPending })
     busted.subscribe({ "suite", "end" }, handler.suiteEnd)
 
     return handler
