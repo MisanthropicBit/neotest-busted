@@ -263,7 +263,7 @@ function BustedNeotestAdapter.create_test_command(paths, options)
         if _options.results_path then
             vim.list_extend(busted_command_args, {
                 "--output",
-                get_path_to_plugin_file("output_handler.lua" ),
+                get_path_to_plugin_file("output_handler.lua"),
                 "-Xoutput",
                 _options.results_path,
             })
@@ -307,7 +307,6 @@ function BustedNeotestAdapter.create_test_command(paths, options)
     end
 
     return {
-        ---@diagnostic disable-next-line: undefined-field
         nvim_command = compat.loop.exepath(),
         arguments = arguments,
         paths = lua_paths,
