@@ -71,6 +71,13 @@ describe("config", function()
             assert
                 .stub(vim.notify_once).was
                 .called_with("[neotest-busted]: Invalid config: " .. tostring(error), vim.log.levels.ERROR)
+
+            if invalid_config_test.busted_command ~= nil then
+                assert.stub(vim.notify_once).was.called_with(
+                    "[neotest-busted]: busted_command is deprecated and will be removed in a future version",
+                    vim.log.levels.WARN
+                )
+            end
         end
 
         ---@diagnostic disable-next-line: undefined-field
