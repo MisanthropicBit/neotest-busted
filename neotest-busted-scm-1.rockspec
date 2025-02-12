@@ -18,6 +18,8 @@ description = {
 
 dependencies = {
     "lua == 5.1",
+    "neotest >= 5.8.0, < 6.0.0",
+    "nvim-nio >= 1.10.1, < 2.0.0",
 }
 
 source = {
