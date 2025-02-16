@@ -11,7 +11,7 @@ local types = {}
 
 ---@class neotest-busted.BustedCommandConfig
 ---@field type "config" | "project" | "user" | "global"
----@field command string
+---@field command string?
 ---@field lua_paths string[]
 ---@field lua_cpaths string[]
 

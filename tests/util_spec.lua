@@ -32,6 +32,7 @@ describe("util", function()
 
             assert.are.same(util.glob(path), {
                 "lua/neotest-busted/async.lua",
+                "lua/neotest-busted/busted-cli-runner.lua",
                 "lua/neotest-busted/busted-util.lua",
                 "lua/neotest-busted/cache.lua",
                 "lua/neotest-busted/compat.lua",
