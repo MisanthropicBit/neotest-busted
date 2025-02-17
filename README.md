@@ -41,7 +41,6 @@ neovim as the lua interpreter.
 - [Parametric tests](#parametric-tests)
 - [Debugging tests](#debugging-tests)
 - [Luarocks and Busted](#luarocks-and-busted)
-- [Running from the command line](#running-from-the-command-line)
 - [Contributing](#contributing)
 - [FAQ](#faq)
 
@@ -208,34 +207,6 @@ The following command will install busted in your home directory.
 
 ```shell
 > luarocks install busted
-```
-
-## Running from the command line
-
-A `test-runner.lua` script is provided in the `scripts/` folder for running
-tests via the command line. This is useful for running all tests during CI for
-example.
-
-If you do not provide a `minimal_init.lua` to set up your test environment, the
-script will look for one and source it. If you don't specify any tests to run,
-the command will automatically try to find your tests in a `spec/`, `test/`, or
-`tests/` directory.
-
-```shell
-$ nvim -l <path-to-neotest-busted>/scripts/test-runner.lua tests/my_spec.lua
-```
-
-### Using busted directly
-
-You can also provide a `.busted` config file and run your tests using busted.
-Learn more about busted configuration files from the [official
-docs](https://lunarmodules.github.io/busted/#usage) or take a look at the example [here](/.busted.example).
-
-Pass extra arguments to `neotest` to run a specific task. For example, to run
-the `"integration"` task in a test file:
-
-```lua
-require("neotest").run.run({ vim.fn.expand("%"), extra_args = { "--run", "integration" } })
 ```
 
 ## Contributing
