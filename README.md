@@ -229,6 +229,11 @@ The test could be run via `neotest-busted` itself but I decided to use plenary
 instead to use another test runner so that bugs in `neotest-busted` won't affect
 its own tests.
 
+#### Q: Can I use `neotest-busted` with pure lua libraries (no neovim)?
+
+This is not currently possible so please open an issue if you would like this
+feature to be implemented.
+
 ## Inspiration
 
 * [Using Neovim as Lua interpreter with Luarocks](https://zignar.net/2023/01/21/using-luarocks-as-lua-interpreter-with-luarocks/)
