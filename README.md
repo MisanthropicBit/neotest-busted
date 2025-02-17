@@ -41,7 +41,6 @@ neovim as the lua interpreter.
 - [Parametric tests](#parametric-tests)
 - [Debugging tests](#debugging-tests)
 - [Luarocks and Busted](#luarocks-and-busted)
-- [Running from the command line](#running-from-the-command-line)
 - [Contributing](#contributing)
 - [FAQ](#faq)
 
@@ -209,10 +208,6 @@ The following command will install busted in your home directory.
 ```shell
 > luarocks install busted
 ```
-
-## Running from the command line
-
-See [here](/RUNNING_TESTS_CLI.md)
 
 ## Contributing
 
