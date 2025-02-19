@@ -1,18 +1,10 @@
 <div align="center">
   <br />
   <h1>neotest-busted</h1>
-  <p>🚧 Highly experimental 🚧</p>
   <p>
-    <img src="https://img.shields.io/badge/version-1.0.0-blue?style=flat-square" />
-    <a href="https://luarocks.org/modules/misanthropicbit/neotest-busted">
-        <img src="https://img.shields.io/luarocks/v/misanthropicbit/neotest-busted?style=flat-square&logo=lua&logoColor=%2351a0cf&color=purple" />
-    </a>
-    <a href="/.github/workflows/tests.yml">
-        <img src="https://img.shields.io/github/actions/workflow/status/MisanthropicBit/neotest-busted/tests.yml?branch=master&style=flat-square" />
-    </a>
-    <a href="/LICENSE">
-        <img src="https://img.shields.io/github/license/MisanthropicBit/neotest-busted?style=flat-square" />
-    </a>
+    <a href="https://luarocks.org/modules/misanthropicbit/neotest-busted"><img src="https://img.shields.io/luarocks/v/misanthropicbit/neotest-busted?style=flat-square&logo=lua&logoColor=%2351a0cf&color=purple" /></a>
+    <a href="/.github/workflows/tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/MisanthropicBit/neotest-busted/tests.yml?branch=master&style=flat-square" /></a>
+    <a href="/LICENSE"><img src="https://img.shields.io/github/license/MisanthropicBit/neotest-busted?style=flat-square" /></a>
   </p>
   <br />
 </div>
@@ -228,6 +220,11 @@ busted v1 but I haven't tested that.
 The test could be run via `neotest-busted` itself but I decided to use plenary
 instead to use another test runner so that bugs in `neotest-busted` won't affect
 its own tests.
+
+#### Q: Can I use `neotest-busted` with pure lua libraries (no neovim)?
+
+This is not currently possible so please open an issue if you would like this
+feature to be implemented.
 
 ## Inspiration
 
