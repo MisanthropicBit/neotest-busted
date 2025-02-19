@@ -3,13 +3,13 @@
   <h1>neotest-busted</h1>
   <p>
     <a href="https://luarocks.org/modules/misanthropicbit/neotest-busted">
-        <img src="https://img.shields.io/luarocks/v/misanthropicbit/neotest-busted?style=for-the-badge&logo=lua&logoColor=%2351a0cf&color=purple" />
+        <img src="https://img.shields.io/luarocks/v/misanthropicbit/neotest-busted?style=flat-square&logo=lua&logoColor=%2351a0cf&color=purple" />
     </a>
     <a href="/.github/workflows/tests.yml">
-        <img src="https://img.shields.io/github/actions/workflow/status/MisanthropicBit/neotest-busted/tests.yml?branch=master&style=for-the-badge" />
+        <img src="https://img.shields.io/github/actions/workflow/status/MisanthropicBit/neotest-busted/tests.yml?branch=master&style=flat-square" />
     </a>
     <a href="/LICENSE">
-        <img src="https://img.shields.io/github/license/MisanthropicBit/neotest-busted?style=for-the-badge" />
+        <img src="https://img.shields.io/github/license/MisanthropicBit/neotest-busted?style=flat-square" />
     </a>
   </p>
   <br />
