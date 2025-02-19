@@ -1,7 +1,6 @@
 <div align="center">
   <br />
   <h1>neotest-busted</h1>
-  <p>🚧 Highly experimental 🚧</p>
   <p>
     <img src="https://img.shields.io/badge/version-1.0.0-blue?style=flat-square" />
     <a href="https://luarocks.org/modules/misanthropicbit/neotest-busted">
