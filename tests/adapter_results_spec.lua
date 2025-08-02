@@ -3,6 +3,9 @@ local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local types = require("neotest.types")
 local stub = require("luassert.stub")
+local test_utils = require("neotest-busted.test_utils")
+
+test_utils.prepare_vim_treesitter()
 
 ---@type neotest.Adapter
 local adapter = require("neotest-busted")()

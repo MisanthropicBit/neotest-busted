@@ -1,5 +1,8 @@
 local async = require("neotest.async").tests
 local config = require("neotest-busted.config")
+local test_utils = require("neotest-busted.test_utils")
+
+test_utils.prepare_vim_treesitter()
 
 ---@type neotest.Adapter
 local adapter = require("neotest-busted")()
