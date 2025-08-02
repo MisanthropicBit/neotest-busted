@@ -2,6 +2,9 @@ local _async = require("neotest.async")
 -- local logger = require("neotest.logging")
 local Tree = require("neotest.types").Tree
 local stub = require("luassert.stub")
+local test_utils = require("neotest-busted.test-utils")
+
+test_utils.prepare_vim_treesitter()
 
 local async = _async.tests
 
