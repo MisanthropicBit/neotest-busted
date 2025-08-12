@@ -1,3 +1,6 @@
+local nio = require("nio")
+local async = nio.tests
+
 describe("top-level namespace 1", function()
     describe("nested namespace 1", function()
         it("test 1", function()
@@ -5,7 +8,7 @@ describe("top-level namespace 1", function()
             assert.is_true(true)
         end)
 
-        it("test 2", function()
+        async.it("test 2", function()
             assert.is_false(false)
         end)
     end)

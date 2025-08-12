@@ -422,6 +422,16 @@ function BustedNeotestAdapter.discover_positions(path)
         arguments: (arguments (string) @test.name)
     ) (#match? @func_name "^pending$")) @test.definition
 
+    ;; plenary.nvim async blocks
+    ((function_call
+        name: (
+            dot_index_expression
+                table: (identifier)
+                field: (identifier)
+        ) @func_name
+        arguments: (arguments (_) @test.name (function_definition))
+    ) (#match? @func_name "^async\.it$")) @test.definition
+
     ;; custom async blocks
     ((function_call
         name: (identifier) @func_name
@@ -575,6 +585,8 @@ function BustedNeotestAdapter.build_spec(args)
         vim.list_extend(command, args.extra_args)
     end
 
+    vim.print(vim.inspect(command))
+
     return {
         command = command,
         context = {
@@ -638,6 +650,24 @@ local function convert_test_result_to_neotest_result(status, test_result, output
     return pos_id, result
 end
 
+---@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
+local function is_nio_async_test(test_result)
+    return test_result.trace.short_src:match("nvim%-nio/lua/nio/tests.lua$")
+end
+
+local function create_nio_async_test_pos_id_key(pos_id_key, test_result)
+    -- /Users/hyrule/.vim-plug/nvim-nio/lua/nio/tests.lua::top-level namespace 1 nested namespace 1 test 2::66
+    local parts = vim.split(pos_id_key, "::")
+    local traceback = test_result.trace.traceback
+    local lnum_match = vim.iter(traceback:gmatch("%.lua:(%d+)")):skip(1):totable()[1]
+
+    if not lnum_match then
+        return nil
+    end
+
+    return "/Users/hyrule/projects/nvim/neotest-busted/test_files/test1_spec.lua::" .. parts[2] .. "::" .. lnum_match
+end
+
 --- Convert busted test results to neotest test results
 ---@param test_results_json neotest-busted.BustedResultObject
 ---@param output string
@@ -675,7 +705,15 @@ local function convert_test_results_to_neotest_results(
                 test_result,
                 output
             )
+
             local pos_id = position_id_mapping[pos_id_key]
+
+            if not pos_id and is_nio_async_test(test_result) then
+                pos_id_key = create_nio_async_test_pos_id_key(pos_id_key, test_result)
+                pos_id = position_id_mapping[pos_id_key]
+            end
+
+            vim.print(pos_id_key)
 
             if not pos_id then
                 logging.error("Failed to find matching position id for key %s", nil, pos_id_key)
@@ -780,7 +818,8 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
     local results, pos_id_to_test_name = convert_test_results_to_neotest_results(
         test_results_json,
         strategy_result.output,
-        spec.context.position_id_mapping
+        spec.context.position_id_mapping,
+        tree
     )
 
     if config.parametric_test_discovery == true then
