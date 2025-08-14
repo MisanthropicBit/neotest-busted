@@ -737,10 +737,8 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     ---@cast test_results_json neotest-busted.BustedResultObject
 
-    local results, pos_id_to_test_name = convert_test_results_to_neotest_results(
-        test_results_json,
-        strategy_result.output
-    )
+    local results, pos_id_to_test_name =
+        convert_test_results_to_neotest_results(test_results_json, strategy_result.output)
 
     if config.parametric_test_discovery == true then
         update_parametric_tests_in_tree(tree, pos_id_to_test_name)
