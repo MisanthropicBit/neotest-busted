@@ -35,10 +35,7 @@ describe("adapter.results", function()
         assert:set_parameter("TableFormatLevel", 10)
 
         spec = {
-            context = {
-                results_path = "test_output.json",
-                position_id_mapping = {},
-            },
+            context = { results_path = "test_output.json" },
         }
 
         config.configure()
@@ -54,18 +51,6 @@ describe("adapter.results", function()
     async.it("creates neotest results", function()
         local path = "./test_files/test1_spec.lua"
         local tree = discover_positions(path, "./test_files/busted_test_output.json")
-
-        spec.context.position_id_mapping = {
-            [path .. "::top-level namespace 1 nested namespace 1 test 1::3"] = path
-                .. '::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-            [path .. "::top-level namespace 1 nested namespace 1 test 2::8"] = path
-                .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = path
-                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = path
-                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
-        }
-
         local neotest_results = adapter.results(spec, strategy_result, tree)
 
         assert.are.same(neotest_results, {
@@ -118,14 +103,6 @@ describe("adapter.results", function()
     async.it("creates neotest results with single and literal quotes", function()
         local path = "./test_files/quotes_spec.lua"
         local tree = discover_positions(path, "./test_files/quotes_spec.json")
-
-        spec.context.position_id_mapping = {
-            [path .. "::quotes single quotes test::2"] = path
-                .. "::\"quotes\"::'single quotes test'",
-            [path .. "::quotes literal quotes test::6"] = path
-                .. '::"quotes"::[[literal quotes test]]',
-        }
-
         local neotest_results = adapter.results(spec, strategy_result, tree)
 
         assert.are.same(neotest_results, {
@@ -170,12 +147,6 @@ describe("adapter.results", function()
 
             local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
             local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
-                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
@@ -224,28 +195,6 @@ describe("adapter.results", function()
 
             assert.is_not_nil(subtree)
             ---@cast subtree -nil
-
-            local parametric_pos_id_key1 = path
-                .. "::namespace::2::nested::namespace::2::-::1::some::test"
-            local parametric_pos_id_key2 = path
-                .. "::namespace::2::nested::namespace::2::-::2::some::test"
-            local parametric_pos_id_key3 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::1"
-            local parametric_pos_id_key4 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::2"
-            local parametric_pos_id_key5 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::1"
-            local parametric_pos_id_key6 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key1,
-                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key2,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key3,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key4,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key5,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key6,
-            }
 
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
@@ -307,35 +256,6 @@ describe("adapter.results", function()
             local path = parametric_test_path
             local tree =
                 discover_positions(path, "./test_files/parametric_test_output_success_file.json")
-
-            local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
-            local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-            local parametric_pos_id_key3 = path .. "::namespace::1::nested::namespace::1::test::3"
-            local parametric_pos_id_key4 = path
-                .. "::namespace::2::nested::namespace::2::-::1::some::test"
-            local parametric_pos_id_key5 = path
-                .. "::namespace::2::nested::namespace::2::-::2::some::test"
-            local parametric_pos_id_key6 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::1"
-            local parametric_pos_id_key7 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::2"
-            local parametric_pos_id_key8 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::1"
-            local parametric_pos_id_key9 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
-                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
-                [path .. "::namespace 1 nested namespace 1 test 3::9"] = parametric_pos_id_key3,
-                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key4,
-                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key5,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key6,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key7,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key8,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key9,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, tree)
 
             assert.are.same(neotest_results, {
@@ -418,12 +338,6 @@ describe("adapter.results", function()
 
             local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
             local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
-                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
@@ -480,28 +394,6 @@ describe("adapter.results", function()
             -- Get the subtree rooted at the the first parametric namespace in the file
             local subtree = tree:children()[2]:children()[1]
             assert.is_not_nil(subtree)
-
-            local parametric_pos_id_key1 = path
-                .. "::namespace::2::nested::namespace::2::-::1::some::test"
-            local parametric_pos_id_key2 = path
-                .. "::namespace::2::nested::namespace::2::-::2::some::test"
-            local parametric_pos_id_key3 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::1"
-            local parametric_pos_id_key4 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::2"
-            local parametric_pos_id_key5 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::1"
-            local parametric_pos_id_key6 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key1,
-                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key2,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key3,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key4,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key5,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key6,
-            }
 
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
@@ -599,35 +491,6 @@ describe("adapter.results", function()
             local path = "./test_files/parametric_tests_fail_spec.lua"
             local tree =
                 discover_positions(path, "./test_files/parametric_test_output_fail_file.json")
-
-            local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
-            local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-            local parametric_pos_id_key3 = path .. "::namespace::1::nested::namespace::1::test::3"
-            local parametric_pos_id_key4 = path
-                .. "::namespace::2::nested::namespace::2::-::1::some::test"
-            local parametric_pos_id_key5 = path
-                .. "::namespace::2::nested::namespace::2::-::2::some::test"
-            local parametric_pos_id_key6 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::1"
-            local parametric_pos_id_key7 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::2"
-            local parametric_pos_id_key8 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::1"
-            local parametric_pos_id_key9 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
-                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
-                [path .. "::namespace 1 nested namespace 1 test 3::9"] = parametric_pos_id_key3,
-                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key4,
-                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key5,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key6,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key7,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key8,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key9,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, tree)
 
             assert.are.same(neotest_results, {
@@ -813,77 +676,5 @@ describe("adapter.results", function()
         vim.notify:revert()
         ---@diagnostic disable-next-line: undefined-field
         lib.files.read:revert()
-    end)
-
-    it("logs not finding a matching position id", function()
-        stub(vim, "schedule", function(func)
-            func()
-        end)
-
-        stub(vim, "notify")
-
-        stub(lib.files, "read", function()
-            return table.concat(vim.fn.readfile("./test_files/busted_test_output.json"), "\n")
-        end)
-
-        local path = "./test_files/test1_spec.lua"
-        -- spec.context.position_id_mapping[path .. "::namespace tests a failing test::7"] = nil
-
-        spec.context.position_id_mapping = {
-            [path .. "::top-level namespace 1 nested namespace 1 test 2::8"] = path
-                .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = path
-                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = path
-                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
-        }
-
-        ---@diagnostic disable-next-line: missing-parameter
-        local neotest_results = adapter.results(spec, strategy_result)
-
-        assert.are.same(neotest_results, {
-            [path .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"'] = {
-                status = types.ResultStatus.passed,
-                short = "top-level namespace 1 nested namespace 1 test 2: passed",
-                output = strategy_result.output,
-            },
-            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"'] = {
-                status = types.ResultStatus.failed,
-                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3: failed",
-                output = strategy_result.output,
-                errors = {
-                    {
-                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
-                        line = 15,
-                    },
-                },
-            },
-            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"'] = {
-                status = types.ResultStatus.failed,
-                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4: failed",
-                output = strategy_result.output,
-                errors = {
-                    {
-                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
-                        line = 19,
-                    },
-                },
-            },
-        })
-
-        assert.stub(vim.schedule).was.called()
-        assert.stub(vim.notify).was.called()
-        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
-        assert.stub(logger.error).was.called_with(
-            "Failed to find matching position id for key "
-                .. path
-                .. "::top-level namespace 1 nested namespace 1 test 1::3",
-            nil
-        )
-
-        ---@diagnostic disable-next-line: undefined-field
-        vim.schedule:revert()
-        ---@diagnostic disable-next-line: undefined-field
-        vim.notify:revert()
     end)
 end)
