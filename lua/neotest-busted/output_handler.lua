@@ -4,20 +4,14 @@ return function(options)
     local busted = require("busted")
     local handler = require("busted.outputHandlers.base")()
 
-    ---@param value string
-    ---@return string
-    local function double_quote(value)
-        return ('"%s"'):format(value)
-    end
-
     -- A copy of the base handler's getFullName function except that it uses
     -- "::" as a separator instead of spaces and also preprends the full path
     local function createNeotestPositionId(context)
         local parent = busted.parent(context)
-        local names = { double_quote(context.name or context.descriptor) }
+        local names = { context.name or context.descriptor }
 
         while parent and (parent.name or parent.descriptor) and parent.descriptor ~= "file" do
-            table.insert(names, 1, double_quote(parent.name or parent.descriptor))
+            table.insert(names, 1, parent.name or parent.descriptor)
             parent = busted.parent(parent)
         end
 
@@ -48,28 +42,23 @@ return function(options)
 
     ---@diagnostic disable-next-line: unused-local
     handler.testEnd = function(element, parent, status)
-        local pos_id = createNeotestPositionId(element)
+        local posId = createNeotestPositionId(element)
         local insertTable
 
         if status == "success" then
             insertTable = handler.successes
-            handler.successesCount = handler.successesCount + 1
         elseif status == "pending" then
             insertTable = handler.pendings
-            handler.pendingsCount = handler.pendingsCount + 1
         elseif status == "failure" then
-            -- Failure already saved in failure handler
-            handler.failuresCount = handler.failuresCount + 1
-            return nil, true
+            insertTable = handler.failures
         elseif status == "error" then
-            -- Error count already incremented and saved in error handler
-            return nil, true
+            insertTable = handler.errors
         end
 
         -- Inject an extra field for the neotest position id as the default
         -- name in the json output using spaces so we cannot reliably split
         -- on space since the full test name itself might contain spaces
-        insertTable[#insertTable]["neotestPositionId"] = pos_id
+        insertTable[#insertTable]["neotestPositionId"] = posId
     end
 
     handler.suiteEnd = function()

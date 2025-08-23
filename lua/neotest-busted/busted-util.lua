@@ -93,6 +93,7 @@ local function get_runtime_test_info(tree)
         local test = { path = path, in_tree = false }
 
         if lnum and rest then
+            -- TODO: 'rest' is the test.name I think so we don't need pos_id_to_test_name
             local non_path_parts = vim.split(rest, " ")
             local position_id = ("%s::%s"):format(path, table.concat(non_path_parts, "::"))
 
@@ -127,13 +128,15 @@ local function find_overlapping_position(tree, runtime_test)
     for _, node in tree:iter_nodes() do
         local pos = node:data()
 
-        if pos.range[1] + 1 == runtime_test.lnum then
+        -- vim.print(vim.inspect({ pos.id, pos.range[1] + 1, runtime_test.lnum }))
+        if pos.type == types.PositionType.test and pos.range[1] + 1 == runtime_test.lnum then
             position = pos
             break
         end
     end
 
     if not position then
+        -- vim.print(vim.inspect({ "fail", runtime_test }))
         logging.error(
             "Failed to find a matching position for runtime test. This can happen if neotest-busted cannot parse some tests (you are using neotest's async.it instead of neotest-busted's async function) so busted cannot list the tests properly",
             nil,
@@ -191,6 +194,10 @@ function busted_util.discover_parametric_tests(tree)
     -- in the file
     for _, pos_id in ipairs(ordered_pos_ids) do
         local test = runtime_test_info[pos_id]
+
+        if pos_id:match("test::3$") then
+            vim.print(vim.inspect(test))
+        end
 
         if not test.in_tree then
             local pos = find_overlapping_position(tree, test)

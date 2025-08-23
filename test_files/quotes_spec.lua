@@ -1,4 +1,4 @@
-describe("quotes", function()
+describe([[quotes]], function()
     -- stylua: ignore start
     it('single quotes test', function()
         -- stylua: ignore end

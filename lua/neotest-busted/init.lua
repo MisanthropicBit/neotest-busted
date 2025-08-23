@@ -407,13 +407,18 @@ function BustedNeotestAdapter.discover_positions(path)
     ;; describe blocks
     ((function_call
         name: (identifier) @func_name (#match? @func_name "^describe$")
-        arguments: (arguments (_) @namespace.name (function_definition))
+        arguments: (arguments (
+                string content: (string_content) @namespace.name
+            ) (function_definition))
     )) @namespace.definition
 
     ;; it blocks
     ((function_call
         name: (identifier) @func_name
-        arguments: (arguments (_) @test.name (function_definition))
+        arguments: (arguments
+            (string
+                content: (string_content) @test.name
+            ) (function_definition))
     ) (#match? @func_name "^it$")) @test.definition
 
     ;; pending blocks
@@ -528,6 +533,7 @@ function BustedNeotestAdapter.build_spec(args)
     -- Iterate all tests in the tree and generate position ids for them
     local filters = create_filters_for_tree(tree)
 
+    -- vim.print(pos.id)
     local paths = { pos.path }
     local results_path = async.fn.tempname() .. ".json"
     local test_command = BustedNeotestAdapter.create_test_command(paths, {
@@ -582,7 +588,7 @@ end
 local function convert_test_result_to_neotest_result(status, test_result, output)
     if test_result.isError == true then
         -- This is an internal error in busted, not a test that threw
-        return nil, {
+        return {
             message = test_result.message,
             line = 0,
         }
@@ -635,6 +641,7 @@ local function convert_test_results_to_neotest_results(test_results_json, output
                 output
             )
 
+            -- TODO: Why does continue to work with quotes_spec.lua? Does neotest strip quotes?
             local pos_id = test_result.neotestPositionId
 
             if not pos_id then
@@ -739,6 +746,8 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     local results, pos_id_to_test_name =
         convert_test_results_to_neotest_results(test_results_json, strategy_result.output)
+
+    -- vim.print(vim.inspect(results))
 
     if config.parametric_test_discovery == true then
         update_parametric_tests_in_tree(tree, pos_id_to_test_name)
