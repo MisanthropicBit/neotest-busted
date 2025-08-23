@@ -18,34 +18,39 @@ local types = require("neotest.types")
 
 --- Process a line from the output of 'busted --list'
 ---@param line string
----@return string?
----@return string?
-local function process_runtime_test_line(line)
-    -- TODO: Make this more robust
-    -- Splitting like this accounts for colons in test names
-    local iter = vim.gsplit(line, ": ?")
+---@return string
+---@return integer
+local function process_list_test_line(line)
+    local parts = vim.split(line, "::")
+    local pos_id_parts = vim.list_slice(parts, 1, #parts - 1)
+    local lnum = tonumber(parts[#parts])
+    ---@cast lnum -nil
 
-    local path = iter()
-    local lnum = iter()
-    local rest = line:sub(#path + #lnum + 4)
-
-    return lnum, rest
+    return table.concat(pos_id_parts, "::"), lnum
 end
 
 ---@async
 ---@param tree neotest.Tree
----@return table<string, neotest-busted.RuntimeTestInfo>
----@return table<string>
-local function get_runtime_test_info(tree)
+---@return string?
+local function run_list_tests_command(tree)
     local position = tree:data()
     local path = position.path
+
+    -- Using 'busted --list' outputs an incomplete path and uses spaces to
+    -- concatenate the full test name so we do not know if a space is a
+    -- delimiter or part of the test name. Instead we use a custom helper
+    -- script that works similar to the code executed by running 'busted --list'.
+    -- It outputs the full path and uses an internal delimiter.
     local command_info = adapter.create_test_command({ path }, {
-        busted_arguments = { "--list" },
+        busted_arguments = {
+            "--helper",
+            util.get_path_to_plugin_file("helper_scripts/list_tests_helper.lua"),
+        },
     })
 
     if not command_info then
         logging.error("Could not find a busted command for listing tests")
-        return {}, {}
+        return
     end
 
     logger.debug(
@@ -62,89 +67,60 @@ local function get_runtime_test_info(tree)
 
     if err then
         logging.error("Failed to list tests via busted: %s", nil, err)
-        return {}, {}
+        return
     end
 
-    -- 'busted --list' outputs to stderr
+    -- Output goes to stderr
     ---@cast process nio.process.Process
     local stderr, read_err = process.stderr.read()
 
     if read_err then
         logging.error("Got error when reading output from busted: %s", nil, read_err)
-        return {}, {}
+        return
     end
 
     local code = process.result()
 
     if code ~= 0 then
         logging.error("Failed to list tests via busted (code: %d)", nil, code)
-        return {}, {}
+        return
     end
 
-    ---@cast stderr -nil
+    return stderr
+end
+
+---@async
+---@param tree neotest.Tree
+---@return table<string, neotest-busted.RuntimeTestInfo>
+---@return table<string>
+local function get_runtime_test_info(tree)
+    local output = run_list_tests_command(tree)
+
+    if not output then
+        return {}, {}
+    end
 
     ---@type table<string, neotest-busted.RuntimeTestInfo>
     local tests = {}
     local ordered_pos_ids = {}
+    local path = tree:data().path
 
-    -- 'busted --list' output contains carriage returns
-    for line in vim.gsplit(stderr, "\r\n", { plain = true, trimempty = true }) do
-        local lnum, rest = process_runtime_test_line(line)
-        local test = { path = path, in_tree = false }
+    -- Output contains carriage returns
+    for line in vim.gsplit(output, "\r\n", { plain = true, trimempty = true }) do
+        local position_id, lnum = process_list_test_line(line)
 
-        if lnum and rest then
-            local non_path_parts = vim.split(rest, " ")
-            local position_id = ("%s::%s"):format(path, table.concat(non_path_parts, "::"))
+        tests[position_id] = {
+            path = path,
+            in_tree = false,
+            id = position_id,
+            type = types.PositionType.test,
+            lnum = lnum,
+        }
 
-            test.id = position_id
-            test.type = types.PositionType.test
-            test.lnum = tonumber(lnum)
-
-            tests[position_id] = test
-            table.insert(ordered_pos_ids, position_id)
-        else
-            -- NOTE: This can happen for top-level 'it' tests outside of a
-            -- 'describe' where only the test name is listed by busted
-            --
-            -- https://github.com/lunarmodules/busted/issues/743
-            logger.warn(
-                "Top-level 'it' found which is not currently supported for parametric tests"
-            )
-        end
+        table.insert(ordered_pos_ids, position_id)
     end
 
     return tests, ordered_pos_ids
-end
-
----@param tree neotest.Tree
----@param runtime_test neotest-busted.RuntimeTestInfo
----@return neotest.Position?
-local function find_overlapping_position(tree, runtime_test)
-    local position
-
-    -- Iterate all nodes to find a test position that matches the line
-    -- number of the runtime test
-    for _, node in tree:iter_nodes() do
-        local pos = node:data()
-
-        if pos.range[1] + 1 == runtime_test.lnum then
-            position = pos
-            break
-        end
-    end
-
-    if not position then
-        logging.error(
-            "Failed to find a matching position for runtime test. This can happen if neotest-busted cannot parse some tests (you are using neotest's async.it instead of neotest-busted's async function) so busted cannot list the tests properly",
-            nil,
-            {
-                runtime_test = runtime_test,
-            }
-        )
-        return nil
-    end
-
-    return position
 end
 
 ---@async
@@ -157,31 +133,26 @@ function busted_util.discover_parametric_tests(tree)
         return {}
     end
 
-    -- Await the scheduler since calling vimL functions like vim.split cannot
-    -- be done in fast calls
-    nio.scheduler()
+    ---@type table<integer, neotest.Position>
+    local tests_by_line_number = {}
 
-    -- Iterate all positions and find those not in the 'busted --list' output
-    -- as they are the original unexpanded parametric tests
-    -- TODO: Can't we just save the mapping between unexpanded tests and
-    -- parametric tests here?
+    -- Iterate all positions and find those not in the output
+    -- as they are the original source-level parametric tests
     for _, node in tree:iter_nodes() do
         local pos = node:data()
 
         if pos.type == types.PositionType.test then
-            local path, stripped = util.strip_position_id(pos.id, "::")
-            local normalized_id = ("%s::%s"):format(
-                path,
-                table.concat(vim.split(stripped, " "), "::")
-            )
+            tests_by_line_number[pos.range[1] + 1] = pos
 
-            if runtime_test_info[normalized_id] then
+            if runtime_test_info[pos.id] then
                 -- The tree position appears in the runtime test information
-                runtime_test_info[normalized_id].in_tree = true
+                runtime_test_info[pos.id].in_tree = true
             end
         end
     end
 
+    --- Group parametric (runtime-level) tests by their shared (source-level) position id
+    ---@type table<string, neotest-busted.RuntimeTestInfo[]>
     local parametric_positions = {}
 
     -- Iterate runtime test info and mark those positions not in the tree as
@@ -192,15 +163,16 @@ function busted_util.discover_parametric_tests(tree)
     for _, pos_id in ipairs(ordered_pos_ids) do
         local test = runtime_test_info[pos_id]
 
+        -- Test was not in tree so it must be parametric
         if not test.in_tree then
-            local pos = find_overlapping_position(tree, test)
+            local source_level_pos = tests_by_line_number[test.lnum]
 
-            if pos then
-                if not parametric_positions[pos.id] then
-                    parametric_positions[pos.id] = {}
+            if source_level_pos then
+                if not parametric_positions[source_level_pos.id] then
+                    parametric_positions[source_level_pos.id] = {}
                 end
 
-                table.insert(parametric_positions[pos.id], test)
+                table.insert(parametric_positions[source_level_pos.id], test)
             end
         end
     end
