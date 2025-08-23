@@ -26,6 +26,16 @@ return function(options)
         return table.concat(names, "::")
     end
 
+    local function get_parent(context)
+        local parent = busted.parent(context)
+
+        while parent and (parent.name or parent.descriptor) and parent.descriptor ~= "file" do
+            parent = busted.parent(parent)
+        end
+
+        return parent.name
+    end
+
     -- Copy options and remove arguments so the utfTerminal handler can parse
     -- them without error
     local utf_terminal_options = vim.deepcopy(options)
@@ -53,23 +63,30 @@ return function(options)
 
         if status == "success" then
             insertTable = handler.successes
-            handler.successesCount = handler.successesCount + 1
         elseif status == "pending" then
             insertTable = handler.pendings
-            handler.pendingsCount = handler.pendingsCount + 1
         elseif status == "failure" then
-            -- Failure already saved in failure handler
-            handler.failuresCount = handler.failuresCount + 1
-            return nil, true
+            insertTable = handler.failures
         elseif status == "error" then
-            -- Error count already incremented and saved in error handler
-            return nil, true
+            insertTable = handler.errors
+        end
+
+        local thirdPartyAsync = element.trace.source:match("nio/tests.lua$") ~= nil
+
+        if thirdPartyAsync then
+            local _parent = get_parent(element)
+            local name = _parent
+            local parts = vim.split(pos_id, "::")
+
+            insertTable[#insertTable]["neotestPositionId"] = name .. "::" .. table.concat(vim.list_slice(parts, 2), "::")
+        else
+            insertTable[#insertTable]["neotestPositionId"] = pos_id
         end
 
         -- Inject an extra field for the neotest position id as the default
         -- name in the json output using spaces so we cannot reliably split
         -- on space since the full test name itself might contain spaces
-        insertTable[#insertTable]["neotestPositionId"] = pos_id
+        insertTable[#insertTable]["thirdPartyAsync"] = thirdPartyAsync
     end
 
     handler.suiteEnd = function()
