@@ -12,28 +12,35 @@ return function(options)
 
     -- A copy of the base handler's getFullName function except that it uses
     -- "::" as a separator instead of spaces and also preprends the full path
-    local function createNeotestPositionId(context)
-        local parent = busted.parent(context)
-        local names = { double_quote(context.name or context.descriptor) }
+    ---@param element neotest-busted.BustedElement
+    ---@return string
+    local function createNeotestPositionId(element)
+        local parent = busted.parent(element)
+        local names = { double_quote(element.name or element.descriptor) }
 
         while parent and (parent.name or parent.descriptor) and parent.descriptor ~= "file" do
             table.insert(names, 1, double_quote(parent.name or parent.descriptor))
             parent = busted.parent(parent)
         end
 
-        table.insert(names, 1, context.trace.source:sub(2))
+        local isThirdPartyAsync = element.trace.source:match("nio/tests.lua$") ~= nil
+        local path
 
-        return table.concat(names, "::")
-    end
-
-    local function get_parent(context)
-        local parent = busted.parent(context)
-
-        while parent and (parent.name or parent.descriptor) and parent.descriptor ~= "file" do
-            parent = busted.parent(parent)
+        if isThirdPartyAsync then
+            -- When the while loop above exits it might be because the parent descriptor
+            -- is 'file' in which case its name is the file containing the async test. If
+            -- we used element.trace.source below it would give the nio module's tests.lua
+            -- file which would not match any position ids in the neotest tree. We could
+            -- probably also do this for non-async tests
+            path = parent.name or parent.descriptor
+        else
+            -- Strip the leading '@' from the element's trace source
+            path = element.trace.source:sub(2)
         end
 
-        return parent.name
+        table.insert(names, 1, path)
+
+        return table.concat(names, "::")
     end
 
     -- Copy options and remove arguments so the utfTerminal handler can parse
@@ -58,7 +65,6 @@ return function(options)
 
     ---@diagnostic disable-next-line: unused-local
     handler.testEnd = function(element, parent, status)
-        local pos_id = createNeotestPositionId(element)
         local insertTable
 
         if status == "success" then
@@ -71,22 +77,11 @@ return function(options)
             insertTable = handler.errors
         end
 
-        local thirdPartyAsync = element.trace.source:match("nio/tests.lua$") ~= nil
-
-        if thirdPartyAsync then
-            local _parent = get_parent(element)
-            local name = _parent
-            local parts = vim.split(pos_id, "::")
-
-            insertTable[#insertTable]["neotestPositionId"] = name .. "::" .. table.concat(vim.list_slice(parts, 2), "::")
-        else
-            insertTable[#insertTable]["neotestPositionId"] = pos_id
-        end
-
-        -- Inject an extra field for the neotest position id as the default
-        -- name in the json output using spaces so we cannot reliably split
-        -- on space since the full test name itself might contain spaces
-        insertTable[#insertTable]["thirdPartyAsync"] = thirdPartyAsync
+        -- Inject an extra field containing the neotest position id as the
+        -- default 'name' field in the json output uses spaces so we cannot
+        -- reliably split on space since the full test name itself might
+        -- contain spaces
+        insertTable[#insertTable]["neotestPositionId"] = createNeotestPositionId(element)
     end
 
     handler.suiteEnd = function()
