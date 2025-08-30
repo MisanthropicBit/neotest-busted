@@ -422,7 +422,7 @@ function BustedNeotestAdapter.discover_positions(path)
         arguments: (arguments (string) @test.name)
     ) (#match? @func_name "^pending$")) @test.definition
 
-    ;; plenary.nvim async blocks
+    ;; nvim-nio async blocks
     ((function_call
         name: (
             dot_index_expression
