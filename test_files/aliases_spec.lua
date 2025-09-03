@@ -20,16 +20,25 @@ describe("describe", function()
     end)
 
     describe("describe", function()
-        it("async it", async(function()
-            assert.are.same(1, 1)
-        end))
+        it(
+            "async it",
+            async(function()
+                assert.are.same(1, 1)
+            end)
+        )
 
-        spec("async spec", async(function()
-            assert.are.same(1, 1)
-        end))
+        spec(
+            "async spec",
+            async(function()
+                assert.are.same(1, 1)
+            end)
+        )
 
-        test("async test", async(function()
-            assert.are.same(1, 1)
-        end))
+        test(
+            "async test",
+            async(function()
+                assert.are.same(1, 1)
+            end)
+        )
     end)
 end)
