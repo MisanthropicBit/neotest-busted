@@ -406,7 +406,7 @@ function BustedNeotestAdapter.discover_positions(path)
     local query = [[
     ;; describe blocks
     ((function_call
-        name: (identifier) @func_name (#match? @func_name "^(describe|context)$")
+        name: (identifier) @func_name (#match? @func_name "^(describe|context|insulate|expose)$")
         arguments: (arguments (_) @namespace.name (function_definition))
     )) @namespace.definition
 
@@ -414,7 +414,7 @@ function BustedNeotestAdapter.discover_positions(path)
     ((function_call
         name: (identifier) @func_name
         arguments: (arguments (_) @test.name (function_definition))
-    ) (#match? @func_name "^it$")) @test.definition
+    ) (#match? @func_name "^(it|test|spec)$")) @test.definition
 
     ;; pending blocks
     ((function_call

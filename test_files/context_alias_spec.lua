@@ -1,7 +1,0 @@
-describe("describe", function()
-    context("context", function()
-        it("test", function()
-            assert.are.same(1, 1)
-        end)
-    end)
-end)

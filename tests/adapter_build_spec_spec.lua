@@ -213,7 +213,7 @@ describe("adapter.build_spec", function()
         })
     end)
 
-    async.it("builds command for test with context alias", function()
+    async.it("builds command for test file using aliases", function()
         package.loaded["neotest-busted"] = nil
 
         local adapter = require("neotest-busted")({
@@ -223,10 +223,8 @@ describe("adapter.build_spec", function()
             busted_cpaths = nil,
             minimal_init = nil,
         })
-        local tree = create_tree(adapter, "./test_files/context_alias_spec.lua")
-        local spec = adapter.build_spec({
-            tree = tree:children()[1]:children()[1]:children()[1],
-        })
+        local tree = create_tree(adapter, "./test_files/aliases_spec.lua")
+        local spec = adapter.build_spec({ tree = tree:children()[1] })
 
         assert.is_not_nil(spec)
 
@@ -248,14 +246,20 @@ describe("adapter.build_spec", function()
             "test-output.json",
             "--verbose",
             "--filter",
-            "^describe context test$",
-            "./test_files/context_alias_spec.lua",
+            "^describe context it$",
+            "--filter",
+            "^describe insulate spec$",
+            "--filter",
+            "^describe expose test$",
+            "./test_files/aliases_spec.lua",
         })
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
             position_id_mapping = {
-                ["./test_files/context_alias_spec.lua::describe context test::3"] = './test_files/context_alias_spec.lua::"describe"::"context"::"test"',
+                ["./test_files/aliases_spec.lua::describe context it::3"] = './test_files/aliases_spec.lua::"describe"::"context"::"it"',
+                ["./test_files/aliases_spec.lua::describe insulate spec::9"] = './test_files/aliases_spec.lua::"describe"::"insulate"::"spec"',
+                ["./test_files/aliases_spec.lua::describe expose test::15"] = './test_files/aliases_spec.lua::"describe"::"expose"::"test"',
             },
         })
     end)
