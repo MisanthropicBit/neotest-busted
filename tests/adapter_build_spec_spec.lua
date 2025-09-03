@@ -51,7 +51,8 @@ describe("adapter.build_spec", function()
     ---@return neotest.Tree
     local function create_tree(adapter, path)
         -- TODO: Why not just return the tree from discover_positions?
-        local positions = adapter.discover_positions(path or "./test_files/test1_spec.lua"):to_list()
+        local positions =
+            adapter.discover_positions(path or "./test_files/test1_spec.lua"):to_list()
 
         return Tree.from_list(positions, function(pos)
             return pos.id
