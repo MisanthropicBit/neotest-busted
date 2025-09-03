@@ -47,10 +47,11 @@ describe("adapter.build_spec", function()
     end
 
     ---@param adapter neotest.Adapter
+    ---@param path string?
     ---@return neotest.Tree
-    local function create_tree(adapter)
+    local function create_tree(adapter, path)
         -- TODO: Why not just return the tree from discover_positions?
-        local positions = adapter.discover_positions("./test_files/test1_spec.lua"):to_list()
+        local positions = adapter.discover_positions(path or "./test_files/test1_spec.lua"):to_list()
 
         return Tree.from_list(positions, function(pos)
             return pos.id
@@ -208,6 +209,53 @@ describe("adapter.build_spec", function()
             results_path = "test-output.json",
             position_id_mapping = {
                 ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
+            },
+        })
+    end)
+
+    async.it("builds command for test with context alias", function()
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            busted_args = {},
+            busted_paths = nil,
+            busted_cpaths = nil,
+            minimal_init = nil,
+        })
+        local tree = create_tree(adapter, "./test_files/context_alias_spec.lua")
+        local spec = adapter.build_spec({
+            tree = tree:children()[1]:children()[1]:children()[1],
+        })
+
+        assert.is_not_nil(spec)
+
+        assert_spec_command(spec.command, {
+            vim.loop.exepath(),
+            "--headless",
+            "-i",
+            "NONE",
+            "-n",
+            "-u",
+            "tests/minimal_init.lua",
+            "-c",
+            "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
+            "-l",
+            "./busted",
+            "--output",
+            "./lua/neotest-busted/output_handler.lua",
+            "-Xoutput",
+            "test-output.json",
+            "--verbose",
+            "--filter",
+            "^describe context test$",
+            "./test_files/context_alias_spec.lua",
+        })
+
+        assert.are.same(spec.context, {
+            results_path = "test-output.json",
+            position_id_mapping = {
+                ["./test_files/context_alias_spec.lua::describe context test::3"] = './test_files/context_alias_spec.lua::"describe"::"context"::"test"',
             },
         })
     end)
