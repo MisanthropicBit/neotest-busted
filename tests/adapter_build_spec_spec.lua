@@ -268,8 +268,8 @@ describe("adapter.build_spec", function()
                 ["./test_files/aliases_spec.lua::describe insulate spec::11"] = './test_files/aliases_spec.lua::"describe"::"insulate"::"spec"',
                 ["./test_files/aliases_spec.lua::describe expose test::17"] = './test_files/aliases_spec.lua::"describe"::"expose"::"test"',
                 ["./test_files/aliases_spec.lua::describe describe async it::23"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async it"',
-                ["./test_files/aliases_spec.lua::describe describe async spec::27"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async spec"',
-                ["./test_files/aliases_spec.lua::describe describe async test::31"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async test"',
+                ["./test_files/aliases_spec.lua::describe describe async spec::30"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async spec"',
+                ["./test_files/aliases_spec.lua::describe describe async test::37"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async test"',
             },
         })
     end)
