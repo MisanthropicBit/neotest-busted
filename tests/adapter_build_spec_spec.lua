@@ -252,15 +252,24 @@ describe("adapter.build_spec", function()
             "^describe insulate spec$",
             "--filter",
             "^describe expose test$",
+            "--filter",
+            "^describe describe async it$",
+            "--filter",
+            "^describe describe async spec$",
+            "--filter",
+            "^describe describe async test$",
             "./test_files/aliases_spec.lua",
         })
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
             position_id_mapping = {
-                ["./test_files/aliases_spec.lua::describe context it::3"] = './test_files/aliases_spec.lua::"describe"::"context"::"it"',
-                ["./test_files/aliases_spec.lua::describe insulate spec::9"] = './test_files/aliases_spec.lua::"describe"::"insulate"::"spec"',
-                ["./test_files/aliases_spec.lua::describe expose test::15"] = './test_files/aliases_spec.lua::"describe"::"expose"::"test"',
+                ["./test_files/aliases_spec.lua::describe context it::5"] = './test_files/aliases_spec.lua::"describe"::"context"::"it"',
+                ["./test_files/aliases_spec.lua::describe insulate spec::11"] = './test_files/aliases_spec.lua::"describe"::"insulate"::"spec"',
+                ["./test_files/aliases_spec.lua::describe expose test::17"] = './test_files/aliases_spec.lua::"describe"::"expose"::"test"',
+                ["./test_files/aliases_spec.lua::describe describe async it::23"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async it"',
+                ["./test_files/aliases_spec.lua::describe describe async spec::27"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async spec"',
+                ["./test_files/aliases_spec.lua::describe describe async test::31"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async test"',
             },
         })
     end)

@@ -1,3 +1,5 @@
+local async = require("neotest-busted.async")
+
 describe("describe", function()
     context("context", function()
         it("it", function()
@@ -15,5 +17,19 @@ describe("describe", function()
         test("test", function()
             assert.are.same(1, 1)
         end)
+    end)
+
+    describe("describe", function()
+        it("async it", async(function()
+            assert.are.same(1, 1)
+        end))
+
+        spec("async spec", async(function()
+            assert.are.same(1, 1)
+        end))
+
+        test("async test", async(function()
+            assert.are.same(1, 1)
+        end))
     end)
 end)

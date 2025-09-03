@@ -428,7 +428,7 @@ function BustedNeotestAdapter.discover_positions(path)
         arguments: (arguments (_) @test.name (function_call
             name: (identifier) @async (#match? @async "^async$")
         ))
-    ) (#match? @func_name "^it$")) @test.definition
+    ) (#match? @func_name "^(it|test|spec)$")) @test.definition
 ]]
 
     -- Lua-ls does not understand that neotest.lib.treesitter.ParseOptions
