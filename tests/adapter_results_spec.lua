@@ -74,8 +74,7 @@ describe("adapter.results", function()
                 output = strategy_result.output,
                 errors = {
                     {
-                        message =
-                        "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                         line = 15,
                     },
                 },
@@ -86,8 +85,7 @@ describe("adapter.results", function()
                 output = strategy_result.output,
                 errors = {
                     {
-                        message =
-                        "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
                         line = 19,
                     },
                 },
@@ -354,8 +352,7 @@ describe("adapter.results", function()
                     output = strategy_result.output,
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                            message = "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
                             line = 4,
                         },
                     },
@@ -366,8 +363,7 @@ describe("adapter.results", function()
                     output = strategy_result.output,
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                            message = "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
                             line = 4,
                         },
                     },
@@ -412,8 +408,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 18,
                         },
                     },
@@ -424,8 +419,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 23,
                         },
                     },
@@ -436,8 +430,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 23,
                         },
                     },
@@ -448,8 +441,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 18,
                         },
                     },
@@ -460,8 +452,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 23,
                         },
                     },
@@ -472,8 +463,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 23,
                         },
                     },
@@ -514,8 +504,7 @@ describe("adapter.results", function()
                     output = strategy_result.output,
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                            message = "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
                             line = 4,
                         },
                     },
@@ -526,8 +515,7 @@ describe("adapter.results", function()
                     output = strategy_result.output,
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                            message = "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
                             line = 4,
                         },
                     },
@@ -538,8 +526,7 @@ describe("adapter.results", function()
                     output = strategy_result.output,
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:10: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                            message = "./test_files/parametric_tests_fail_spec.lua:10: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
                             line = 9,
                         },
                     },
@@ -550,8 +537,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 18,
                         },
                     },
@@ -562,8 +548,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 23,
                         },
                     },
@@ -574,8 +559,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 23,
                         },
                     },
@@ -586,8 +570,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 18,
                         },
                     },
@@ -598,8 +581,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 23,
                         },
                     },
@@ -610,8 +592,7 @@ describe("adapter.results", function()
                     status = "failed",
                     errors = {
                         {
-                            message =
-                            "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
+                            message = "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
                             line = 23,
                         },
                     },
@@ -727,15 +708,14 @@ describe("adapter.results", function()
                 output = strategy_result.output,
                 errors = {
                     {
-                        message =
-                        "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
+                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
                         line = 19,
                     },
                 },
             },
             [path .. '::"top-level namespace 1"::"nested namespace 1"::"test 1"'] = {
                 output = strategy_result.output,
-                short = 'top-level namespace 1 nested namespace 1 test 1: skipped',
+                short = "top-level namespace 1 nested namespace 1 test 1: skipped",
                 status = types.ResultStatus.skipped,
             },
         })

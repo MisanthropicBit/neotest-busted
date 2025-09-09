@@ -161,16 +161,16 @@ local function escape_test_pattern_filter(filter)
     -- match any earlier replacements that insert a '%'.
     return (
         filter
-        :gsub("%%", "%%%%")
-        :gsub("%(", "%%(")
-        :gsub("%)", "%%)")
-        :gsub("%[", "%%[")
-        :gsub("%*", "%%*")
-        :gsub("%+", "%%+")
-        :gsub("%-", "%%-")
-        :gsub("%?", "%%?")
-        :gsub("%$", "%%$")
-        :gsub("%^", "%%^")
+            :gsub("%%", "%%%%")
+            :gsub("%(", "%%(")
+            :gsub("%)", "%%)")
+            :gsub("%[", "%%[")
+            :gsub("%*", "%%*")
+            :gsub("%+", "%%+")
+            :gsub("%-", "%%-")
+            :gsub("%?", "%%?")
+            :gsub("%$", "%%$")
+            :gsub("%^", "%%^")
     )
 end
 
