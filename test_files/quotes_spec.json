@@ -23,6 +23,7 @@
                 "starttick": 250057.353197
             },
             "name": "quotes single quotes test",
+            "neotestPositionId": "./test_files/quotes_spec.lua::\"quotes\"::'single quotes test'",
             "trace": {
                 "source": "@./test_files/quotes_spec.lua",
                 "lastlinedefined": 9,
@@ -56,6 +57,7 @@
                 "starttick": 250057.353331
             },
             "name": "quotes literal quotes test",
+            "neotestPositionId": "./test_files/quotes_spec.lua::\"quotes\"::[[literal quotes test]]",
             "trace": {
                 "source": "@./test_files/quotes_spec.lua",
                 "lastlinedefined": 9,

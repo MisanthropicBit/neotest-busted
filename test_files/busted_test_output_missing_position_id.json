@@ -22,7 +22,6 @@
             },
             "message": "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
             "name": "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3",
-            "neotestPositionId": "./test_files/test1_spec.lua::\"^top-le[ve]l (na*m+e-sp?ac%e) 2$\"::\"test 3\"",
             "trace": {
                 "currentline": 16,
                 "lastlinedefined": 17,

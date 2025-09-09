@@ -39,7 +39,7 @@ describe("adapter.build_spec", function()
                 idx = idx + 1
             elseif item == '"--helper"' then
                 assert.is_true(
-                    vim.endswith(spec_command[idx], 'lua/neotest-busted/start_debug.lua"')
+                    vim.endswith(spec_command[idx], 'lua/neotest-busted/helper_scripts/start_debug.lua"')
                 )
                 idx = idx + 1
             end
@@ -106,15 +106,7 @@ describe("adapter.build_spec", function()
             "./test_files/test1_spec.lua",
         })
 
-        assert.are.same(spec.context, {
-            results_path = "test-output.json",
-            position_id_mapping = {
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::8"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
-            },
-        })
+        assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
 
     async.it("builds command for namespace test", function()
@@ -156,13 +148,7 @@ describe("adapter.build_spec", function()
             "./test_files/test1_spec.lua",
         })
 
-        assert.are.same(spec.context, {
-            results_path = "test-output.json",
-            position_id_mapping = {
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::8"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-            },
-        })
+        assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
 
     async.it("builds command for test", function()
@@ -204,12 +190,7 @@ describe("adapter.build_spec", function()
             "./test_files/test1_spec.lua",
         })
 
-        assert.are.same(spec.context, {
-            results_path = "test-output.json",
-            position_id_mapping = {
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-            },
-        })
+        assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
 
     async.it("builds command for test with extra arguments", function()
@@ -254,12 +235,7 @@ describe("adapter.build_spec", function()
             "--no-sort",
         })
 
-        assert.are.same(spec.context, {
-            results_path = "test-output.json",
-            position_id_mapping = {
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-            },
-        })
+        assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
 
     async.it("escapes special characters in pattern in command", function()
@@ -296,12 +272,7 @@ describe("adapter.build_spec", function()
             "./test_files/test1_spec.lua",
         })
 
-        assert.are.same(spec.context, {
-            results_path = "test-output.json",
-            position_id_mapping = {
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-            },
-        })
+        assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
 
     async.it("builds command for debugging file test", function()
@@ -354,22 +325,14 @@ describe("adapter.build_spec", function()
 
         assert_spec_command(spec.command, vim.list_extend({ vim.loop.exepath() }, arguments))
 
-        assert.are.same(spec.context, {
-            results_path = "test-output.json",
-            position_id_mapping = {
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-                ["./test_files/test1_spec.lua::top-level namespace 1 nested namespace 1 test 2::8"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-                ["./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = './test_files/test1_spec.lua::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
-            },
-        })
+        assert.are.same(spec.context, { results_path = "test-output.json" })
 
         local debug_arguments = vim.list_slice(arguments, 1, #arguments - 3)
 
         vim.list_extend(debug_arguments, {
             '"--shuffle-tests"',
             '"--helper"',
-            '"./lua/neotest-busted/start_debug.lua"',
+            '"./lua/neotest-busted/helper_scripts/start_debug.lua"',
             '"./test_files/test1_spec.lua"',
         })
 

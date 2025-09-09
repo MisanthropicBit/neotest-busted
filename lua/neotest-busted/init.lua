@@ -448,15 +448,6 @@ local function create_pos_id_key_from_position(position, stripped_pos_id)
     return ("%s::%s::%d"):format(position.path, stripped_pos_id, lnum)
 end
 
---- Create a unique key to identify a test
----@param path string
----@param stripped_pos_id string neotest position id stripped of "::"
----@param lnum_start integer
----@return string
-local function create_pos_id_key(path, stripped_pos_id, lnum_start)
-    return ("%s::%s::%d"):format(path, stripped_pos_id, lnum_start)
-end
-
 ---@param position neotest.Position
 ---@return boolean
 local function is_parametric_test(position)
@@ -701,8 +692,6 @@ local function update_parametric_tests_in_tree(tree, pos_id_to_test_name)
                 local pos_id = parametric_test.id
 
                 if not tree:get_key(pos_id) then
-                    parametric_test.name = pos_id_to_test_name[pos_id]
-
                     -- WARNING: The following code relies on neotest internals
 
                     ---@diagnostic disable-next-line: invisible

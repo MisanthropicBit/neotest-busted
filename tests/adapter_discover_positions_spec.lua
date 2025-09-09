@@ -65,18 +65,20 @@ describe("adapter.discover_positions", function()
 
         assert.are.same(result1, {
             {
-                id = path .. "::namespace::1::nested::namespace::1::test::1",
+                id = path .. '::"namespace 1"::"nested namespace 1"::"test 1"',
                 in_tree = false,
                 lnum = 4,
                 path = path,
                 type = "test",
+                name = "test 1",
             },
             {
-                id = path .. "::namespace::1::nested::namespace::1::test::2",
+                id = path .. '::"namespace 1"::"nested namespace 1"::"test 2"',
                 in_tree = false,
                 lnum = 4,
                 path = path,
                 type = "test",
+                name = "test 2",
             },
         })
 
@@ -84,11 +86,12 @@ describe("adapter.discover_positions", function()
 
         assert.are.same(result2, {
             {
-                id = path .. "::namespace::1::nested::namespace::1::test::3",
+                id = path .. '::"namespace 1"::"nested namespace 1"::"test 3"',
                 in_tree = false,
                 lnum = 9,
                 path = path,
                 type = "test",
+                name = "test 3",
             },
         })
 
@@ -100,32 +103,36 @@ describe("adapter.discover_positions", function()
 
         assert.are.same(result3, {
             {
-                id = path .. "::namespace::2::nested::namespace::2::-::1::test::1",
+                id = path .. '::"namespace 2"::"nested namespace 2 - 1"::"test 1"',
                 in_tree = false,
                 lnum = 23,
                 path = path,
                 type = "test",
+                name = "test 1",
             },
             {
-                id = path .. "::namespace::2::nested::namespace::2::-::1::test::2",
+                id = path .. '::"namespace 2"::"nested namespace 2 - 1"::"test 2"',
                 in_tree = false,
                 lnum = 23,
                 path = path,
                 type = "test",
+                name = "test 2",
             },
             {
-                id = path .. "::namespace::2::nested::namespace::2::-::2::test::1",
+                id = path .. '::"namespace 2"::"nested namespace 2 - 2"::"test 1"',
                 in_tree = false,
                 lnum = 23,
                 path = path,
                 type = "test",
+                name = "test 1",
             },
             {
-                id = path .. "::namespace::2::nested::namespace::2::-::2::test::2",
+                id = path .. '::"namespace 2"::"nested namespace 2 - 2"::"test 2"',
                 in_tree = false,
                 lnum = 23,
                 path = path,
                 type = "test",
+                name = "test 2",
             },
         })
 
@@ -135,18 +142,20 @@ describe("adapter.discover_positions", function()
 
         assert.are.same(result4, {
             {
-                id = path .. "::namespace::2::nested::namespace::2::-::1::some::test",
+                id = path .. '::"namespace 2"::"nested namespace 2 - 1"::"some test"',
                 in_tree = false,
                 lnum = 18,
                 path = path,
                 type = "test",
+                name = "some test",
             },
             {
-                id = path .. "::namespace::2::nested::namespace::2::-::2::some::test",
+                id = path .. '::"namespace 2"::"nested namespace 2 - 2"::"some test"',
                 in_tree = false,
                 lnum = 18,
                 path = path,
                 type = "test",
+                name = "some test",
             },
         })
     end)

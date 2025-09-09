@@ -19,14 +19,21 @@ local types = require("neotest.types")
 --- Process a line from the output of 'busted --list'
 ---@param line string
 ---@return string
+---@return string
 ---@return integer
 local function process_list_test_line(line)
     local parts = vim.split(line, "::")
-    local pos_id_parts = vim.list_slice(parts, 1, #parts - 1)
+    local path = parts[1]
+    local pos_id_parts = vim.list_slice(parts, 2, #parts - 1)
+    local test_name = pos_id_parts[#pos_id_parts]
     local lnum = tonumber(parts[#parts])
     ---@cast lnum -nil
 
-    return table.concat(pos_id_parts, "::"), lnum
+    local quoted_pos_id = vim.tbl_map(function(part)
+        return '"' .. part .. '"'
+    end, pos_id_parts)
+
+    return path .. "::" .. table.concat(quoted_pos_id, "::"), test_name, lnum
 end
 
 ---@async
@@ -44,7 +51,7 @@ local function run_list_tests_command(tree)
     local command_info = adapter.create_test_command({ path }, {
         busted_arguments = {
             "--helper",
-            util.get_path_to_plugin_file("helper_scripts/list_tests_helper.lua"),
+            util.get_path_to_plugin_file("helper_scripts/list_tests.lua"),
         },
     })
 
@@ -107,7 +114,7 @@ local function get_runtime_test_info(tree)
 
     -- Output contains carriage returns
     for line in vim.gsplit(output, "\r\n", { plain = true, trimempty = true }) do
-        local position_id, lnum = process_list_test_line(line)
+        local position_id, test_name, lnum = process_list_test_line(line)
 
         tests[position_id] = {
             path = path,
@@ -115,6 +122,7 @@ local function get_runtime_test_info(tree)
             id = position_id,
             type = types.PositionType.test,
             lnum = lnum,
+            name = test_name,
         }
 
         table.insert(ordered_pos_ids, position_id)

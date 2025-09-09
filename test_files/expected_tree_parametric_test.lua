@@ -36,7 +36,7 @@ return function(path)
                     -- Two new nodes have been added to the tree for the two parametric tests that were run
                     {
                         {
-                            id = path .. "::namespace::1::nested::namespace::1::test::1",
+                            id = path .. '::"namespace 1"::"nested namespace 1"::"test 1"',
                             in_tree = false,
                             name = "test 1",
                             lnum = 4,
@@ -46,7 +46,7 @@ return function(path)
                     },
                     {
                         {
-                            id = path .. "::namespace::1::nested::namespace::1::test::2",
+                            id = path .. '::"namespace 1"::"nested namespace 1"::"test 2"',
                             in_tree = false,
                             name = "test 2",
                             lnum = 4,

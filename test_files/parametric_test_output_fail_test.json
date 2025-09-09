@@ -22,6 +22,7 @@
             },
             "message": "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
             "name": "namespace 1 nested namespace 1 test 1",
+            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::\"namespace 1\"::\"nested namespace 1\"::\"test 1\"",
             "trace": {
                 "currentline": 5,
                 "lastlinedefined": 6,
@@ -53,6 +54,7 @@
             },
             "message": "./test_files/parametric_tests_fail_spec.lua:5: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
             "name": "namespace 1 nested namespace 1 test 2",
+            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::\"namespace 1\"::\"nested namespace 1\"::\"test 2\"",
             "trace": {
                 "currentline": 5,
                 "lastlinedefined": 6,
