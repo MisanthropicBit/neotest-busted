@@ -1,4 +1,5 @@
 local async = require("neotest.async").tests
+local compat = require("neotest-busted.compat")
 local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local types = require("neotest.types")
@@ -23,9 +24,9 @@ describe("adapter.results", function()
     ---@return neotest.Tree
     local function discover_positions(test_path, json_path)
         local tree = adapter.discover_positions(test_path)
-        local fd = vim.uv.fs_open(json_path, "r", 438)
-        local stat = vim.uv.fs_fstat(fd)
-        local data = vim.uv.fs_read(fd, stat.size, 0)
+        local fd = compat.uv.fs_open(json_path, "r", 438)
+        local stat = compat.uv.fs_fstat(fd)
+        local data = compat.uv.fs_read(fd, stat.size, 0)
 
         stub(lib.files, "read", data)
 
