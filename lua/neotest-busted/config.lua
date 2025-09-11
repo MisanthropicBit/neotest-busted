@@ -105,13 +105,6 @@ end
 function config.configure(user_config)
     _user_config = vim.tbl_deep_extend("keep", user_config or {}, default_config)
 
-    if _user_config.busted_command ~= nil then
-        vim.notify_once(
-            "[neotest-busted]: busted_command is deprecated and will be removed in a future version",
-            vim.log.levels.WARN
-        )
-    end
-
     -- Skip checking the executable when running setup to avoid the error
     -- message as neotest loads all adapters so users will see an error in a
     -- non-lua/neovim directory with a relative path in `busted_command`
