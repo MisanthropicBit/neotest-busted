@@ -10,8 +10,8 @@ return {
     },
     {
         {
-            id = path .. '::quotes',
-            name = 'quotes',
+            id = path .. "::quotes",
+            name = "quotes",
             path = path,
             range = { 0, 0, 10, 4 },
             type = "namespace",
@@ -27,7 +27,7 @@ return {
         },
         {
             {
-                id = path .. '::quotes::literal quotes test',
+                id = path .. "::quotes::literal quotes test",
                 name = "literal quotes test",
                 path = path,
                 range = { 7, 4, 9, 8 },

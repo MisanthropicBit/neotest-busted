@@ -8,16 +8,16 @@ return {
     },
     {
         {
-            id = './test_files/parametric_tests_spec.lua::namespace 1',
-            name = 'namespace 1',
+            id = "./test_files/parametric_tests_spec.lua::namespace 1",
+            name = "namespace 1",
             path = "./test_files/parametric_tests_spec.lua",
             range = { 0, 0, 12, 4 },
             type = "namespace",
         },
         {
             {
-                id = './test_files/parametric_tests_spec.lua::namespace 1::nested namespace 1',
-                name = 'nested namespace 1',
+                id = "./test_files/parametric_tests_spec.lua::namespace 1::nested namespace 1",
+                name = "nested namespace 1",
                 path = "./test_files/parametric_tests_spec.lua",
                 range = { 1, 4, 11, 8 },
                 type = "namespace",
@@ -44,8 +44,8 @@ return {
     },
     {
         {
-            id = './test_files/parametric_tests_spec.lua::namespace 2',
-            name = 'namespace 2',
+            id = "./test_files/parametric_tests_spec.lua::namespace 2",
+            name = "namespace 2",
             path = "./test_files/parametric_tests_spec.lua",
             range = { 14, 0, 28, 4 },
             type = "namespace",
@@ -61,7 +61,7 @@ return {
             {
                 {
                     id = './test_files/parametric_tests_spec.lua::namespace 2::"nested namespace 2 - " .. tostring(i)::some test',
-                    name = 'some test',
+                    name = "some test",
                     path = "./test_files/parametric_tests_spec.lua",
                     range = { 17, 12, 19, 16 },
                     type = "test",

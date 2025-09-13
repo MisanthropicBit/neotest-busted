@@ -548,7 +548,7 @@ local function create_filters_for_tree(tree)
             local positions = parametric_tests or { pos }
 
             for _, _pos in ipairs(positions) do
-               add_filter(_pos)
+                add_filter(_pos)
             end
         end
     end
@@ -782,7 +782,8 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     ---@cast test_results_json neotest-busted.BustedResultObject
 
-    local results = convert_test_results_to_neotest_results(test_results_json, strategy_result.output)
+    local results =
+        convert_test_results_to_neotest_results(test_results_json, strategy_result.output)
 
     if config.parametric_test_discovery == true then
         update_parametric_tests_in_tree(tree)

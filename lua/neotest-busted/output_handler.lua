@@ -43,7 +43,8 @@ return function(options)
         -- default 'name' field in the json output uses spaces so we cannot
         -- reliably split on space since the full test name itself might
         -- contain spaces
-        insertTable[#insertTable]["neotestPositionId"] = util.position_id_from_busted_element(element)
+        insertTable[#insertTable]["neotestPositionId"] =
+            util.position_id_from_busted_element(element)
     end
 
     handler.suiteEnd = function()

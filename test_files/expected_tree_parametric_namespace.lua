@@ -11,16 +11,16 @@ return function(path)
         },
         {
             {
-                id = path .. '::namespace 1',
-                name = 'namespace 1',
+                id = path .. "::namespace 1",
+                name = "namespace 1",
                 path = path,
                 range = { 0, 0, 12, 4 },
                 type = "namespace",
             },
             {
                 {
-                    id = path .. '::namespace 1::nested namespace 1',
-                    name = 'nested namespace 1',
+                    id = path .. "::namespace 1::nested namespace 1",
+                    name = "nested namespace 1",
                     path = path,
                     range = { 1, 4, 11, 8 },
                     type = "namespace",
@@ -47,8 +47,8 @@ return function(path)
         },
         {
             {
-                id = path .. '::namespace 2',
-                name = 'namespace 2',
+                id = path .. "::namespace 2",
+                name = "namespace 2",
                 path = path,
                 range = { 14, 0, 28, 4 },
                 type = "namespace",
@@ -72,7 +72,7 @@ return function(path)
                     },
                     {
                         {
-                            id = path .. '::namespace 2::nested namespace 2 - 1::some test',
+                            id = path .. "::namespace 2::nested namespace 2 - 1::some test",
                             in_tree = false,
                             name = "some test",
                             lnum = 18,
@@ -82,7 +82,7 @@ return function(path)
                     },
                     {
                         {
-                            id = path .. '::namespace 2::nested namespace 2 - 2::some test',
+                            id = path .. "::namespace 2::nested namespace 2 - 2::some test",
                             in_tree = false,
                             name = "some test",
                             lnum = 18,
@@ -102,7 +102,7 @@ return function(path)
                     },
                     {
                         {
-                            id = path .. '::namespace 2::nested namespace 2 - 1::test 1',
+                            id = path .. "::namespace 2::nested namespace 2 - 1::test 1",
                             in_tree = false,
                             name = "test 1",
                             lnum = 23,
@@ -112,7 +112,7 @@ return function(path)
                     },
                     {
                         {
-                            id = path .. '::namespace 2::nested namespace 2 - 1::test 2',
+                            id = path .. "::namespace 2::nested namespace 2 - 1::test 2",
                             in_tree = false,
                             name = "test 2",
                             lnum = 23,
@@ -122,7 +122,7 @@ return function(path)
                     },
                     {
                         {
-                            id = path .. '::namespace 2::nested namespace 2 - 2::test 1',
+                            id = path .. "::namespace 2::nested namespace 2 - 2::test 1",
                             in_tree = false,
                             name = "test 1",
                             lnum = 23,
@@ -132,7 +132,7 @@ return function(path)
                     },
                     {
                         {
-                            id = path .. '::namespace 2::nested namespace 2 - 2::test 2',
+                            id = path .. "::namespace 2::nested namespace 2 - 2::test 2",
                             in_tree = false,
                             name = "test 2",
                             lnum = 23,
