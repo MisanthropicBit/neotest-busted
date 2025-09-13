@@ -22,7 +22,7 @@
             },
             "message": "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
             "name": "namespace 2 nested namespace 2 - 1 some test",
-            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::\"namespace 2\"::\"nested namespace 2 - 1\"::\"some test\"",
+            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::namespace 2::nested namespace 2 - 1::some test",
             "trace": {
                 "currentline": 19,
                 "lastlinedefined": 20,
@@ -54,7 +54,7 @@
             },
             "message": "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
             "name": "namespace 2 nested namespace 2 - 1 test 1",
-            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::\"namespace 2\"::\"nested namespace 2 - 1\"::\"test 1\"",
+            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::namespace 2::nested namespace 2 - 1::test 1",
             "trace": {
                 "currentline": 24,
                 "lastlinedefined": 25,
@@ -86,7 +86,7 @@
             },
             "message": "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
             "name": "namespace 2 nested namespace 2 - 1 test 2",
-            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::\"namespace 2\"::\"nested namespace 2 - 1\"::\"test 2\"",
+            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::namespace 2::nested namespace 2 - 1::test 2",
             "trace": {
                 "currentline": 24,
                 "lastlinedefined": 25,
@@ -118,7 +118,7 @@
             },
             "message": "./test_files/parametric_tests_fail_spec.lua:19: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
             "name": "namespace 2 nested namespace 2 - 2 some test",
-            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::\"namespace 2\"::\"nested namespace 2 - 2\"::\"some test\"",
+            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::namespace 2::nested namespace 2 - 2::some test",
             "trace": {
                 "currentline": 19,
                 "lastlinedefined": 20,
@@ -150,7 +150,7 @@
             },
             "message": "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
             "name": "namespace 2 nested namespace 2 - 2 test 1",
-            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::\"namespace 2\"::\"nested namespace 2 - 2\"::\"test 1\"",
+            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::namespace 2::nested namespace 2 - 2::test 1",
             "trace": {
                 "currentline": 24,
                 "lastlinedefined": 25,
@@ -182,7 +182,7 @@
             },
             "message": "./test_files/parametric_tests_fail_spec.lua:24: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
             "name": "namespace 2 nested namespace 2 - 2 test 2",
-            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::\"namespace 2\"::\"nested namespace 2 - 2\"::\"test 2\"",
+            "neotestPositionId": "./test_files/parametric_tests_fail_spec.lua::namespace 2::nested namespace 2 - 2::test 2",
             "trace": {
                 "currentline": 24,
                 "lastlinedefined": 25,

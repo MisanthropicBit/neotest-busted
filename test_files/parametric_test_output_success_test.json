@@ -14,7 +14,7 @@
         "lastlinedefined": 12
       },
       "name": "namespace 1 nested namespace 1 test 1",
-      "neotestPositionId": "./test_files/parametric_tests_spec.lua::\"namespace 1\"::\"nested namespace 1\"::\"test 1\"",
+      "neotestPositionId": "./test_files/parametric_tests_spec.lua::namespace 1::nested namespace 1::test 1",
       "element": {
         "duration": 4.1000079363585e-05,
         "descriptor": "it",
@@ -48,7 +48,7 @@
         "lastlinedefined": 12
       },
       "name": "namespace 1 nested namespace 1 test 2",
-      "neotestPositionId": "./test_files/parametric_tests_spec.lua::\"namespace 1\"::\"nested namespace 1\"::\"test 2\"",
+      "neotestPositionId": "./test_files/parametric_tests_spec.lua::namespace 1::nested namespace 1::test 2",
       "element": {
         "duration": 3.5000033676624e-05,
         "descriptor": "it",

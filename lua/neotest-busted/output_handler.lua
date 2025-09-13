@@ -3,31 +3,7 @@ local json = require("dkjson")
 return function(options)
     local busted = require("busted")
     local handler = require("busted.outputHandlers.base")()
-
-    ---@param value string
-    ---@return string
-    local function double_quote(value)
-        return ('"%s"'):format(value)
-    end
-
-    -- A copy of the base handler's getFullName function except that it uses
-    -- "::" as a separator instead of spaces and also preprends the full path
-    ---@param element neotest-busted.BustedElement
-    ---@return string
-    local function createNeotestPositionId(element)
-        local parent = busted.parent(element)
-        local names = { double_quote(element.name or element.descriptor) }
-
-        while parent and (parent.name or parent.descriptor) and parent.descriptor ~= "file" do
-            table.insert(names, 1, double_quote(parent.name or parent.descriptor))
-            parent = busted.parent(parent)
-        end
-
-        -- Strip the leading '@' from the element's trace source
-        table.insert(names, 1, element.trace.source:sub(2))
-
-        return table.concat(names, "::")
-    end
+    local util = require("neotest-busted.util")
 
     -- Copy options and remove arguments so the utfTerminal handler can parse
     -- them without error
@@ -67,7 +43,7 @@ return function(options)
         -- default 'name' field in the json output uses spaces so we cannot
         -- reliably split on space since the full test name itself might
         -- contain spaces
-        insertTable[#insertTable]["neotestPositionId"] = createNeotestPositionId(element)
+        insertTable[#insertTable]["neotestPositionId"] = util.position_id_from_busted_element(element)
     end
 
     handler.suiteEnd = function()

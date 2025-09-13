@@ -22,7 +22,7 @@
             },
             "message": "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
             "name": "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3",
-            "neotestPositionId": "./test_files/test1_spec.lua::\"^top-le[ve]l (na*m+e-sp?ac%e) 2$\"::\"test 3\"",
+            "neotestPositionId": "./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$::test 3",
             "trace": {
                 "currentline": 16,
                 "lastlinedefined": 17,
@@ -54,7 +54,7 @@
             },
             "message": "...rojects/vim/neotest-busted/test_files/test1_spec.lua:20: Expected objects to be the same.\nPassed in:\n(boolean) true\nExpected:\n(boolean) false",
             "name": "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4",
-            "neotestPositionId": "./test_files/test1_spec.lua::\"^top-le[ve]l (na*m+e-sp?ac%e) 2$\"::\"test 4\"",
+            "neotestPositionId": "./test_files/test1_spec.lua::^top-le[ve]l (na*m+e-sp?ac%e) 2$::test 4",
             "trace": {
                 "currentline": 20,
                 "lastlinedefined": 21,
@@ -91,7 +91,7 @@
             },
             "message": "...rojects/vim/neotest-busted/test_files/test1_spec.lua:4: {\n}",
             "name": "top-level namespace 1 nested namespace 1 test 1",
-            "neotestPositionId": "./test_files/test1_spec.lua::\"top-level namespace 1\"::\"nested namespace 1\"::\"test 1\"",
+            "neotestPositionId": "./test_files/test1_spec.lua::top-level namespace 1::nested namespace 1::test 1",
             "trace": {
                 "currentline": 4,
                 "lastlinedefined": 6,
@@ -126,7 +126,7 @@
                 }
             },
             "name": "top-level namespace 1 nested namespace 1 test 2",
-            "neotestPositionId": "./test_files/test1_spec.lua::\"top-level namespace 1\"::\"nested namespace 1\"::\"test 2\"",
+            "neotestPositionId": "./test_files/test1_spec.lua::top-level namespace 1::nested namespace 1::test 2",
             "trace": {
                 "currentline": 8,
                 "lastlinedefined": 11,

@@ -59,13 +59,13 @@ describe("adapter.discover_positions", function()
         assert.are.same(cache:size(), 4)
 
         local result1 =
-            cache:get(path .. '::"namespace 1"::"nested namespace 1"::("test %d"):format(i)')
+            cache:get(path .. '::namespace 1::nested namespace 1::("test %d"):format(i)')
 
         sort_parametric_results(result1)
 
         assert.are.same(result1, {
             {
-                id = path .. '::"namespace 1"::"nested namespace 1"::"test 1"',
+                id = path .. '::namespace 1::nested namespace 1::test 1',
                 in_tree = false,
                 lnum = 4,
                 path = path,
@@ -73,7 +73,7 @@ describe("adapter.discover_positions", function()
                 name = "test 1",
             },
             {
-                id = path .. '::"namespace 1"::"nested namespace 1"::"test 2"',
+                id = path .. '::namespace 1::nested namespace 1::test 2',
                 in_tree = false,
                 lnum = 4,
                 path = path,
@@ -82,11 +82,11 @@ describe("adapter.discover_positions", function()
             },
         })
 
-        local result2 = cache:get(path .. '::"namespace 1"::"nested namespace 1"::"test " .. "3"')
+        local result2 = cache:get(path .. '::namespace 1::nested namespace 1::"test " .. "3"')
 
         assert.are.same(result2, {
             {
-                id = path .. '::"namespace 1"::"nested namespace 1"::"test 3"',
+                id = path .. '::namespace 1::nested namespace 1::test 3',
                 in_tree = false,
                 lnum = 9,
                 path = path,
@@ -96,14 +96,14 @@ describe("adapter.discover_positions", function()
         })
 
         local result3 = cache:get(
-            path .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)::("test %d"):format(j)'
+            path .. '::namespace 2::"nested namespace 2 - " .. tostring(i)::("test %d"):format(j)'
         )
 
         sort_parametric_results(result3)
 
         assert.are.same(result3, {
             {
-                id = path .. '::"namespace 2"::"nested namespace 2 - 1"::"test 1"',
+                id = path .. '::namespace 2::nested namespace 2 - 1::test 1',
                 in_tree = false,
                 lnum = 23,
                 path = path,
@@ -111,7 +111,7 @@ describe("adapter.discover_positions", function()
                 name = "test 1",
             },
             {
-                id = path .. '::"namespace 2"::"nested namespace 2 - 1"::"test 2"',
+                id = path .. '::namespace 2::nested namespace 2 - 1::test 2',
                 in_tree = false,
                 lnum = 23,
                 path = path,
@@ -119,7 +119,7 @@ describe("adapter.discover_positions", function()
                 name = "test 2",
             },
             {
-                id = path .. '::"namespace 2"::"nested namespace 2 - 2"::"test 1"',
+                id = path .. '::namespace 2::nested namespace 2 - 2::test 1',
                 in_tree = false,
                 lnum = 23,
                 path = path,
@@ -127,7 +127,7 @@ describe("adapter.discover_positions", function()
                 name = "test 1",
             },
             {
-                id = path .. '::"namespace 2"::"nested namespace 2 - 2"::"test 2"',
+                id = path .. '::namespace 2::nested namespace 2 - 2::test 2',
                 in_tree = false,
                 lnum = 23,
                 path = path,
@@ -137,12 +137,12 @@ describe("adapter.discover_positions", function()
         })
 
         local result4 = cache:get(
-            path .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)::"some test"'
+            path .. '::namespace 2::"nested namespace 2 - " .. tostring(i)::some test'
         )
 
         assert.are.same(result4, {
             {
-                id = path .. '::"namespace 2"::"nested namespace 2 - 1"::"some test"',
+                id = path .. '::namespace 2::nested namespace 2 - 1::some test',
                 in_tree = false,
                 lnum = 18,
                 path = path,
@@ -150,7 +150,7 @@ describe("adapter.discover_positions", function()
                 name = "some test",
             },
             {
-                id = path .. '::"namespace 2"::"nested namespace 2 - 2"::"some test"',
+                id = path .. '::namespace 2::nested namespace 2 - 2::some test',
                 in_tree = false,
                 lnum = 18,
                 path = path,

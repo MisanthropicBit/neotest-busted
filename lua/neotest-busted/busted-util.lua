@@ -18,22 +18,31 @@ local types = require("neotest.types")
 
 --- Process a line from the output of 'busted --list'
 ---@param line string
----@return string
----@return string
----@return integer
+---@return string?, string?, integer?
 local function process_list_test_line(line)
     local parts = vim.split(line, "::")
-    local path = parts[1]
-    local pos_id_parts = vim.list_slice(parts, 2, #parts - 1)
+
+    if #parts == 1 then
+        logging.debug("Encountered output line that could not be parsed: '%s'", nil, line)
+        return
+    end
+
+    local pos_id_parts = vim.list_slice(parts, 1, #parts - 1)
     local test_name = pos_id_parts[#pos_id_parts]
-    local lnum = tonumber(parts[#parts])
+    local ok, lnum = pcall(tonumber, parts[#parts])
+
+    if not ok then
+        logging.debug(
+            "Encountered output line with line number that could not be parsed: '%s'",
+            nil,
+            line
+        )
+        return
+    end
+
     ---@cast lnum -nil
 
-    local quoted_pos_id = vim.tbl_map(function(part)
-        return '"' .. part .. '"'
-    end, pos_id_parts)
-
-    return path .. "::" .. table.concat(quoted_pos_id, "::"), test_name, lnum
+    return table.concat(pos_id_parts, "::"), test_name, lnum
 end
 
 ---@async
@@ -116,16 +125,18 @@ local function get_runtime_test_info(tree)
     for line in vim.gsplit(output, "\r\n", { plain = true, trimempty = true }) do
         local position_id, test_name, lnum = process_list_test_line(line)
 
-        tests[position_id] = {
-            path = path,
-            in_tree = false,
-            id = position_id,
-            type = types.PositionType.test,
-            lnum = lnum,
-            name = test_name,
-        }
+        if position_id and test_name and lnum then
+            tests[position_id] = {
+                path = path,
+                in_tree = false,
+                id = position_id,
+                type = types.PositionType.test,
+                lnum = lnum,
+                name = test_name,
+            }
 
-        table.insert(ordered_pos_ids, position_id)
+            table.insert(ordered_pos_ids, position_id)
+        end
     end
 
     return tests, ordered_pos_ids
@@ -176,11 +187,13 @@ function busted_util.discover_parametric_tests(tree)
             local source_level_pos = tests_by_line_number[test.lnum]
 
             if source_level_pos then
-                if not parametric_positions[source_level_pos.id] then
-                    parametric_positions[source_level_pos.id] = {}
+                local sl_pos_id = source_level_pos.id
+
+                if not parametric_positions[sl_pos_id] then
+                    parametric_positions[sl_pos_id] = {}
                 end
 
-                table.insert(parametric_positions[source_level_pos.id], test)
+                table.insert(parametric_positions[sl_pos_id], test)
             end
         end
     end

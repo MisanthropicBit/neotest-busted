@@ -1,9 +1,10 @@
 local busted = require("busted")
+local util = require("neotest-busted.util")
 
 ---@diagnostic disable-next-line: unused-local
 local printTestName = function(element, parent, status)
     if status ~= "pending" then
-        print(require("neotest-busted.test_utils").position_id_from_busted_element(element))
+        print(util.position_id_from_busted_element(element, true))
     end
 
     return nil, false
