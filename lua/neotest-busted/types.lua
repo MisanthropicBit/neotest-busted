@@ -8,9 +8,11 @@ local types = {}
 ---@field minimal_init string?
 ---@field local_luarocks_only boolean?
 ---@field parametric_test_discovery boolean?
+---@field no_nvim boolean?
 
 ---@class neotest-busted.BustedCommandConfig
 ---@field type "config" | "project" | "user" | "global"
+---@field no_nvim boolean
 ---@field command string?
 ---@field lua_paths string[]
 ---@field lua_cpaths string[]
@@ -24,8 +26,9 @@ local types = {}
 ---@field quote_strings boolean?
 
 ---@class neotest-busted.TestCommandConfig
----@field nvim_command string
+---@field command string
 ---@field arguments string[]
+---@field set_env boolean?
 ---@field paths string[]
 ---@field cpaths string[]
 

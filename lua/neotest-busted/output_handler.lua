@@ -14,13 +14,24 @@ local io_flush = io.flush
 --      return jsonOutputHandler
 --  end
 
+local function deepcopy(obj)
+    if type(obj) ~= "table" then
+        return obj
+    end
+    local res = {}
+    for k, v in pairs(obj) do
+        res[k] = deepcopy(v)
+    end
+    return res
+end
+
 return function(options)
     local busted = require("busted")
     local handler = require("busted.outputHandlers.base")()
 
     -- Copy options and remove arguments so the utfTerminal handler can parse
     -- them without error
-    local utf_terminal_options = vim.deepcopy(options)
+    local utf_terminal_options = deepcopy(options)
     utf_terminal_options.arguments = {}
 
     -- Initialise the utfTerminal handler

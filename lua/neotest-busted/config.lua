@@ -11,6 +11,7 @@ local default_config = {
     minimal_init = nil,
     local_luarocks_only = true,
     parametric_test_discovery = false,
+    no_nvim = false,
 }
 
 local _user_config = default_config
@@ -81,6 +82,10 @@ function config.validate(_config, skip_executable_check)
         },
         parametric_test_discovery = {
             _config.parametric_test_discovery,
+            "boolean"
+        },
+        no_nvim = {
+            _config.no_nvim,
             "boolean"
         },
     })

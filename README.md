@@ -62,6 +62,8 @@ require("neotest").setup({
         require("neotest-busted")({
             -- Leave as nil to let neotest-busted automatically find busted
             busted_command = "<path to a busted executable>",
+            -- Do not use nvim to run busted, but run busted directly
+            no_nvim = false,
             -- Extra arguments to busted
             busted_args = { "--shuffle-files" },
             -- List of paths to add to package.path in neovim before running busted
