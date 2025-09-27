@@ -2,6 +2,8 @@ name: Bug Report
 description: File a bug/issue
 title: "bug: "
 labels: [bug]
+assignees:
+  - MisanthropicBit
 body:
   - type: markdown
     attributes:
@@ -29,6 +31,12 @@ body:
       required: true
   - type: input
     attributes:
+      label: "Busted version (busted --version)"
+      placeholder: "2.2.0"
+    validations:
+      required: true
+  - type: input
+    attributes:
       label: "Operating system/version"
       placeholder: "MacOS 11.7.6"
     validations:
@@ -43,6 +51,12 @@ body:
     attributes:
       label: Expected Behavior
       description: A concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Paste your `neotest-busted` configuration
+      render: lua
     validations:
       required: true
   - type: textarea
