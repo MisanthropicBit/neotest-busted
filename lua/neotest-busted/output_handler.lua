@@ -1,22 +1,24 @@
 local json = require("dkjson")
 
-local io_write = io.write
-local io_flush = io.flush
-
--- return function(options)
---      local utfTerminalHandler = require("busted.outputHandlers.utfTerminal")(options)
---      utfTerminalHandler:subscribe(options)
-
---      table.insert(options.arguments, 1, "test-output.json")
---      local jsonOutputHandler = require("busted.outputHandlers.json")(options)
---      jsonOutputHandler:subscribe(options)
-
---      return jsonOutputHandler
---  end
-
 return function(options)
     local busted = require("busted")
     local handler = require("busted.outputHandlers.base")()
+
+    -- A copy of the base handler's getFullName function except that it uses
+    -- "::" as a separator instead of spaces and also preprends the full path
+    local function createNeotestPositionId(context)
+        local parent = busted.parent(context)
+        local names = { context.name or context.descriptor }
+
+        while parent and (parent.name or parent.descriptor) and parent.descriptor ~= "file" do
+            table.insert(names, 1, parent.name or parent.descriptor)
+            parent = busted.parent(parent)
+        end
+
+        table.insert(names, 1, context.trace.source:sub(2))
+
+        return table.concat(names, "::")
+    end
 
     -- Copy options and remove arguments so the utfTerminal handler can parse
     -- them without error
@@ -38,11 +40,32 @@ return function(options)
         os.exit(1)
     end
 
+    ---@diagnostic disable-next-line: unused-local
+    handler.testEnd = function(element, parent, status)
+        local posId = createNeotestPositionId(element)
+        local insertTable
+
+        if status == "success" then
+            insertTable = handler.successes
+        elseif status == "pending" then
+            insertTable = handler.pendings
+        elseif status == "failure" then
+            insertTable = handler.failures
+        elseif status == "error" then
+            insertTable = handler.errors
+        end
+
+        -- Inject an extra field for the neotest position id as the default
+        -- name in the json output using spaces so we cannot reliably split
+        -- on space since the full test name itself might contain spaces
+        insertTable[#insertTable]["neotestPositionId"] = posId
+    end
+
     handler.suiteEnd = function()
         local file, err_message = io.open(output_file, "w")
 
         if not file then
-            io_write(
+            io.write(
                 ("Failed to open file '%s' for writing json results: %s"):format(
                     output_file,
                     err_message
@@ -70,14 +93,15 @@ return function(options)
             file:write(result)
             file:close()
         else
-            io_write("Failed to encode test results to json: " .. result .. "\n")
-            io_flush()
+            io.write("Failed to encode test results to json: " .. result .. "\n")
+            io.flush()
         end
 
         return nil, true
     end
 
     busted.subscribe({ "suite", "end" }, handler.suiteEnd)
+    busted.subscribe({ "test", "end" }, handler.testEnd)
 
     return handler
 end

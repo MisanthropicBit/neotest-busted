@@ -407,13 +407,18 @@ function BustedNeotestAdapter.discover_positions(path)
     ;; describe blocks
     ((function_call
         name: (identifier) @func_name (#match? @func_name "^describe$")
-        arguments: (arguments (_) @namespace.name (function_definition))
+        arguments: (arguments (
+                string content: (string_content) @namespace.name
+            ) (function_definition))
     )) @namespace.definition
 
     ;; it blocks
     ((function_call
         name: (identifier) @func_name
-        arguments: (arguments (_) @test.name (function_definition))
+        arguments: (arguments
+            (string
+                content: (string_content) @test.name
+            ) (function_definition))
     ) (#match? @func_name "^it$")) @test.definition
 
     ;; pending blocks
@@ -448,26 +453,6 @@ function BustedNeotestAdapter.discover_positions(path)
     return tree
 end
 
---- Create a unique key from a position to identify a test
----@param position neotest.Position
----@param stripped_pos_id string neotest position id stripped of "::"
----@return string
-local function create_pos_id_key_from_position(position, stripped_pos_id)
-    ---@diagnostic disable-next-line: undefined-field
-    local lnum = position.range and position.range[1] + 1 or position.lnum
-
-    return ("%s::%s::%d"):format(position.path, stripped_pos_id, lnum)
-end
-
---- Create a unique key to identify a test
----@param path string
----@param stripped_pos_id string neotest position id stripped of "::"
----@param lnum_start integer
----@return string
-local function create_pos_id_key(path, stripped_pos_id, lnum_start)
-    return ("%s::%s::%d"):format(path, stripped_pos_id, lnum_start)
-end
-
 ---@param position neotest.Position
 ---@return boolean
 local function is_parametric_test(position)
@@ -478,24 +463,21 @@ end
 --- Extract test info from a position
 ---@param pos neotest.Position
 ---@return string
----@return string
-local function extract_test_info(pos)
+local function filter_from_position(pos)
     -- Busted creates test names concatenated with spaces so we can't recreate the
     -- position id using "::". Instead create a key stripped of "::" like the one
     -- from busted along with the path and test range to uniquely identify the test
     local _, stripped_pos_id = util.strip_position_id(pos.id)
 
-    return stripped_pos_id, create_pos_id_key_from_position(pos, stripped_pos_id)
+    return stripped_pos_id
 end
 
---- Generate test info for the nodes in a tree
+--- Create command line filters for the nodes in a tree
 ---@param tree neotest.Tree
 ---@return string[]
----@return string[]
-local function generate_test_info_for_nodes(tree)
+local function create_filters_for_tree(tree)
     local filters = {}
     local position = tree:data()
-    local position_id_mapping = {}
     local gen_filters = position.type ~= types.PositionType.file
 
     local function add_filter(filter)
@@ -506,11 +488,10 @@ local function generate_test_info_for_nodes(tree)
     if is_parametric_test(position) then
         -- This is a parametric test. Running one directly like this can occur
         -- when it is run from the neotest summary after being added to the tree
-        local filter, pos_id_key = extract_test_info(position)
+        local filter = filter_from_position(position)
         add_filter(filter)
-        position_id_mapping[pos_id_key] = position.id
 
-        return filters, position_id_mapping
+        return filters
     end
 
     for _, node in tree:iter_nodes() do
@@ -521,18 +502,16 @@ local function generate_test_info_for_nodes(tree)
             local tests = parametric_tests or { pos }
 
             for _, test in ipairs(tests) do
-                local filter, pos_id_key = extract_test_info(test)
+                local filter = filter_from_position(test)
 
                 if gen_filters then
                     add_filter(filter)
                 end
-
-                position_id_mapping[pos_id_key] = test.id
             end
         end
     end
 
-    return filters, position_id_mapping
+    return filters
 end
 
 ---@param args neotest.RunArgs
@@ -552,8 +531,9 @@ function BustedNeotestAdapter.build_spec(args)
     end
 
     -- Iterate all tests in the tree and generate position ids for them
-    local filters, position_id_mapping = generate_test_info_for_nodes(tree)
+    local filters = create_filters_for_tree(tree)
 
+    -- vim.print(pos.id)
     local paths = { pos.path }
     local results_path = async.fn.tempname() .. ".json"
     local test_command = BustedNeotestAdapter.create_test_command(paths, {
@@ -577,10 +557,7 @@ function BustedNeotestAdapter.build_spec(args)
 
     return {
         command = command,
-        context = {
-            results_path = results_path,
-            position_id_mapping = position_id_mapping,
-        },
+        context = { results_path = results_path },
         strategy = get_strategy_config(args.strategy, results_path, paths, filters),
     }
 end
@@ -607,22 +584,15 @@ end
 ---@param status neotest.ResultStatus
 ---@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
 ---@param output string
----@return string?
 ---@return neotest.Result
 local function convert_test_result_to_neotest_result(status, test_result, output)
     if test_result.isError == true then
         -- This is an internal error in busted, not a test that threw
-        return nil, {
+        return {
             message = test_result.message,
             line = 0,
         }
     end
-
-    local pos_id = create_pos_id_key(
-        test_result.element.trace.source:sub(2), -- Strip the "@" from the source path
-        test_result.name,
-        test_result.element.trace.currentline
-    )
 
     local result = {
         status = status,
@@ -635,20 +605,15 @@ local function convert_test_result_to_neotest_result(status, test_result, output
         result.errors = create_error_info(test_result)
     end
 
-    return pos_id, result
+    return result
 end
 
 --- Convert busted test results to neotest test results
 ---@param test_results_json neotest-busted.BustedResultObject
 ---@param output string
----@param position_id_mapping table<string, string>
 ---@return table<string, neotest.Result>
 ---@return table<string, string>
-local function convert_test_results_to_neotest_results(
-    test_results_json,
-    output,
-    position_id_mapping
-)
+local function convert_test_results_to_neotest_results(test_results_json, output)
     local results = {}
     local pos_id_to_test_name = {}
 
@@ -670,15 +635,17 @@ local function convert_test_results_to_neotest_results(
         for _, test_result in ipairs(test_results) do
             ---@cast test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult
 
-            local pos_id_key, result = convert_test_result_to_neotest_result(
+            local result = convert_test_result_to_neotest_result(
                 test_types[busted_result_key],
                 test_result,
                 output
             )
-            local pos_id = position_id_mapping[pos_id_key]
+
+            -- TODO: Why does continue to work with quotes_spec.lua? Does neotest strip quotes?
+            local pos_id = test_result.neotestPositionId
 
             if not pos_id then
-                logging.error("Failed to find matching position id for key %s", nil, pos_id_key)
+                logging.error("Failed to generate neotest position id in output handler")
             else
                 results[pos_id] = result
                 pos_id_to_test_name[pos_id] = test_result.element.name
@@ -777,11 +744,10 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     ---@cast test_results_json neotest-busted.BustedResultObject
 
-    local results, pos_id_to_test_name = convert_test_results_to_neotest_results(
-        test_results_json,
-        strategy_result.output,
-        spec.context.position_id_mapping
-    )
+    local results, pos_id_to_test_name =
+        convert_test_results_to_neotest_results(test_results_json, strategy_result.output)
+
+    -- vim.print(vim.inspect(results))
 
     if config.parametric_test_discovery == true then
         update_parametric_tests_in_tree(tree, pos_id_to_test_name)
