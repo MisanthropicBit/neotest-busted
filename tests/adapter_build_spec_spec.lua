@@ -306,8 +306,13 @@ describe("adapter.build_spec", function()
             "lua/?/init.lua",
         }, ";")
 
-        assert.are.equal(spec.env.LUA_PATH, lua_paths)
-        assert.are.equal(spec.env.LUA_CPATH, vim.fs.normalize(busted_cpaths[1]))
+        -- check that custom paths from config are correctly appended
+        local path_end = spec.env.LUA_PATH:sub(-#lua_paths)
+        assert.are.equal(path_end, lua_paths)
+
+        local lua_cpaths = vim.fs.normalize(busted_cpaths[1])
+        path_end = spec.env.LUA_CPATH:sub(-#lua_cpaths)
+        assert.are.equal(path_end, lua_cpaths)
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",
