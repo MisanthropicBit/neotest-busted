@@ -66,9 +66,11 @@ require("neotest").setup({
             no_nvim = false,
             -- Extra arguments to busted
             busted_args = { "--shuffle-files" },
-            -- List of paths to add to package.path in neovim before running busted
+            -- List of paths to add to package.path in neovim before running
+            -- busted, or a function returning a list of such paths
             busted_paths = { "my/custom/path/?.lua" },
-            -- List of paths to add to package.cpath in neovim before running busted
+            -- List of paths to add to package.cpath in neovim before running
+            -- busted, or a function returning a list of such paths
             busted_cpaths = { "my/custom/path/?.so" },
             -- Custom config to load via -u to set up testing.
             -- If nil, will look for a 'minimal_init.lua' file

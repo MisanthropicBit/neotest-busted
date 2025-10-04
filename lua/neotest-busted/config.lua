@@ -43,6 +43,31 @@ local function is_optional_string_list(value)
     return true
 end
 
+---@param value any
+---@return boolean
+---@return string?
+local function is_optional_string_list_or_function(value)
+    if value == nil then
+        return true
+    end
+
+    if type(value) == "function" then
+        value = value()
+    end
+
+    if not compat.tbl_islist(value) then
+        return false, "must be a list-like table or a function returning a list-like table"
+    end
+
+    for idx, item in ipairs(value) do
+        if type(item) ~= "string" then
+            return false, "item at index " .. tostring(idx)
+        end
+    end
+
+    return true
+end
+
 --- Validate a config
 ---@param _config neotest-busted.Config
 ---@param skip_executable_check? boolean
@@ -63,13 +88,13 @@ function config.validate(_config, skip_executable_check)
         },
         busted_paths = {
             _config.busted_paths,
-            is_optional_string_list,
-            "an optional string list",
+            is_optional_string_list_or_function,
+            "an optional string list or function returning a string list",
         },
         busted_cpaths = {
             _config.busted_cpaths,
-            is_optional_string_list,
-            "an optional string list",
+            is_optional_string_list_or_function,
+            "an optional string list or function returning a string list",
         },
         minimal_init = {
             _config.minimal_init,

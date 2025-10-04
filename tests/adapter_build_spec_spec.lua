@@ -274,8 +274,12 @@ describe("adapter.build_spec", function()
             busted_command = "./busted",
             no_nvim = true,
             busted_args = {},
-            busted_paths = busted_paths,
-            busted_cpaths = busted_cpaths,
+            busted_paths = function()
+                return busted_paths
+            end,
+            busted_cpaths = function()
+                return busted_cpaths
+            end,
             minimal_init = nil,
         })
 

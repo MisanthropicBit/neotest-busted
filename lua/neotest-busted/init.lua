@@ -201,23 +201,16 @@ end
 local function get_lua_paths(busted_config)
     local lua_paths, lua_cpaths = {}, {}
 
-    -- if using an external command, we use the configured paths
-    -- as baseline
-    if config.no_nvim then
-        for path in (os.getenv("LUA_PATH") or ""):gmatch("([^;]+)") do
-            lua_paths[#lua_paths + 1] = path
-        end
-        for path in (os.getenv("LUA_CPATH") or ""):gmatch("([^;]+)") do
-            lua_cpaths[#lua_cpaths + 1] = path
-        end
-    end
-
     if compat.tbl_islist(config.busted_paths) then
         vim.list_extend(lua_paths, config.busted_paths)
+    elseif type(config.busted_paths) == "function" then
+        vim.list_extend(lua_paths, config.busted_paths())
     end
 
     if compat.tbl_islist(config.busted_cpaths) then
         vim.list_extend(lua_cpaths, config.busted_cpaths)
+    elseif type(config.busted_cpaths) == "function" then
+        vim.list_extend(lua_cpaths, config.busted_cpaths())
     end
 
     -- Append paths so busted can find the plugin files

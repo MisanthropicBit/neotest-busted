@@ -3,8 +3,8 @@ local types = {}
 ---@class neotest-busted.Config
 ---@field busted_command string?
 ---@field busted_args string[]?
----@field busted_paths string[]?
----@field busted_cpaths string[]?
+---@field busted_paths string[]? | fun(): string[]
+---@field busted_cpaths string[]? | fun(): string[]
 ---@field minimal_init string?
 ---@field local_luarocks_only boolean?
 ---@field parametric_test_discovery boolean?
