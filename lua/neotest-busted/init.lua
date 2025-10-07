@@ -203,14 +203,10 @@ local function get_lua_paths(busted_config)
 
     if compat.tbl_islist(config.busted_paths) then
         vim.list_extend(lua_paths, config.busted_paths)
-    elseif type(config.busted_paths) == "function" then
-        vim.list_extend(lua_paths, config.busted_paths())
     end
 
     if compat.tbl_islist(config.busted_cpaths) then
         vim.list_extend(lua_cpaths, config.busted_cpaths)
-    elseif type(config.busted_cpaths) == "function" then
-        vim.list_extend(lua_cpaths, config.busted_cpaths())
     end
 
     -- Append paths so busted can find the plugin files
@@ -597,9 +593,17 @@ function BustedNeotestAdapter.build_spec(args)
 
     local env = nil
     if test_command.set_env then
+        local lua_path = util.normalize_and_create_lua_path(unpack(test_command.paths))
+        if vim.env.LUA_PATH ~= "" then
+            lua_path = string.format("%s;%s", lua_path, vim.env.LUA_PATH)
+        end
+        local lua_cpath = util.normalize_and_create_lua_path(unpack(test_command.cpaths))
+        if vim.env.LUA_CPATH ~= "" then
+            lua_cpath = string.format("%s;%s", lua_cpath, vim.env.LUA_CPATH)
+        end
         env = {
-            LUA_PATH = util.normalize_and_create_lua_path(unpack(test_command.paths)),
-            LUA_CPATH = util.normalize_and_create_lua_path(unpack(test_command.cpaths)),
+            LUA_PATH = lua_path,
+            LUA_CPATH = lua_cpath,
         }
     end
 

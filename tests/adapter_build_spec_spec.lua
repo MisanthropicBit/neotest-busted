@@ -311,12 +311,12 @@ describe("adapter.build_spec", function()
         }, ";")
 
         -- check that custom paths from config are correctly appended
-        local path_end = spec.env.LUA_PATH:sub(-#lua_paths)
-        assert.are.equal(path_end, lua_paths)
+        local path_start = spec.env.LUA_PATH:sub(1, #lua_paths)
+        assert.are.equal(path_start, lua_paths)
 
         local lua_cpaths = vim.fs.normalize(busted_cpaths[1])
-        path_end = spec.env.LUA_CPATH:sub(-#lua_cpaths)
-        assert.are.equal(path_end, lua_cpaths)
+        path_start = spec.env.LUA_CPATH:sub(1, #lua_cpaths)
+        assert.are.equal(path_start, lua_cpaths)
 
         assert.are.same(spec.context, {
             results_path = "test-output.json",

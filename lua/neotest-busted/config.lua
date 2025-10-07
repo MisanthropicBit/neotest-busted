@@ -52,7 +52,12 @@ local function is_optional_string_list_or_function(value)
     end
 
     if type(value) == "function" then
-        value = value()
+        local status, ret_val = pcall(value)
+        if not status then
+            return false, "function call failed: " .. ret_val
+        else
+            value = ret_val
+        end
     end
 
     if not compat.tbl_islist(value) then
@@ -152,6 +157,17 @@ end
 
 return setmetatable(config, {
     __index = function(_, key)
+        if type(_user_config[key]) == "function" then
+            local status, ret_value = pcall(_user_config[key])
+            if not status then
+                vim.notify_once(
+                    "[neotest-busted]: Issue calling function in configuration: " .. ret_value,
+                    vim.log.levels.ERROR
+                )
+                return nil
+            end
+            return ret_value
+        end
         return _user_config[key]
     end,
 })
