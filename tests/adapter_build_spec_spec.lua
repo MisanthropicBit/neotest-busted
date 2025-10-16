@@ -109,6 +109,8 @@ describe("adapter.build_spec", function()
             "./test_files/test1_spec.lua",
         })
 
+        assert.is_nil(spec.env)
+
         assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
 
@@ -237,6 +239,63 @@ describe("adapter.build_spec", function()
             "--no-enable-sound",
             "--no-sort",
         })
+
+        assert.are.same(spec.context, { results_path = "test-output.json" })
+    end)
+
+    async.it("builds command for no_nvim", function()
+        package.loaded["neotest-busted"] = nil
+
+        local busted_paths = { "~/.luarocks/share/lua/5.1/?.lua" }
+        local busted_cpaths = { "~/.luarocks/lib/lua/5.1/?.so" }
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            no_nvim = true,
+            busted_args = {},
+            busted_paths = function()
+                return busted_paths
+            end,
+            busted_cpaths = function()
+                return busted_cpaths
+            end,
+            minimal_init = nil,
+        })
+
+        local tree = create_tree(adapter)
+        local spec = adapter.build_spec({
+            tree = tree:children()[1]:children()[1]:children()[1],
+        })
+
+        assert.is_not_nil(spec)
+
+        assert_spec_command(spec.command, {
+            "./busted",
+            "--output",
+            "./lua/neotest-busted/output_handler.lua",
+            "-Xoutput",
+            "test-output.json",
+            "--verbose",
+            "--filter",
+            "^top%-level namespace 1 nested namespace 1 test 1$",
+            "./test_files/test1_spec.lua",
+        })
+
+        assert.is_not_nil(spec.env)
+
+        local lua_paths = table.concat({
+            vim.fs.normalize(busted_paths[1]),
+            "lua/?.lua",
+            "lua/?/init.lua",
+        }, ";")
+
+        -- check that custom paths from config are correctly appended
+        local path_start = spec.env.LUA_PATH:sub(1, #lua_paths)
+        assert.are.equal(path_start, lua_paths)
+
+        local lua_cpaths = vim.fs.normalize(busted_cpaths[1])
+        path_start = spec.env.LUA_CPATH:sub(1, #lua_cpaths)
+        assert.are.equal(path_start, lua_cpaths)
 
         assert.are.same(spec.context, { results_path = "test-output.json" })
     end)

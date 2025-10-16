@@ -5,6 +5,8 @@ describe("config", function()
     it("handles invalid configs", function()
         local non_empty_string = "optional non-empty string"
         local optional_string_list = "an optional string list"
+        local optional_string_list_or_func =
+            "an optional string list or function returning a string list"
 
         local invalid_config_tests = {
             {
@@ -30,6 +32,14 @@ describe("config", function()
             {
                 config = { busted_paths = 1 },
                 error_message = optional_string_list,
+            },
+            {
+                config = {
+                    busted_paths = function()
+                        return 1
+                    end,
+                },
+                error_message = optional_string_list_or_func,
             },
             {
                 config = { busted_cpaths = { 1, 2, 3 } },
@@ -71,13 +81,6 @@ describe("config", function()
             assert
                 .stub(vim.notify_once).was
                 .called_with("[neotest-busted]: Invalid config: " .. tostring(error), vim.log.levels.ERROR)
-
-            if invalid_config_test.busted_command ~= nil then
-                assert.stub(vim.notify_once).was.called_with(
-                    "[neotest-busted]: busted_command is deprecated and will be removed in a future version",
-                    vim.log.levels.WARN
-                )
-            end
         end
 
         ---@diagnostic disable-next-line: undefined-field
