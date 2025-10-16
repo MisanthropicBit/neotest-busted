@@ -34,6 +34,7 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
         -- luarocks, so for now we just return empty paths
         return {
             type = "config",
+            no_nvim = config.no_nvim,
             command = config.busted_command,
             lua_paths = {},
             lua_cpaths = {},
@@ -62,6 +63,7 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
 
             return {
                 type = "project",
+                no_nvim = config.no_nvim,
                 lua_paths = {
                     util.create_path("lua_modules", "share", "lua", "5.1", "?.lua"),
                     util.create_path("lua_modules", "share", "lua", "5.1", "?", "init.lua"),
@@ -100,6 +102,7 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
 
         return {
             type = "user",
+            no_nvim = config.no_nvim,
             lua_paths = {
                 util.create_path("~", ".luarocks", "share", "lua", "5.1", "?.lua"),
                 util.create_path("~", ".luarocks", "share", "lua", "5.1", "?", "init.lua"),
@@ -122,6 +125,7 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
 
         return {
             type = "global",
+            no_nvim = config.no_nvim,
             lua_paths = {
                 util.create_path("/usr", "local", "share", "lua", "5.1", "?.lua"),
                 util.create_path("/usr", "local", "share", "lua", "5.1", "?", "init.lua"),
@@ -191,33 +195,12 @@ local function quote_string(string)
     return '"' .. string .. '"'
 end
 
----@param paths string[]
----@param options neotest-busted.TestCommandOptions?
----@return neotest-busted.TestCommandConfig?
----@diagnostic disable-next-line: inject-field
-function BustedNeotestAdapter.create_test_command(paths, options)
-    local busted_config = BustedNeotestAdapter.find_busted_command()
-
-    if not busted_config then
-        logging.error("Could not find a busted installation")
-        return
-    end
-
-    -- stylua: ignore start
-    ---@type string[]
-    local arguments = {
-        "--headless",
-        "-i", "NONE", -- no shada
-        "-n", -- no swapfile, always in-memory
-        "-u", find_minimal_init() or "NONE",
-    }
-    -- stylua: ignore end
-
-    ---@type string[], string[]
+---@param busted_config neotest-busted.BustedCommandConfig
+---@return string[]
+---@return string[]
+local function get_lua_paths(busted_config)
     local lua_paths, lua_cpaths = {}, {}
 
-    -- TODO: Should paths be quoted? Try seeing if a path with a space works
-    -- Append custom paths from config
     if compat.tbl_islist(config.busted_paths) then
         vim.list_extend(lua_paths, config.busted_paths)
     end
@@ -234,34 +217,68 @@ function BustedNeotestAdapter.create_test_command(paths, options)
     vim.list_extend(lua_paths, busted_config.lua_paths)
     vim.list_extend(lua_cpaths, busted_config.lua_cpaths)
 
+    return lua_paths, lua_cpaths
+end
+
+---@param lua_paths string[]
+---@param lua_cpaths string[]
+---@return arguments string[]
+local function get_nvim_arguments(lua_paths, lua_cpaths)
+    -- stylua: ignore start
+    ---@type string[]
+    local arguments = {
+        "--headless",
+        "-i", "NONE", -- no shada
+        "-n", -- no swapfile, always in-memory
+        "-u", find_minimal_init() or "NONE",
+    }
+    -- stylua: ignore end
+
     -- Create '-c' arguments for updating package paths in neovim
     vim.list_extend(arguments, util.create_package_path_argument("package.path", lua_paths))
     vim.list_extend(arguments, util.create_package_path_argument("package.cpath", lua_cpaths))
 
+    return arguments
+end
+
+---@param paths string[]
+---@param options neotest-busted.TestCommandOptions?
+---@return neotest-busted.TestCommandConfig?
+---@diagnostic disable-next-line: inject-field
+function BustedNeotestAdapter.create_test_command(paths, options)
+    local busted_config = BustedNeotestAdapter.find_busted_command()
+
+    if not busted_config then
+        logging.error("Could not find a busted installation")
+        return
+    end
+
+    local arguments = {}
     local _options = options or {}
     local busted_command = busted_config.command or get_path_to_plugin_file("busted-cli-runner.lua")
 
-    -- Create a busted command invocation string using neotest-busted's own
-    -- output handler and run busted with neovim ('-l' stops parsing arguments
-    -- for neovim)
-    local busted_command_args = {
-        "-l",
-        busted_command,
-    }
+    local lua_paths, lua_cpaths = get_lua_paths(busted_config)
+    if not config.no_nvim then
+        arguments = get_nvim_arguments(lua_paths, lua_cpaths)
+        vim.list_extend(arguments, {
+            "-l",
+            busted_command,
+        })
+    end
 
     if _options.busted_output_handler then
-        vim.list_extend(busted_command_args, {
+        vim.list_extend(arguments, {
             "--output",
             _options.busted_output_handler,
         })
 
         if _options.busted_output_handler_options then
-            table.insert(busted_command_args, "-Xoutput")
-            vim.list_extend(busted_command_args, _options.busted_output_handler_options)
+            table.insert(arguments, "-Xoutput")
+            vim.list_extend(arguments, _options.busted_output_handler_options)
         end
     else
         if _options.results_path then
-            vim.list_extend(busted_command_args, {
+            vim.list_extend(arguments, {
                 "--output",
                 get_path_to_plugin_file("output_handler.lua"),
                 "-Xoutput",
@@ -269,8 +286,6 @@ function BustedNeotestAdapter.create_test_command(paths, options)
             })
         end
     end
-
-    vim.list_extend(arguments, busted_command_args)
 
     if compat.tbl_islist(config.busted_args) then
         for _, busted_arg in ipairs(config.busted_args) do
@@ -307,8 +322,9 @@ function BustedNeotestAdapter.create_test_command(paths, options)
     end
 
     return {
-        nvim_command = compat.loop.exepath(),
+        command = config.no_nvim and busted_command or compat.loop.exepath(),
         arguments = arguments,
+        set_env = config.no_nvim,
         paths = lua_paths,
         cpaths = lua_cpaths,
     }
@@ -361,7 +377,7 @@ local function get_strategy_config(strategy, results_path, paths, filters)
                 LUA_CPATH = lua_cpaths,
             },
             program = {
-                command = test_command_info.nvim_command,
+                command = test_command_info.command,
             },
             args = test_command_info.arguments,
         }
@@ -568,15 +584,32 @@ function BustedNeotestAdapter.build_spec(args)
     end
 
     ---@type string[]
-    local command = vim.list_extend({ test_command.nvim_command }, test_command.arguments)
+    local command = vim.list_extend({ test_command.command }, test_command.arguments)
 
     -- Extra arguments for busted
     if compat.tbl_islist(args.extra_args) then
         vim.list_extend(command, args.extra_args)
     end
 
+    local env = nil
+    if test_command.set_env then
+        local lua_path = util.normalize_and_create_lua_path(unpack(test_command.paths))
+        if vim.env.LUA_PATH ~= "" then
+            lua_path = string.format("%s;%s", lua_path, vim.env.LUA_PATH)
+        end
+        local lua_cpath = util.normalize_and_create_lua_path(unpack(test_command.cpaths))
+        if vim.env.LUA_CPATH ~= "" then
+            lua_cpath = string.format("%s;%s", lua_cpath, vim.env.LUA_CPATH)
+        end
+        env = {
+            LUA_PATH = lua_path,
+            LUA_CPATH = lua_cpath,
+        }
+    end
+
     return {
         command = command,
+        env = env,
         context = {
             results_path = results_path,
             position_id_mapping = position_id_mapping,

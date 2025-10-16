@@ -5,6 +5,8 @@ describe("config", function()
     it("handles invalid configs", function()
         local non_empty_string = "optional non-empty string"
         local optional_string_list = "an optional string list"
+        local optional_string_list_or_func =
+            "an optional string list or function returning a string list"
 
         local invalid_config_tests = {
             {
@@ -30,6 +32,14 @@ describe("config", function()
             {
                 config = { busted_paths = 1 },
                 error_message = optional_string_list,
+            },
+            {
+                config = {
+                    busted_paths = function()
+                        return 1
+                    end,
+                },
+                error_message = optional_string_list_or_func,
             },
             {
                 config = { busted_cpaths = { 1, 2, 3 } },

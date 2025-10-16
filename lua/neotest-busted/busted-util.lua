@@ -50,13 +50,13 @@ local function get_runtime_test_info(tree)
 
     logger.debug(
         "Running command ",
-        command_info.nvim_command,
+        command_info.command,
         " to list tests with arguments ",
         command_info.arguments
     )
 
     local process, err = nio.process.run({
-        cmd = command_info.nvim_command,
+        cmd = command_info.command,
         args = command_info.arguments,
     })
 
