@@ -26,11 +26,11 @@ local types = {}
 ---@field quote_strings                 boolean?
 
 ---@class neotest-busted.TestCommandConfig
----@field nvim_command string
----@field arguments    string[]
----@field set_env      boolean?
----@field paths        string[]
----@field cpaths       string[]
+---@field command   string
+---@field arguments string[]
+---@field set_env   boolean?
+---@field paths     string[]
+---@field cpaths    string[]
 
 ---@enum neotest-busted.BustedResultKey
 types.BustedResultKey = {
