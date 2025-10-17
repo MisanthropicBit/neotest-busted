@@ -253,11 +253,11 @@ describe("adapter.build_spec", function()
             "--filter",
             "^describe expose test$",
             "--filter",
-            "^describe describe async it$",
+            "^describe async it$",
             "--filter",
-            "^describe describe async spec$",
+            "^describe async spec$",
             "--filter",
-            "^describe describe async test$",
+            "^describe async test$",
             "./test_files/aliases_spec.lua",
         })
 
@@ -267,9 +267,9 @@ describe("adapter.build_spec", function()
                 ["./test_files/aliases_spec.lua::describe context it::5"] = './test_files/aliases_spec.lua::"describe"::"context"::"it"',
                 ["./test_files/aliases_spec.lua::describe insulate spec::11"] = './test_files/aliases_spec.lua::"describe"::"insulate"::"spec"',
                 ["./test_files/aliases_spec.lua::describe expose test::17"] = './test_files/aliases_spec.lua::"describe"::"expose"::"test"',
-                ["./test_files/aliases_spec.lua::describe describe async it::23"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async it"',
-                ["./test_files/aliases_spec.lua::describe describe async spec::30"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async spec"',
-                ["./test_files/aliases_spec.lua::describe describe async test::37"] = './test_files/aliases_spec.lua::"describe"::"describe"::"async test"',
+                ["./test_files/aliases_spec.lua::describe async it::22"] = './test_files/aliases_spec.lua::"describe"::"async it"',
+                ["./test_files/aliases_spec.lua::describe async spec::29"] = './test_files/aliases_spec.lua::"describe"::"async spec"',
+                ["./test_files/aliases_spec.lua::describe async test::36"] = './test_files/aliases_spec.lua::"describe"::"async test"',
             },
         })
     end)
