@@ -86,30 +86,4 @@ function util.get_path_to_plugin_file(filename)
     return table.concat({ plugin_path(), filename })
 end
 
--- A copy of the busted's base handler's getFullName function except that it
--- uses "::" as a separator instead of spaces and also preprends the full path
----@param element      neotest-busted.BustedElement
----@param include_lnum boolean?
----@return string
-function util.position_id_from_busted_element(element, include_lnum)
-    local busted = require("busted")
-    local parent = busted.parent(element)
-    local names = { element.name or element.descriptor }
-
-    while parent and (parent.name or parent.descriptor) and parent.descriptor ~= "file" do
-        table.insert(names, 1, parent.name or parent.descriptor)
-        parent = busted.parent(parent)
-    end
-
-    table.insert(names, 1, element.trace.source:sub(2))
-
-    if include_lnum then
-        table.insert(names, tostring(element.trace.currentline))
-    end
-
-    -- TODO: Use another separator in case test name contains "::"?
-    -- TODO: Output line number as well for finding matching source-level test
-    return table.concat(names, "::")
-end
-
 return util
