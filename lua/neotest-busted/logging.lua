@@ -3,6 +3,7 @@ local logging = {}
 local logger = require("neotest.logging")
 
 local log_methods = {
+    "debug",
     "info",
     "warn",
     "error",
