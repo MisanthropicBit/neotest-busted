@@ -70,9 +70,9 @@ local function run_list_tests_command(tree)
     end
 
     logger.debug(
-        "Running command ",
+        "Running command",
         command_info.command,
-        " to list tests with arguments ",
+        "to list tests with arguments",
         command_info.arguments
     )
 
@@ -86,12 +86,27 @@ local function run_list_tests_command(tree)
         return
     end
 
-    -- Output goes to stderr
     ---@cast process nio.process.Process
-    local stderr, read_err = process.stderr.read()
+    local stderr, read_stderr_err = process.stderr.read()
+    local stdout, read_stdout_err = process.stdout.read()
 
-    if read_err then
-        logging.error("Got error when reading output from busted: %s", nil, read_err)
+    if read_stderr_err or read_stdout_err then
+        local err_message = {}
+
+        if read_stdout_err then
+            table.insert(err_message, "stdout: " .. read_stdout_err)
+        end
+
+        if read_stderr_err then
+            table.insert(err_message, "stdout: " .. read_stderr_err)
+        end
+
+        logging.error(
+            "Got error when reading output from busted: %s",
+            nil,
+            table.concat(err_message, " ")
+        )
+
         return
     end
 
@@ -102,7 +117,10 @@ local function run_list_tests_command(tree)
         return
     end
 
-    return stderr
+    -- NOTE: On some systems busted outputs to stderr (mac osx) and on others
+    -- on stdout (linux). This might be a bug in busted or neotest so for now
+    -- return either
+    return stdout ~= "" and stdout or stderr
 end
 
 ---@async
