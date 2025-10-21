@@ -1,4 +1,5 @@
 local async = require("neotest.async").tests
+local compat = require("neotest-busted.compat")
 local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local types = require("neotest.types")
@@ -23,9 +24,11 @@ describe("adapter.results", function()
     ---@return neotest.Tree
     local function discover_positions(test_path, json_path)
         local tree = adapter.discover_positions(test_path)
-        local test_json = table.concat(vim.fn.readfile(json_path), "\n")
+        local fd = compat.uv.fs_open(json_path, "r", 438)
+        local stat = compat.uv.fs_fstat(fd)
+        local data = compat.uv.fs_read(fd, stat.size, 0)
 
-        stub(lib.files, "read", test_json)
+        stub(lib.files, "read", data)
 
         ---@cast tree -nil
         return tree
@@ -37,7 +40,6 @@ describe("adapter.results", function()
         spec = {
             context = {
                 results_path = "test_output.json",
-                position_id_mapping = {},
             },
         }
 
@@ -54,34 +56,22 @@ describe("adapter.results", function()
     async.it("creates neotest results", function()
         local path = "./test_files/test1_spec.lua"
         local tree = discover_positions(path, "./test_files/busted_test_output.json")
-
-        spec.context.position_id_mapping = {
-            [path .. "::top-level namespace 1 nested namespace 1 test 1::3"] = path
-                .. '::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-            [path .. "::top-level namespace 1 nested namespace 1 test 2::8"] = path
-                .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = path
-                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = path
-                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
-        }
-
         local neotest_results = adapter.results(spec, strategy_result, tree)
 
         assert.are.same(neotest_results, {
-            [path .. '::"top-level namespace 1"::"nested namespace 1"::"test 1"'] = {
+            [path .. "::top-level namespace 1::nested namespace 1::test 1"] = {
                 status = types.ResultStatus.skipped,
-                short = "top-level namespace 1 nested namespace 1 test 1: skipped",
+                short = "test 1: skipped",
                 output = strategy_result.output,
             },
-            [path .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"'] = {
+            [path .. "::top-level namespace 1::nested namespace 1::test 2"] = {
                 status = types.ResultStatus.passed,
-                short = "top-level namespace 1 nested namespace 1 test 2: passed",
+                short = "test 2: passed",
                 output = strategy_result.output,
             },
-            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"'] = {
+            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$::test 3"] = {
                 status = types.ResultStatus.failed,
-                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3: failed",
+                short = "test 3: failed",
                 output = strategy_result.output,
                 errors = {
                     {
@@ -90,9 +80,9 @@ describe("adapter.results", function()
                     },
                 },
             },
-            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"'] = {
+            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$::test 4"] = {
                 status = types.ResultStatus.failed,
-                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4: failed",
+                short = "test 4: failed",
                 output = strategy_result.output,
                 errors = {
                     {
@@ -118,25 +108,17 @@ describe("adapter.results", function()
     async.it("creates neotest results with single and literal quotes", function()
         local path = "./test_files/quotes_spec.lua"
         local tree = discover_positions(path, "./test_files/quotes_spec.json")
-
-        spec.context.position_id_mapping = {
-            [path .. "::quotes single quotes test::2"] = path
-                .. "::\"quotes\"::'single quotes test'",
-            [path .. "::quotes literal quotes test::6"] = path
-                .. '::"quotes"::[[literal quotes test]]',
-        }
-
         local neotest_results = adapter.results(spec, strategy_result, tree)
 
         assert.are.same(neotest_results, {
-            [path .. "::\"quotes\"::'single quotes test'"] = {
+            [path .. "::quotes::single quotes test"] = {
                 status = types.ResultStatus.passed,
-                short = "quotes single quotes test: passed",
+                short = "single quotes test: passed",
                 output = strategy_result.output,
             },
-            [path .. '::"quotes"::[[literal quotes test]]'] = {
+            [path .. "::quotes::literal quotes test"] = {
                 status = types.ResultStatus.passed,
-                short = "quotes literal quotes test: passed",
+                short = "literal quotes test: passed",
                 output = strategy_result.output,
             },
         })
@@ -168,30 +150,22 @@ describe("adapter.results", function()
             assert.is_not_nil(subtree)
             ---@cast subtree -nil
 
-            local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
-            local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
-                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
-                [path .. '::"namespace 1"::"nested namespace 1"::("test %d"):format(i)'] = {
+                [path .. '::namespace 1::nested namespace 1::("test %d"):format(i)'] = {
                     status = types.ResultStatus.passed,
                     short = '("test %d"):format(i): passed',
                     output = strategy_result.output,
                 },
-                [parametric_pos_id_key1] = {
+                [path .. "::namespace 1::nested namespace 1::test 1"] = {
                     status = types.ResultStatus.passed,
-                    short = "namespace 1 nested namespace 1 test 1: passed",
+                    short = "test 1: passed",
                     output = strategy_result.output,
                 },
-                [parametric_pos_id_key2] = {
+                [path .. "::namespace 1::nested namespace 1::test 2"] = {
                     status = types.ResultStatus.passed,
-                    short = "namespace 1 nested namespace 1 test 2: passed",
+                    short = "test 2: passed",
                     output = strategy_result.output,
                 },
             })
@@ -225,64 +199,42 @@ describe("adapter.results", function()
             assert.is_not_nil(subtree)
             ---@cast subtree -nil
 
-            local parametric_pos_id_key1 = path
-                .. "::namespace::2::nested::namespace::2::-::1::some::test"
-            local parametric_pos_id_key2 = path
-                .. "::namespace::2::nested::namespace::2::-::2::some::test"
-            local parametric_pos_id_key3 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::1"
-            local parametric_pos_id_key4 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::2"
-            local parametric_pos_id_key5 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::1"
-            local parametric_pos_id_key6 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key1,
-                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key2,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key3,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key4,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key5,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key6,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
-                [path .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)'] = {
+                [path .. '::namespace 2::"nested namespace 2 - " .. tostring(i)'] = {
                     status = types.ResultStatus.passed,
                     short = '"nested namespace 2 - " .. tostring(i): passed',
                     output = strategy_result.output,
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::some::test"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::some test"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 some test: passed",
+                    short = "some test: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::test::1"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::test 1"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 test 1: passed",
+                    short = "test 1: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::test::2"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::test 2"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 test 2: passed",
+                    short = "test 2: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::some::test"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::some test"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 some test: passed",
+                    short = "some test: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::test::1"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::test 1"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 test 1: passed",
+                    short = "test 1: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::test::2"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::test 2"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 test 2: passed",
+                    short = "test 2: passed",
                     status = "passed",
                 },
             })
@@ -307,35 +259,6 @@ describe("adapter.results", function()
             local path = parametric_test_path
             local tree =
                 discover_positions(path, "./test_files/parametric_test_output_success_file.json")
-
-            local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
-            local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-            local parametric_pos_id_key3 = path .. "::namespace::1::nested::namespace::1::test::3"
-            local parametric_pos_id_key4 = path
-                .. "::namespace::2::nested::namespace::2::-::1::some::test"
-            local parametric_pos_id_key5 = path
-                .. "::namespace::2::nested::namespace::2::-::2::some::test"
-            local parametric_pos_id_key6 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::1"
-            local parametric_pos_id_key7 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::2"
-            local parametric_pos_id_key8 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::1"
-            local parametric_pos_id_key9 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
-                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
-                [path .. "::namespace 1 nested namespace 1 test 3::9"] = parametric_pos_id_key3,
-                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key4,
-                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key5,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key6,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key7,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key8,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key9,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, tree)
 
             assert.are.same(neotest_results, {
@@ -344,49 +267,49 @@ describe("adapter.results", function()
                     short = "parametric_tests_spec.lua: passed",
                     output = strategy_result.output,
                 },
-                [path .. "::namespace::1::nested::namespace::1::test::1"] = {
+                [path .. "::namespace 1::nested namespace 1::test 1"] = {
                     status = types.ResultStatus.passed,
-                    short = "namespace 1 nested namespace 1 test 1: passed",
+                    short = "test 1: passed",
                     output = strategy_result.output,
                 },
-                [path .. "::namespace::1::nested::namespace::1::test::2"] = {
+                [path .. "::namespace 1::nested namespace 1::test 2"] = {
                     status = types.ResultStatus.passed,
-                    short = "namespace 1 nested namespace 1 test 2: passed",
+                    short = "test 2: passed",
                     output = strategy_result.output,
                 },
-                [path .. "::namespace::1::nested::namespace::1::test::3"] = {
+                [path .. "::namespace 1::nested namespace 1::test 3"] = {
                     status = types.ResultStatus.passed,
-                    short = "namespace 1 nested namespace 1 test 3: passed",
+                    short = "test 3: passed",
                     output = strategy_result.output,
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::some::test"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::some test"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 some test: passed",
+                    short = "some test: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::test::1"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::test 1"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 test 1: passed",
+                    short = "test 1: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::test::2"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::test 2"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 test 2: passed",
+                    short = "test 2: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::some::test"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::some test"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 some test: passed",
+                    short = "some test: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::test::1"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::test 1"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 test 1: passed",
+                    short = "test 1: passed",
                     status = "passed",
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::test::2"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::test 2"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 test 2: passed",
+                    short = "test 2: passed",
                     status = "passed",
                 },
             })
@@ -416,25 +339,17 @@ describe("adapter.results", function()
             local subtree = tree:children()[1]:children()[1]:children()[1]
             assert.is_not_nil(subtree)
 
-            local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
-            local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
-                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
-                [path .. '::"namespace 1"::"nested namespace 1"::("test %d"):format(i)'] = {
+                [path .. '::namespace 1::nested namespace 1::("test %d"):format(i)'] = {
                     status = types.ResultStatus.failed,
                     short = '("test %d"):format(i): failed',
                     output = strategy_result.output,
                 },
-                [parametric_pos_id_key1] = {
+                [path .. "::namespace 1::nested namespace 1::test 1"] = {
                     status = types.ResultStatus.failed,
-                    short = "namespace 1 nested namespace 1 test 1: failed",
+                    short = "test 1: failed",
                     output = strategy_result.output,
                     errors = {
                         {
@@ -443,9 +358,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [parametric_pos_id_key2] = {
+                [path .. "::namespace 1::nested namespace 1::test 2"] = {
                     status = types.ResultStatus.failed,
-                    short = "namespace 1 nested namespace 1 test 2: failed",
+                    short = "test 2: failed",
                     output = strategy_result.output,
                     errors = {
                         {
@@ -480,40 +395,17 @@ describe("adapter.results", function()
             -- Get the subtree rooted at the the first parametric namespace in the file
             local subtree = tree:children()[2]:children()[1]
             assert.is_not_nil(subtree)
-
-            local parametric_pos_id_key1 = path
-                .. "::namespace::2::nested::namespace::2::-::1::some::test"
-            local parametric_pos_id_key2 = path
-                .. "::namespace::2::nested::namespace::2::-::2::some::test"
-            local parametric_pos_id_key3 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::1"
-            local parametric_pos_id_key4 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::2"
-            local parametric_pos_id_key5 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::1"
-            local parametric_pos_id_key6 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key1,
-                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key2,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key3,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key4,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key5,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key6,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
-                [path .. '::"namespace 2"::"nested namespace 2 - " .. tostring(i)'] = {
+                [path .. '::namespace 2::"nested namespace 2 - " .. tostring(i)'] = {
                     status = types.ResultStatus.failed,
                     short = '"nested namespace 2 - " .. tostring(i): failed',
                     output = strategy_result.output,
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::some::test"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::some test"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 some test: failed",
+                    short = "some test: failed",
                     status = "failed",
                     errors = {
                         {
@@ -522,9 +414,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::test::1"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::test 1"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 test 1: failed",
+                    short = "test 1: failed",
                     status = "failed",
                     errors = {
                         {
@@ -533,9 +425,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::test::2"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::test 2"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 test 2: failed",
+                    short = "test 2: failed",
                     status = "failed",
                     errors = {
                         {
@@ -544,9 +436,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::some::test"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::some test"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 some test: failed",
+                    short = "some test: failed",
                     status = "failed",
                     errors = {
                         {
@@ -555,9 +447,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::test::1"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::test 1"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 test 1: failed",
+                    short = "test 1: failed",
                     status = "failed",
                     errors = {
                         {
@@ -566,9 +458,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::test::2"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::test 2"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 test 2: failed",
+                    short = "test 2: failed",
                     status = "failed",
                     errors = {
                         {
@@ -599,35 +491,6 @@ describe("adapter.results", function()
             local path = "./test_files/parametric_tests_fail_spec.lua"
             local tree =
                 discover_positions(path, "./test_files/parametric_test_output_fail_file.json")
-
-            local parametric_pos_id_key1 = path .. "::namespace::1::nested::namespace::1::test::1"
-            local parametric_pos_id_key2 = path .. "::namespace::1::nested::namespace::1::test::2"
-            local parametric_pos_id_key3 = path .. "::namespace::1::nested::namespace::1::test::3"
-            local parametric_pos_id_key4 = path
-                .. "::namespace::2::nested::namespace::2::-::1::some::test"
-            local parametric_pos_id_key5 = path
-                .. "::namespace::2::nested::namespace::2::-::2::some::test"
-            local parametric_pos_id_key6 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::1"
-            local parametric_pos_id_key7 = path
-                .. "::namespace::2::nested::namespace::2::-::1::test::2"
-            local parametric_pos_id_key8 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::1"
-            local parametric_pos_id_key9 = path
-                .. "::namespace::2::nested::namespace::2::-::2::test::2"
-
-            spec.context.position_id_mapping = {
-                [path .. "::namespace 1 nested namespace 1 test 1::4"] = parametric_pos_id_key1,
-                [path .. "::namespace 1 nested namespace 1 test 2::4"] = parametric_pos_id_key2,
-                [path .. "::namespace 1 nested namespace 1 test 3::9"] = parametric_pos_id_key3,
-                [path .. "::namespace 2 nested namespace 2 - 1 some test::18"] = parametric_pos_id_key4,
-                [path .. "::namespace 2 nested namespace 2 - 2 some test::18"] = parametric_pos_id_key5,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 1::23"] = parametric_pos_id_key6,
-                [path .. "::namespace 2 nested namespace 2 - 1 test 2::23"] = parametric_pos_id_key7,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 1::23"] = parametric_pos_id_key8,
-                [path .. "::namespace 2 nested namespace 2 - 2 test 2::23"] = parametric_pos_id_key9,
-            }
-
             local neotest_results = adapter.results(spec, strategy_result, tree)
 
             assert.are.same(neotest_results, {
@@ -636,9 +499,9 @@ describe("adapter.results", function()
                     short = "parametric_tests_fail_spec.lua: failed",
                     output = strategy_result.output,
                 },
-                [path .. "::namespace::1::nested::namespace::1::test::1"] = {
+                [path .. "::namespace 1::nested namespace 1::test 1"] = {
                     status = types.ResultStatus.failed,
-                    short = "namespace 1 nested namespace 1 test 1: failed",
+                    short = "test 1: failed",
                     output = strategy_result.output,
                     errors = {
                         {
@@ -647,9 +510,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::1::nested::namespace::1::test::2"] = {
+                [path .. "::namespace 1::nested namespace 1::test 2"] = {
                     status = types.ResultStatus.failed,
-                    short = "namespace 1 nested namespace 1 test 2: failed",
+                    short = "test 2: failed",
                     output = strategy_result.output,
                     errors = {
                         {
@@ -658,9 +521,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::1::nested::namespace::1::test::3"] = {
+                [path .. "::namespace 1::nested namespace 1::test 3"] = {
                     status = types.ResultStatus.failed,
-                    short = "namespace 1 nested namespace 1 test 3: failed",
+                    short = "test 3: failed",
                     output = strategy_result.output,
                     errors = {
                         {
@@ -669,9 +532,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::some::test"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::some test"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 some test: failed",
+                    short = "some test: failed",
                     status = "failed",
                     errors = {
                         {
@@ -680,9 +543,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::test::1"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::test 1"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 test 1: failed",
+                    short = "test 1: failed",
                     status = "failed",
                     errors = {
                         {
@@ -691,9 +554,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::1::test::2"] = {
+                [path .. "::namespace 2::nested namespace 2 - 1::test 2"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 1 test 2: failed",
+                    short = "test 2: failed",
                     status = "failed",
                     errors = {
                         {
@@ -702,9 +565,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::some::test"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::some test"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 some test: failed",
+                    short = "some test: failed",
                     status = "failed",
                     errors = {
                         {
@@ -713,9 +576,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::test::1"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::test 1"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 test 1: failed",
+                    short = "test 1: failed",
                     status = "failed",
                     errors = {
                         {
@@ -724,9 +587,9 @@ describe("adapter.results", function()
                         },
                     },
                 },
-                [path .. "::namespace::2::nested::namespace::2::-::2::test::2"] = {
+                [path .. "::namespace 2::nested namespace 2 - 2::test 2"] = {
                     output = strategy_result.output,
-                    short = "namespace 2 nested namespace 2 - 2 test 2: failed",
+                    short = "test 2: failed",
                     status = "failed",
                     errors = {
                         {
@@ -815,7 +678,7 @@ describe("adapter.results", function()
         lib.files.read:revert()
     end)
 
-    it("logs not finding a matching position id", function()
+    it("logs not finding a position id generated by the custom output handler", function()
         stub(vim, "schedule", function(func)
             func()
         end)
@@ -823,44 +686,26 @@ describe("adapter.results", function()
         stub(vim, "notify")
 
         stub(lib.files, "read", function()
-            return table.concat(vim.fn.readfile("./test_files/busted_test_output.json"), "\n")
+            return table.concat(
+                vim.fn.readfile("./test_files/busted_test_output_missing_position_id.json"),
+                "\n"
+            )
         end)
 
         local path = "./test_files/test1_spec.lua"
-        -- spec.context.position_id_mapping[path .. "::namespace tests a failing test::7"] = nil
-
-        spec.context.position_id_mapping = {
-            [path .. "::top-level namespace 1 nested namespace 1 test 2::8"] = path
-                .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"',
-            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3::15"] = path
-                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"',
-            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4::19"] = path
-                .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"',
-        }
 
         ---@diagnostic disable-next-line: missing-parameter
         local neotest_results = adapter.results(spec, strategy_result)
 
         assert.are.same(neotest_results, {
-            [path .. '::"top-level namespace 1"::"nested namespace 1"::"test 2"'] = {
+            [path .. "::top-level namespace 1::nested namespace 1::test 2"] = {
                 status = types.ResultStatus.passed,
-                short = "top-level namespace 1 nested namespace 1 test 2: passed",
+                short = "test 2: passed",
                 output = strategy_result.output,
             },
-            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 3"'] = {
+            [path .. "::^top-le[ve]l (na*m+e-sp?ac%e) 2$::test 4"] = {
                 status = types.ResultStatus.failed,
-                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3: failed",
-                output = strategy_result.output,
-                errors = {
-                    {
-                        message = "...rojects/vim/neotest-busted/test_files/test1_spec.lua:16: Expected objects to be the same.\nPassed in:\n(boolean) false\nExpected:\n(boolean) true",
-                        line = 15,
-                    },
-                },
-            },
-            [path .. '::"^top-le[ve]l (na*m+e-sp?ac%e) 2$"::"test 4"'] = {
-                status = types.ResultStatus.failed,
-                short = "^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 4: failed",
+                short = "test 4: failed",
                 output = strategy_result.output,
                 errors = {
                     {
@@ -869,15 +714,18 @@ describe("adapter.results", function()
                     },
                 },
             },
+            [path .. "::top-level namespace 1::nested namespace 1::test 1"] = {
+                output = strategy_result.output,
+                short = "test 1: skipped",
+                status = types.ResultStatus.skipped,
+            },
         })
 
         assert.stub(vim.schedule).was.called()
         assert.stub(vim.notify).was.called()
         assert.stub(lib.files.read).was.called_with(spec.context.results_path)
         assert.stub(logger.error).was.called_with(
-            "Failed to find matching position id for key "
-                .. path
-                .. "::top-level namespace 1 nested namespace 1 test 1::3",
+            "Failed to generate neotest position id in output handler for test '^top-le[ve]l (na*m+e-sp?ac%e) 2$ test 3'",
             nil
         )
 

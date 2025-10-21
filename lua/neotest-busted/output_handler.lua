@@ -1,5 +1,37 @@
 local json = require("dkjson")
 
+local function deepcopy(obj)
+    if type(obj) ~= "table" then
+        return obj
+    end
+    local res = {}
+    for k, v in pairs(obj) do
+        res[k] = deepcopy(v)
+    end
+    return res
+end
+
+-- A copy of the busted's base handler's getFullName function except that it
+-- uses "::" as a separator instead of spaces and also preprends the full path
+---@param element neotest-busted.BustedElement
+---@return string
+local function position_id_from_busted_element(element)
+    local busted = require("busted")
+    local parent = busted.parent(element)
+    local names = { element.name or element.descriptor }
+
+    while parent and (parent.name or parent.descriptor) and parent.descriptor ~= "file" do
+        table.insert(names, 1, parent.name or parent.descriptor)
+        parent = busted.parent(parent)
+    end
+
+    table.insert(names, 1, element.trace.source:sub(2))
+
+    -- TODO: Use another separator in case test name contains "::"?
+    -- TODO: Output line number as well for finding matching source-level test
+    return table.concat(names, "::")
+end
+
 return function(options)
     local busted = require("busted")
     local handler = require("busted.outputHandlers.base")()
@@ -45,7 +77,7 @@ return function(options)
 
     -- Copy options and remove arguments so the utfTerminal handler can parse
     -- them without error
-    local utf_terminal_options = vim.deepcopy(options)
+    local utf_terminal_options = deepcopy(options)
     utf_terminal_options.arguments = {}
 
     -- Initialise the utfTerminal handler
@@ -81,7 +113,7 @@ return function(options)
         -- default 'name' field in the json output uses spaces so we cannot
         -- reliably split on space since the full test name itself might
         -- contain spaces
-        insertTable[#insertTable]["neotestPositionId"] = createNeotestPositionId(element)
+        insertTable[#insertTable]["neotestPositionId"] = position_id_from_busted_element(element)
     end
 
     handler.suiteEnd = function()

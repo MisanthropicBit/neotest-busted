@@ -28,23 +28,11 @@ describe("util", function()
 
     describe("glob", function()
         it("globs", function()
-            local path = util.create_path("lua", "**", "*.lua")
+            local path = util.create_path("lua/neotest-busted/helper_scripts", "**", "*.lua")
 
             assert.are.same(util.glob(path), {
-                "lua/neotest-busted/async.lua",
-                "lua/neotest-busted/busted-cli-runner.lua",
-                "lua/neotest-busted/busted-util.lua",
-                "lua/neotest-busted/cache.lua",
-                "lua/neotest-busted/compat.lua",
-                "lua/neotest-busted/config.lua",
-                "lua/neotest-busted/health.lua",
-                "lua/neotest-busted/init.lua",
-                "lua/neotest-busted/logging.lua",
-                "lua/neotest-busted/output_handler.lua",
-                "lua/neotest-busted/start_debug.lua",
-                "lua/neotest-busted/test_utils.lua",
-                "lua/neotest-busted/types.lua",
-                "lua/neotest-busted/util.lua",
+                "lua/neotest-busted/helper_scripts/list_tests.lua",
+                "lua/neotest-busted/helper_scripts/start_debug.lua",
             })
         end)
     end)

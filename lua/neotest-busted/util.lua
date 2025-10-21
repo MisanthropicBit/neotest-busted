@@ -73,4 +73,17 @@ function util.strip_position_id(position_id, concat)
     return path, stripped
 end
 
+---@return string
+local function plugin_path()
+    local str = debug.getinfo(2, "S").source:sub(2)
+
+    return str:match(util.create_path("(.*", ")"))
+end
+
+---@param filename string
+---@return string
+function util.get_path_to_plugin_file(filename)
+    return table.concat({ plugin_path(), filename })
+end
+
 return util

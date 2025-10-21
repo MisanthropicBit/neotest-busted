@@ -3,7 +3,7 @@
   <h1>neotest-busted</h1>
   <p>🚧 Highly experimental 🚧</p>
   <p>
-    <img src="https://img.shields.io/badge/version-1.0.0-blue?style=flat-square" />
+    <img src="https://img.shields.io/badge/version-1.1.1-blue?style=flat-square" />
     <a href="https://luarocks.org/modules/misanthropicbit/neotest-busted">
         <img src="https://img.shields.io/luarocks/v/misanthropicbit/neotest-busted?style=flat-square&logo=lua&logoColor=%2351a0cf&color=purple" />
     </a>
@@ -66,11 +66,15 @@ require("neotest").setup({
         require("neotest-busted")({
             -- Leave as nil to let neotest-busted automatically find busted
             busted_command = "<path to a busted executable>",
+            -- Do not use nvim to run busted, but run busted directly
+            no_nvim = false,
             -- Extra arguments to busted
             busted_args = { "--shuffle-files" },
-            -- List of paths to add to package.path in neovim before running busted
+            -- List of paths to add to lua path lookups before running
+            -- busted, or a function returning a list of such paths
             busted_paths = { "my/custom/path/?.lua" },
-            -- List of paths to add to package.cpath in neovim before running busted
+            -- List of paths to add to lua cpath lookups before running
+            -- busted, or a function returning a list of such paths
             busted_cpaths = { "my/custom/path/?.so" },
             -- Custom config to load via -u to set up testing.
             -- If nil, will look for a 'minimal_init.lua' file
