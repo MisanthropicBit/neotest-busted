@@ -139,8 +139,7 @@ local function get_runtime_test_info(tree)
     local ordered_pos_ids = {}
     local path = tree:data().path
 
-    -- Output contains carriage returns
-    for line in vim.gsplit(output, "\r\n", { plain = true, trimempty = true }) do
+    for line in vim.gsplit(output, "\r?\n", { trimempty = true }) do
         local position_id, test_name, lnum = process_list_test_line(line)
 
         if position_id and test_name and lnum then
