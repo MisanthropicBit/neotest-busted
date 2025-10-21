@@ -426,11 +426,11 @@ function BustedNeotestAdapter.discover_positions(path)
     ((function_call
         name: (
             dot_index_expression
-                table: (identifier)
+                table: (_)
                 field: (identifier)
         ) @func_name
         arguments: (arguments (_) @test.name (function_definition))
-    ) (#match? @func_name "^async\.it$")) @test.definition
+    ) (#any-of? @func_name "async.it" "nio.tests.it" "a.it")) @test.definition
 
     ;; custom async blocks
     ((function_call

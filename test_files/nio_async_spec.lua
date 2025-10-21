@@ -1,3 +1,5 @@
+local nio = require("nio")
+local a = require("nio.async").tests
 local async = require("nio.async").tests
 local control = require("neotest.async").control
 
@@ -15,7 +17,7 @@ describe("nio async tests", function()
         end, 500)
     end, 40)
 
-    async.it("async test 2", function()
+    nio.tests.it("async test 2", function()
         local timer = vim.loop.new_timer()
         local event = control.event()
 
@@ -29,5 +31,11 @@ describe("nio async tests", function()
 
         event.wait()
     end)
+
+    a.it("async test 1", function()
+        vim.wait(100, function()
+            return false
+        end, 500)
+    end, 40)
     -- stylua: ignore end
 end)
