@@ -210,7 +210,7 @@ describe("adapter.build_spec", function()
             busted_cpaths = nil,
             minimal_init = nil,
         })
-        local path =  "./test_files/nio_async_spec.lua"
+        local path = "./test_files/nio_async_spec.lua"
         local tree = create_tree(adapter, path)
         local spec = adapter.build_spec({
             tree = tree:children()[1]:children()[1],
