@@ -138,47 +138,37 @@ describe("adapter.results", function()
     async.it("creates neotest results for all aliases", function()
         local path = "./test_files/aliases_spec.lua"
         local tree = discover_positions(path, "./test_files/aliases_spec.json")
-
-        spec.context.position_id_mapping = {
-            [path .. "::describe context it::5"] = path .. '::"describe"::"context"::"it"',
-            [path .. "::describe insulate spec::11"] = path .. '::"describe"::"insulate"::"spec"',
-            [path .. "::describe expose test::17"] = path .. '::"describe"::"expose"::"test"',
-            [path .. "::describe async it::22"] = path .. '::"describe"::"async it"',
-            [path .. "::describe async spec::29"] = path .. '::"describe"::"async spec"',
-            [path .. "::describe async test::36"] = path .. '::"describe"::"async test"',
-        }
-
         local neotest_results = adapter.results(spec, strategy_result, tree)
 
         assert.are.same(neotest_results, {
-            [path .. '::"describe"::"context"::"it"'] = {
+            [path .. "::describe::context::it"] = {
                 status = types.ResultStatus.passed,
-                short = "describe context it: passed",
+                short = "it: passed",
                 output = strategy_result.output,
             },
-            [path .. '::"describe"::"insulate"::"spec"'] = {
+            [path .. "::describe::insulate::spec"] = {
                 status = types.ResultStatus.passed,
-                short = "describe insulate spec: passed",
+                short = "spec: passed",
                 output = strategy_result.output,
             },
-            [path .. '::"describe"::"expose"::"test"'] = {
+            [path .. "::describe::expose::test"] = {
                 status = types.ResultStatus.passed,
-                short = "describe expose test: passed",
+                short = "test: passed",
                 output = strategy_result.output,
             },
-            [path .. '::"describe"::"async it"'] = {
+            [path .. "::describe::async it"] = {
                 status = types.ResultStatus.passed,
-                short = "describe async it: passed",
+                short = "async it: passed",
                 output = strategy_result.output,
             },
-            [path .. '::"describe"::"async spec"'] = {
+            [path .. "::describe::async spec"] = {
                 status = types.ResultStatus.passed,
-                short = "describe async spec: passed",
+                short = "async spec: passed",
                 output = strategy_result.output,
             },
-            [path .. '::"describe"::"async test"'] = {
+            [path .. "::describe::async test"] = {
                 status = types.ResultStatus.passed,
-                short = "describe async test: passed",
+                short = "async test: passed",
                 output = strategy_result.output,
             },
         })

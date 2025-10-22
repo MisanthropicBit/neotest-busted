@@ -247,17 +247,7 @@ describe("adapter.build_spec", function()
             "./test_files/aliases_spec.lua",
         })
 
-        assert.are.same(spec.context, {
-            results_path = "test-output.json",
-            position_id_mapping = {
-                ["./test_files/aliases_spec.lua::describe context it::5"] = './test_files/aliases_spec.lua::"describe"::"context"::"it"',
-                ["./test_files/aliases_spec.lua::describe insulate spec::11"] = './test_files/aliases_spec.lua::"describe"::"insulate"::"spec"',
-                ["./test_files/aliases_spec.lua::describe expose test::17"] = './test_files/aliases_spec.lua::"describe"::"expose"::"test"',
-                ["./test_files/aliases_spec.lua::describe async it::22"] = './test_files/aliases_spec.lua::"describe"::"async it"',
-                ["./test_files/aliases_spec.lua::describe async spec::29"] = './test_files/aliases_spec.lua::"describe"::"async spec"',
-                ["./test_files/aliases_spec.lua::describe async test::36"] = './test_files/aliases_spec.lua::"describe"::"async test"',
-            },
-        })
+        assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
 
     async.it("builds command for test with extra arguments", function()
