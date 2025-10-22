@@ -50,10 +50,12 @@ describe("adapter.build_spec", function()
     end
 
     ---@param adapter neotest.Adapter
+    ---@param path string?
     ---@return neotest.Tree
-    local function create_tree(adapter)
+    local function create_tree(adapter, path)
         -- TODO: Why not just return the tree from discover_positions?
-        local positions = adapter.discover_positions("./test_files/test1_spec.lua"):to_list()
+        local positions =
+            adapter.discover_positions(path or "./test_files/test1_spec.lua"):to_list()
 
         return Tree.from_list(positions, function(pos)
             return pos.id
@@ -196,6 +198,66 @@ describe("adapter.build_spec", function()
         })
 
         assert.are.same(spec.context, { results_path = "test-output.json" })
+    end)
+
+    async.it("builds command for test file using aliases", function()
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            busted_args = {},
+            busted_paths = nil,
+            busted_cpaths = nil,
+            minimal_init = nil,
+        })
+        local tree = create_tree(adapter, "./test_files/aliases_spec.lua")
+        local spec = adapter.build_spec({ tree = tree:children()[1] })
+
+        assert.is_not_nil(spec)
+
+        assert_spec_command(spec.command, {
+            vim.loop.exepath(),
+            "--headless",
+            "-i",
+            "NONE",
+            "-n",
+            "-u",
+            "tests/minimal_init.lua",
+            "-c",
+            "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
+            "-l",
+            "./busted",
+            "--output",
+            "./lua/neotest-busted/output_handler.lua",
+            "-Xoutput",
+            "test-output.json",
+            "--verbose",
+            "--filter",
+            "^describe context it$",
+            "--filter",
+            "^describe insulate spec$",
+            "--filter",
+            "^describe expose test$",
+            "--filter",
+            "^describe async it$",
+            "--filter",
+            "^describe async spec$",
+            "--filter",
+            "^describe async test$",
+            "./test_files/aliases_spec.lua",
+        })
+
+        assert.are.same(spec.context, {
+            results_path = "test-output.json",
+            position_id_mapping = {
+                ["./test_files/aliases_spec.lua::describe context it::5"] = './test_files/aliases_spec.lua::"describe"::"context"::"it"',
+                ["./test_files/aliases_spec.lua::describe insulate spec::11"] = './test_files/aliases_spec.lua::"describe"::"insulate"::"spec"',
+                ["./test_files/aliases_spec.lua::describe expose test::17"] = './test_files/aliases_spec.lua::"describe"::"expose"::"test"',
+                ["./test_files/aliases_spec.lua::describe async it::22"] = './test_files/aliases_spec.lua::"describe"::"async it"',
+                ["./test_files/aliases_spec.lua::describe async spec::29"] = './test_files/aliases_spec.lua::"describe"::"async spec"',
+                ["./test_files/aliases_spec.lua::describe async test::36"] = './test_files/aliases_spec.lua::"describe"::"async test"',
+            },
+        })
     end)
 
     async.it("builds command for test with extra arguments", function()

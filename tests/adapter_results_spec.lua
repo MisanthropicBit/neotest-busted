@@ -135,6 +135,66 @@ describe("adapter.results", function()
         lib.files.read:revert()
     end)
 
+    async.it("creates neotest results for all aliases", function()
+        local path = "./test_files/aliases_spec.lua"
+        local tree = discover_positions(path, "./test_files/aliases_spec.json")
+
+        spec.context.position_id_mapping = {
+            [path .. "::describe context it::5"] = path .. '::"describe"::"context"::"it"',
+            [path .. "::describe insulate spec::11"] = path .. '::"describe"::"insulate"::"spec"',
+            [path .. "::describe expose test::17"] = path .. '::"describe"::"expose"::"test"',
+            [path .. "::describe async it::22"] = path .. '::"describe"::"async it"',
+            [path .. "::describe async spec::29"] = path .. '::"describe"::"async spec"',
+            [path .. "::describe async test::36"] = path .. '::"describe"::"async test"',
+        }
+
+        local neotest_results = adapter.results(spec, strategy_result, tree)
+
+        assert.are.same(neotest_results, {
+            [path .. '::"describe"::"context"::"it"'] = {
+                status = types.ResultStatus.passed,
+                short = "describe context it: passed",
+                output = strategy_result.output,
+            },
+            [path .. '::"describe"::"insulate"::"spec"'] = {
+                status = types.ResultStatus.passed,
+                short = "describe insulate spec: passed",
+                output = strategy_result.output,
+            },
+            [path .. '::"describe"::"expose"::"test"'] = {
+                status = types.ResultStatus.passed,
+                short = "describe expose test: passed",
+                output = strategy_result.output,
+            },
+            [path .. '::"describe"::"async it"'] = {
+                status = types.ResultStatus.passed,
+                short = "describe async it: passed",
+                output = strategy_result.output,
+            },
+            [path .. '::"describe"::"async spec"'] = {
+                status = types.ResultStatus.passed,
+                short = "describe async spec: passed",
+                output = strategy_result.output,
+            },
+            [path .. '::"describe"::"async test"'] = {
+                status = types.ResultStatus.passed,
+                short = "describe async test: passed",
+                output = strategy_result.output,
+            },
+        })
+
+        local expected_tree = require("./test_files/expected_aliases_tree")
+
+        -- Tree remains unchanged
+        assert.are.same(tree:to_list(), expected_tree)
+
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was_not_called()
+
+        ---@diagnostic disable-next-line: undefined-field
+        lib.files.read:revert()
+    end)
+
     async.it(
         "creates neotest results for successful parametric tests and updates tree (test)",
         function()

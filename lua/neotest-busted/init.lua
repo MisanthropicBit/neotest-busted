@@ -462,7 +462,7 @@ function BustedNeotestAdapter.discover_positions(path)
     local query = [[
     ;; describe blocks
     ((function_call
-        name: (identifier) @func_name (#eq? @func_name "describe")
+        name: (identifier) @func_name (#any-of? @func_name "describe" "context" "insulate" "expose")
         arguments: (arguments (_) @namespace.name (function_definition))
     )) @namespace.definition
 
@@ -470,7 +470,7 @@ function BustedNeotestAdapter.discover_positions(path)
     ((function_call
         name: (identifier) @func_name
         arguments: (arguments (_) @test.name (function_definition))
-    ) (#eq? @func_name "it")) @test.definition
+    ) (#any-of? @func_name "it" "test" "spec")) @test.definition
 
     ;; pending blocks
     ((function_call
@@ -484,7 +484,7 @@ function BustedNeotestAdapter.discover_positions(path)
         arguments: (arguments (_) @test.name (function_call
             name: (identifier) @async (#eq? @async "async")
         ))
-    ) (#eq? @func_name "it")) @test.definition
+    ) (#any-of? @func_name "it" "test" "spec")) @test.definition
 ]]
 
     -- Lua-ls does not understand that neotest.lib.treesitter.ParseOptions
