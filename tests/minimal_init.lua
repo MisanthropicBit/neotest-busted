@@ -1,7 +1,7 @@
 vim.opt.rtp:append(".")
-vim.opt.rtp:append("~/.vim-plug/plenary.nvim")
-vim.opt.rtp:append("~/.vim-plug/neotest")
-vim.opt.rtp:append("~/.vim-plug/nvim-nio")
-vim.opt.rtp:append("~/.vim-plug/nvim-treesitter")
+vim.opt.rtp:append("~/.local/share/nvim/lazy/plenary.nvim")
+vim.opt.rtp:append("~/.local/share/nvim/lazy/neotest")
+vim.opt.rtp:append("~/.local/share/nvim/lazy/nvim-nio")
+vim.opt.rtp:append("~/.local/share/nvim/lazy/nvim-treesitter")
 
 vim.cmd.runtime({ "plugin/plenary.vim", bang = false })
