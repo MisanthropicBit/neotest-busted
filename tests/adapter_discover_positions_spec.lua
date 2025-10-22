@@ -22,7 +22,7 @@ describe("adapter.discover_positions", function()
     async.it("discovers test positions", function()
         local positions = adapter.discover_positions("./test_files/test1_spec.lua"):to_list()
 
-        local expected_tree = require("./test_files/expected_tree")
+        local expected_tree = require("./test_files/expected_trees/expected_tree")
         assert.are.same(positions, expected_tree)
 
         ---@diagnostic disable-next-line: undefined-field
@@ -34,7 +34,7 @@ describe("adapter.discover_positions", function()
     async.it("discovers pending tests", function()
         local positions = adapter.discover_positions("./test_files/pending_spec.lua"):to_list()
 
-        local expected_tree = require("./test_files/expected_pending_tree")
+        local expected_tree = require("./test_files/expected_trees/expected_pending_tree")
         assert.are.same(positions, expected_tree)
 
         ---@diagnostic disable-next-line: undefined-field
@@ -46,7 +46,7 @@ describe("adapter.discover_positions", function()
     async.it("discovers all aliases", function()
         local positions = adapter.discover_positions("./test_files/aliases_spec.lua"):to_list()
 
-        local expected_tree = require("./test_files/expected_aliases_tree")
+        local expected_tree = require("./test_files/expected_trees/expected_aliases_tree")
         assert.are.same(positions, expected_tree)
 
         ---@diagnostic disable-next-line: undefined-field
@@ -62,7 +62,7 @@ describe("adapter.discover_positions", function()
 
         local tree = adapter.discover_positions(path):to_list()
 
-        local expected_tree = require("./test_files/expected_tree2")
+        local expected_tree = require("./test_files/expected_trees/expected_tree2")
         assert.are.same(tree, expected_tree)
 
         ---@diagnostic disable-next-line: undefined-field
