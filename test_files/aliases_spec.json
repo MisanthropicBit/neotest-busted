@@ -3,6 +3,7 @@
   "successes": [
     {
       "name": "describe context it",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::context::it",
       "trace": {
         "lastlinedefined": 8,
         "source": "@./test_files/aliases_spec.lua",
@@ -36,6 +37,7 @@
     },
     {
       "name": "describe insulate spec",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::insulate::spec",
       "trace": {
         "lastlinedefined": 14,
         "source": "@./test_files/aliases_spec.lua",
@@ -69,6 +71,7 @@
     },
     {
       "name": "describe expose test",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::expose::test",
       "trace": {
         "lastlinedefined": 20,
         "source": "@./test_files/aliases_spec.lua",
@@ -102,6 +105,7 @@
     },
     {
       "name": "describe async it",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::async it",
       "trace": {
         "lastlinedefined": 42,
         "source": "@./test_files/aliases_spec.lua",
@@ -135,6 +139,7 @@
     },
     {
       "name": "describe async spec",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::async spec",
       "trace": {
         "lastlinedefined": 42,
         "source": "@./test_files/aliases_spec.lua",
@@ -168,6 +173,7 @@
     },
     {
       "name": "describe async test",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::async test",
       "trace": {
         "lastlinedefined": 42,
         "source": "@./test_files/aliases_spec.lua",
