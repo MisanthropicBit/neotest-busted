@@ -135,6 +135,56 @@ describe("adapter.results", function()
         lib.files.read:revert()
     end)
 
+    async.it("creates neotest results for all aliases", function()
+        local path = "./test_files/aliases_spec.lua"
+        local tree = discover_positions(path, "./test_files/aliases_spec.json")
+        local neotest_results = adapter.results(spec, strategy_result, tree)
+
+        assert.are.same(neotest_results, {
+            [path .. "::describe::context::it"] = {
+                status = types.ResultStatus.passed,
+                short = "it: passed",
+                output = strategy_result.output,
+            },
+            [path .. "::describe::insulate::spec"] = {
+                status = types.ResultStatus.passed,
+                short = "spec: passed",
+                output = strategy_result.output,
+            },
+            [path .. "::describe::expose::test"] = {
+                status = types.ResultStatus.passed,
+                short = "test: passed",
+                output = strategy_result.output,
+            },
+            [path .. "::describe::async it"] = {
+                status = types.ResultStatus.passed,
+                short = "async it: passed",
+                output = strategy_result.output,
+            },
+            [path .. "::describe::async spec"] = {
+                status = types.ResultStatus.passed,
+                short = "async spec: passed",
+                output = strategy_result.output,
+            },
+            [path .. "::describe::async test"] = {
+                status = types.ResultStatus.passed,
+                short = "async test: passed",
+                output = strategy_result.output,
+            },
+        })
+
+        local expected_tree = require("./test_files/expected_aliases_tree")
+
+        -- Tree remains unchanged
+        assert.are.same(tree:to_list(), expected_tree)
+
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was_not_called()
+
+        ---@diagnostic disable-next-line: undefined-field
+        lib.files.read:revert()
+    end)
+
     async.it(
         "creates neotest results for successful parametric tests and updates tree (test)",
         function()

@@ -1,0 +1,212 @@
+{
+  "pendings": [],
+  "successes": [
+    {
+      "name": "describe context it",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::context::it",
+      "trace": {
+        "lastlinedefined": 8,
+        "source": "@./test_files/aliases_spec.lua",
+        "short_src": "./test_files/aliases_spec.lua",
+        "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:5: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:4>\n",
+        "message": "it",
+        "currentline": 5,
+        "what": "Lua",
+        "linedefined": 4
+      },
+      "element": {
+        "starttick": 4211992.602767,
+        "attributes": [],
+        "trace": {
+          "lastlinedefined": 8,
+          "source": "@./test_files/aliases_spec.lua",
+          "short_src": "./test_files/aliases_spec.lua",
+          "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:5: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:4>\n",
+          "message": "it",
+          "currentline": 5,
+          "what": "Lua",
+          "linedefined": 4
+        },
+        "endtick": 4211992.60284,
+        "duration": 0.000072999857366085,
+        "name": "it",
+        "descriptor": "it",
+        "endtime": 1760706267.4428,
+        "starttime": 1760706267.4427
+      }
+    },
+    {
+      "name": "describe insulate spec",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::insulate::spec",
+      "trace": {
+        "lastlinedefined": 14,
+        "source": "@./test_files/aliases_spec.lua",
+        "short_src": "./test_files/aliases_spec.lua",
+        "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:11: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:10>\n",
+        "message": "spec",
+        "currentline": 11,
+        "what": "Lua",
+        "linedefined": 10
+      },
+      "element": {
+        "starttick": 4211992.603212,
+        "attributes": [],
+        "trace": {
+          "lastlinedefined": 14,
+          "source": "@./test_files/aliases_spec.lua",
+          "short_src": "./test_files/aliases_spec.lua",
+          "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:11: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:10>\n",
+          "message": "spec",
+          "currentline": 11,
+          "what": "Lua",
+          "linedefined": 10
+        },
+        "endtick": 4211992.603278,
+        "duration": 0.000066000036895275,
+        "name": "spec",
+        "descriptor": "it",
+        "endtime": 1760706267.4432,
+        "starttime": 1760706267.4432
+      }
+    },
+    {
+      "name": "describe expose test",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::expose::test",
+      "trace": {
+        "lastlinedefined": 20,
+        "source": "@./test_files/aliases_spec.lua",
+        "short_src": "./test_files/aliases_spec.lua",
+        "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:17: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:16>\n",
+        "message": "test",
+        "currentline": 17,
+        "what": "Lua",
+        "linedefined": 16
+      },
+      "element": {
+        "starttick": 4211992.603632,
+        "attributes": [],
+        "trace": {
+          "lastlinedefined": 20,
+          "source": "@./test_files/aliases_spec.lua",
+          "short_src": "./test_files/aliases_spec.lua",
+          "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:17: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:16>\n",
+          "message": "test",
+          "currentline": 17,
+          "what": "Lua",
+          "linedefined": 16
+        },
+        "endtick": 4211992.60371,
+        "duration": 0.000078000128269196,
+        "name": "test",
+        "descriptor": "it",
+        "endtime": 1760706267.4437,
+        "starttime": 1760706267.4436
+      }
+    },
+    {
+      "name": "describe async it",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::async it",
+      "trace": {
+        "lastlinedefined": 42,
+        "source": "@./test_files/aliases_spec.lua",
+        "short_src": "./test_files/aliases_spec.lua",
+        "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:22: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:3>\n",
+        "message": "async it",
+        "currentline": 22,
+        "what": "Lua",
+        "linedefined": 3
+      },
+      "element": {
+        "starttick": 4211992.603912,
+        "attributes": [],
+        "trace": {
+          "lastlinedefined": 42,
+          "source": "@./test_files/aliases_spec.lua",
+          "short_src": "./test_files/aliases_spec.lua",
+          "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:22: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:3>\n",
+          "message": "async it",
+          "currentline": 22,
+          "what": "Lua",
+          "linedefined": 3
+        },
+        "endtick": 4211992.607962,
+        "duration": 0.0040500005707145,
+        "name": "async it",
+        "descriptor": "it",
+        "endtime": 1760706267.4479,
+        "starttime": 1760706267.4439
+      }
+    },
+    {
+      "name": "describe async spec",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::async spec",
+      "trace": {
+        "lastlinedefined": 42,
+        "source": "@./test_files/aliases_spec.lua",
+        "short_src": "./test_files/aliases_spec.lua",
+        "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:29: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:3>\n",
+        "message": "async spec",
+        "currentline": 29,
+        "what": "Lua",
+        "linedefined": 3
+      },
+      "element": {
+        "starttick": 4211992.608165,
+        "attributes": [],
+        "trace": {
+          "lastlinedefined": 42,
+          "source": "@./test_files/aliases_spec.lua",
+          "short_src": "./test_files/aliases_spec.lua",
+          "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:29: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:3>\n",
+          "message": "async spec",
+          "currentline": 29,
+          "what": "Lua",
+          "linedefined": 3
+        },
+        "endtick": 4211992.608249,
+        "duration": 0.000084000639617443,
+        "name": "async spec",
+        "descriptor": "it",
+        "endtime": 1760706267.4482,
+        "starttime": 1760706267.4481
+      }
+    },
+    {
+      "name": "describe async test",
+      "neotestPositionId": "./test_files/aliases_spec.lua::describe::async test",
+      "trace": {
+        "lastlinedefined": 42,
+        "source": "@./test_files/aliases_spec.lua",
+        "short_src": "./test_files/aliases_spec.lua",
+        "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:36: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:3>\n",
+        "message": "async test",
+        "currentline": 36,
+        "what": "Lua",
+        "linedefined": 3
+      },
+      "element": {
+        "starttick": 4211992.608331,
+        "attributes": [],
+        "trace": {
+          "lastlinedefined": 42,
+          "source": "@./test_files/aliases_spec.lua",
+          "short_src": "./test_files/aliases_spec.lua",
+          "traceback": "\nstack traceback:\n\t...projects/nvim/neotest-busted/test_files/aliases_spec.lua:36: in function <...projects/nvim/neotest-busted/test_files/aliases_spec.lua:3>\n",
+          "message": "async test",
+          "currentline": 36,
+          "what": "Lua",
+          "linedefined": 3
+        },
+        "endtick": 4211992.608371,
+        "duration": 0.00003999937325716,
+        "name": "async test",
+        "descriptor": "it",
+        "endtime": 1760706267.4483,
+        "starttime": 1760706267.4483
+      }
+    }
+  ],
+  "failures": [],
+  "errors": [],
+  "duration": 0.0071330005303025
+}

@@ -210,7 +210,7 @@ end
 
 ---@param lua_paths string[]
 ---@param lua_cpaths string[]
----@return arguments string[]
+---@return string[]
 local function get_nvim_arguments(lua_paths, lua_cpaths)
     -- stylua: ignore start
     ---@type string[]
@@ -462,7 +462,7 @@ function BustedNeotestAdapter.discover_positions(path)
     local query = [[
     ;; describe blocks
     ((function_call
-        name: (identifier) @func_name (#eq? @func_name "describe")
+        name: (identifier) @func_name (#any-of? @func_name "describe" "context" "insulate" "expose")
         arguments: (arguments (_) @namespace.name (function_definition))
     )) @namespace.definition
 
@@ -470,7 +470,7 @@ function BustedNeotestAdapter.discover_positions(path)
     ((function_call
         name: (identifier) @func_name
         arguments: (arguments (_) @test.name (function_definition))
-    ) (#eq? @func_name "it")) @test.definition
+    ) (#any-of? @func_name "it" "test" "spec")) @test.definition
 
     ;; pending blocks
     ((function_call
@@ -494,7 +494,7 @@ function BustedNeotestAdapter.discover_positions(path)
         arguments: (arguments (_) @test.name (function_call
             name: (identifier) @async (#eq? @async "async")
         ))
-    ) (#eq? @func_name "it")) @test.definition
+    ) (#any-of? @func_name "it" "test" "spec")) @test.definition
 ]]
 
     -- Lua-ls does not understand that neotest.lib.treesitter.ParseOptions
@@ -692,24 +692,6 @@ local function convert_test_result_to_neotest_result(status, test_result, output
     return result
 end
 
----@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
-local function is_nio_async_test(test_result)
-    return test_result.trace.short_src:match("nvim%-nio/lua/nio/tests.lua$")
-end
-
-local function create_nio_async_test_pos_id_key(pos_id_key, test_result)
-    -- /Users/hyrule/.vim-plug/nvim-nio/lua/nio/tests.lua::top-level namespace 1 nested namespace 1 test 2::66
-    local parts = vim.split(pos_id_key, "::")
-    local traceback = test_result.trace.traceback
-    local lnum_match = vim.iter(traceback:gmatch("%.lua:(%d+)")):skip(1):totable()[1]
-
-    if not lnum_match then
-        return nil
-    end
-
-    return "/Users/hyrule/projects/nvim/neotest-busted/test_files/test1_spec.lua::" .. parts[2] .. "::" .. lnum_match
-end
-
 --- Convert busted test results to neotest test results
 ---@param test_results_json neotest-busted.BustedResultObject
 ---@param output string
@@ -843,10 +825,8 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
     ---@cast test_results_json neotest-busted.BustedResultObject
 
-    local results, pos_id_to_test_name = convert_test_results_to_neotest_results(
-        test_results_json,
-        strategy_result.output
-    )
+    local results =
+        convert_test_results_to_neotest_results(test_results_json, strategy_result.output)
 
     if config.parametric_test_discovery == true then
         update_parametric_tests_in_tree(tree)

@@ -53,9 +53,9 @@ describe("adapter.build_spec", function()
     ---@param path string?
     ---@return neotest.Tree
     local function create_tree(adapter, path)
-        local _path = path or "./test_files/test1_spec.lua"
         -- TODO: Why not just return the tree from discover_positions?
-        local positions = adapter.discover_positions(_path):to_list()
+        local positions =
+            adapter.discover_positions(path or "./test_files/test1_spec.lua"):to_list()
 
         return Tree.from_list(positions, function(pos)
             return pos.id
@@ -236,16 +236,61 @@ describe("adapter.build_spec", function()
             "test-output.json",
             "--verbose",
             "--filter",
-            "^namespace 1 nested namespace 1 async test 1$",
+            "^nio async tests async test 1$",
             path,
         })
 
-        assert.are.same(spec.context, {
-            results_path = "test-output.json",
-            -- position_id_mapping = {
-            --     [path .. "::namespace 1 nested namespace 1 async test 1::3"] = './test_files/test1_spec.lua::"top-level namespace 1"::"nested namespace 1"::"test 1"',
-            -- },
+        assert.are.same(spec.context, { results_path = "test-output.json" })
+    end)
+
+    async.it("builds command for test file using aliases", function()
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            busted_args = {},
+            busted_paths = nil,
+            busted_cpaths = nil,
+            minimal_init = nil,
         })
+        local tree = create_tree(adapter, "./test_files/aliases_spec.lua")
+        local spec = adapter.build_spec({ tree = tree:children()[1] })
+
+        assert.is_not_nil(spec)
+
+        assert_spec_command(spec.command, {
+            vim.loop.exepath(),
+            "--headless",
+            "-i",
+            "NONE",
+            "-n",
+            "-u",
+            "tests/minimal_init.lua",
+            "-c",
+            "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
+            "-l",
+            "./busted",
+            "--output",
+            "./lua/neotest-busted/output_handler.lua",
+            "-Xoutput",
+            "test-output.json",
+            "--verbose",
+            "--filter",
+            "^describe context it$",
+            "--filter",
+            "^describe insulate spec$",
+            "--filter",
+            "^describe expose test$",
+            "--filter",
+            "^describe async it$",
+            "--filter",
+            "^describe async spec$",
+            "--filter",
+            "^describe async test$",
+            "./test_files/aliases_spec.lua",
+        })
+
+        assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
 
     -- TODO: Make test for neotest-busted async test
