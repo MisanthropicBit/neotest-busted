@@ -32,7 +32,7 @@ describe("nio async tests", function()
         event.wait()
     end)
 
-    a.it("async test 1", function()
+    a.it("async test 3", function()
         vim.wait(100, function()
             return false
         end, 500)
