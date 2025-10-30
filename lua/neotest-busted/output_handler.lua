@@ -25,7 +25,22 @@ local function position_id_from_busted_element(element)
         parent = busted.parent(parent)
     end
 
-    table.insert(names, 1, element.trace.source:sub(2))
+    local isThirdPartyAsync = element.trace.source:match("nio/tests.lua$") ~= nil
+    local path
+
+    if isThirdPartyAsync then
+        -- When the while loop above exits it might be because the parent descriptor
+        -- is 'file' in which case its name is the file containing the async test. If
+        -- we used element.trace.source below it would give the nio module's tests.lua
+        -- file which would not match any position ids in the neotest tree. We could
+        -- probably also do this for non-async tests
+        path = parent.name or parent.descriptor
+    else
+        -- Strip the leading '@' from the element's trace source
+        path = element.trace.source:sub(2)
+    end
+
+    table.insert(names, 1, path)
 
     -- TODO: Use another separator in case test name contains "::"?
     -- TODO: Output line number as well for finding matching source-level test
@@ -35,45 +50,6 @@ end
 return function(options)
     local busted = require("busted")
     local handler = require("busted.outputHandlers.base")()
-
-    ---@param value string
-    ---@return string
-    local function double_quote(value)
-        return ('"%s"'):format(value)
-    end
-
-    -- A copy of the base handler's getFullName function except that it uses
-    -- "::" as a separator instead of spaces and also preprends the full path
-    ---@param element neotest-busted.BustedElement
-    ---@return string
-    local function createNeotestPositionId(element)
-        local parent = busted.parent(element)
-        local names = { double_quote(element.name or element.descriptor) }
-
-        while parent and (parent.name or parent.descriptor) and parent.descriptor ~= "file" do
-            table.insert(names, 1, double_quote(parent.name or parent.descriptor))
-            parent = busted.parent(parent)
-        end
-
-        local isThirdPartyAsync = element.trace.source:match("nio/tests.lua$") ~= nil
-        local path
-
-        if isThirdPartyAsync then
-            -- When the while loop above exits it might be because the parent descriptor
-            -- is 'file' in which case its name is the file containing the async test. If
-            -- we used element.trace.source below it would give the nio module's tests.lua
-            -- file which would not match any position ids in the neotest tree. We could
-            -- probably also do this for non-async tests
-            path = parent.name or parent.descriptor
-        else
-            -- Strip the leading '@' from the element's trace source
-            path = element.trace.source:sub(2)
-        end
-
-        table.insert(names, 1, path)
-
-        return table.concat(names, "::")
-    end
 
     -- Copy options and remove arguments so the utfTerminal handler can parse
     -- them without error
