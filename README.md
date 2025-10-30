@@ -102,7 +102,7 @@ control async timeouts.
 
 ```lua
 local control = require("neotest.async").control
-local async = require("nio.async").tests
+local async = require("nio.tests")
 
 describe("async", function()
     before_each(function()
@@ -129,7 +129,7 @@ end)
 
 If you are not using `nvim-nio`, `neotest-butsed` also comes with builtin
 support for async tests. Just use `require("neotest-busted.async")` instead of
-`require("nio.async").tests` then wrap the test function in a call to `async`.
+`require("nio.tests")` then wrap the test function in a call to `async`.
 This also works for `before_each` and `after_each`.
 
 ```lua

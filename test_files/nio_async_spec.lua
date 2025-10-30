@@ -1,6 +1,6 @@
 local nio = require("nio")
-local a = require("nio.async").tests
-local async = require("nio.async").tests
+local a = require("nio.tests")
+local async = require("nio.tests")
 local control = require("neotest.async").control
 
 describe("nio async tests", function()
