@@ -210,7 +210,7 @@ end
 
 ---@param lua_paths string[]
 ---@param lua_cpaths string[]
----@return arguments string[]
+---@return string[]
 local function get_nvim_arguments(lua_paths, lua_cpaths)
     -- stylua: ignore start
     ---@type string[]
@@ -478,6 +478,16 @@ function BustedNeotestAdapter.discover_positions(path)
         arguments: (arguments (string) @test.name)
     ) (#eq? @func_name "pending")) @test.definition
 
+    ;; nvim-nio async blocks
+    ((function_call
+        name: (
+            dot_index_expression
+                table: (_)
+                field: (identifier)
+        ) @func_name
+        arguments: (arguments (_) @test.name (function_definition))
+    ) (#any-of? @func_name "async.it" "nio.tests.it" "a.it")) @test.definition
+
     ;; custom async blocks
     ((function_call
         name: (identifier) @func_name
@@ -528,7 +538,7 @@ local function filter_from_position(pos)
     return stripped_pos_id
 end
 
---- Generate test info for the nodes in a tree
+--- Create command line filters for the nodes in a tree
 ---@param tree neotest.Tree
 ---@return string[]
 local function create_filters_for_tree(tree)
@@ -832,11 +842,13 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
         local position = tree:data()
 
-        results[position.id] = {
-            status = status,
-            short = ("%s: %s"):format(position.name, status),
-            output = strategy_result.output,
-        }
+        if position.type == types.PositionType.test then
+            results[position.id] = {
+                status = status,
+                short = ("%s: %s"):format(position.name, status),
+                output = strategy_result.output,
+            }
+        end
     end
 
     return results
