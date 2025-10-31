@@ -36,8 +36,8 @@ return {
         },
         {
             {
-                id = path .. "::nio async tests::async test 1",
-                name = "async test 1",
+                id = path .. "::nio async tests::async test 3",
+                name = "async test 3",
                 path = path,
                 range = { 34, 4, 38, 12 },
                 type = "test",

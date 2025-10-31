@@ -842,11 +842,13 @@ function BustedNeotestAdapter.results(spec, strategy_result, tree)
 
         local position = tree:data()
 
-        results[position.id] = {
-            status = status,
-            short = ("%s: %s"):format(position.name, status),
-            output = strategy_result.output,
-        }
+        if position.type == types.PositionType.test then
+            results[position.id] = {
+                status = status,
+                short = ("%s: %s"):format(position.name, status),
+                output = strategy_result.output,
+            }
+        end
     end
 
     return results

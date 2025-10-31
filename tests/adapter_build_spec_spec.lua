@@ -212,9 +212,7 @@ describe("adapter.build_spec", function()
         })
         local path = "./test_files/nio_async_spec.lua"
         local tree = create_tree(adapter, path)
-        local spec = adapter.build_spec({
-            tree = tree:children()[1]:children()[1],
-        })
+        local spec = adapter.build_spec({ tree = tree:children()[1] })
 
         assert.is_not_nil(spec)
 
@@ -237,6 +235,10 @@ describe("adapter.build_spec", function()
             "--verbose",
             "--filter",
             "^nio async tests async test 1$",
+            "--filter",
+            "^nio async tests async test 2$",
+            "--filter",
+            "^nio async tests async test 3$",
             path,
         })
 

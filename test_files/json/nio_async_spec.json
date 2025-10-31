@@ -6,19 +6,20 @@
   "successes": [
     {
       "name": "nio async tests async test 1",
+      "neotestPositionId": "./test_files/nio_async_spec.lua::nio async tests::async test 1",
       "element": {
         "starttime": 1761080550.8284,
         "endtime": 1761080550.9287,
         "endtick": 4586276.630565,
         "trace": {
           "lastlinedefined": 67,
-          "source": "@/Users/hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua",
+          "source": "@nvim-nio/lua/nio/tests.lua",
           "message": "async test 1",
           "linedefined": 65,
-          "traceback": "\nstack traceback:\n\t...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:14: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
+          "traceback": "\nstack traceback:\n\t.../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:14: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
           "currentline": 66,
           "what": "Lua",
-          "short_src": "...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
+          "short_src": ".../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
         },
         "descriptor": "it",
         "name": "async test 1",
@@ -28,30 +29,31 @@
       },
       "trace": {
         "lastlinedefined": 67,
-        "source": "@/Users/hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua",
+        "source": "@nvim-nio/lua/nio/tests.lua",
         "message": "async test 1",
         "linedefined": 65,
-        "traceback": "\nstack traceback:\n\t...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:14: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
+        "traceback": "\nstack traceback:\n\t.../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:14: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
         "currentline": 66,
         "what": "Lua",
-        "short_src": "...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
+        "short_src": ".../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
       }
     },
     {
       "name": "nio async tests async test 2",
+      "neotestPositionId": "./test_files/nio_async_spec.lua::nio async tests::async test 2",
       "element": {
         "starttime": 1761080551.1306,
         "endtime": 1761080551.3315,
         "endtick": 4586277.033298,
         "trace": {
           "lastlinedefined": 67,
-          "source": "@/Users/hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua",
+          "source": "@nvim-nio/lua/nio/tests.lua",
           "message": "async test 2",
           "linedefined": 65,
-          "traceback": "\nstack traceback:\n\t...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:20: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
+          "traceback": "\nstack traceback:\n\t.../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:20: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
           "currentline": 66,
           "what": "Lua",
-          "short_src": "...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
+          "short_src": ".../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
         },
         "descriptor": "it",
         "name": "async test 2",
@@ -61,46 +63,47 @@
       },
       "trace": {
         "lastlinedefined": 67,
-        "source": "@/Users/hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua",
+        "source": "@nvim-nio/lua/nio/tests.lua",
         "message": "async test 2",
         "linedefined": 65,
-        "traceback": "\nstack traceback:\n\t...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:20: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
+        "traceback": "\nstack traceback:\n\t.../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:20: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
         "currentline": 66,
         "what": "Lua",
-        "short_src": "...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
+        "short_src": ".../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
       }
     },
     {
-      "name": "nio async tests async test 1",
+      "name": "nio async tests async test 3",
+      "neotestPositionId": "./test_files/nio_async_spec.lua::nio async tests::async test 3",
       "element": {
         "starttime": 1761080551.5331,
         "endtime": 1761080551.6336,
         "endtick": 4586277.335469,
         "trace": {
           "lastlinedefined": 67,
-          "source": "@/Users/hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua",
-          "message": "async test 1",
+          "source": "@nvim-nio/lua/nio/tests.lua",
+          "message": "async test 3",
           "linedefined": 65,
-          "traceback": "\nstack traceback:\n\t...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:35: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
+          "traceback": "\nstack traceback:\n\t.../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:35: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
           "currentline": 66,
           "what": "Lua",
-          "short_src": "...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
+          "short_src": ".../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
         },
         "descriptor": "it",
-        "name": "async test 1",
+        "name": "async test 3",
         "attributes": [],
         "duration": 0.10055799968541,
         "starttick": 4586277.234911
       },
       "trace": {
         "lastlinedefined": 67,
-        "source": "@/Users/hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua",
-        "message": "async test 1",
+        "source": "@nvim-nio/lua/nio/tests.lua",
+        "message": "async test 3",
         "linedefined": 65,
-        "traceback": "\nstack traceback:\n\t...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:35: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
+        "traceback": "\nstack traceback:\n\t.../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua:66: in function 'it'\n\t...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:35: in function <...ojects/nvim/neotest-busted/test_files/nio_async_spec.lua:6>\n",
         "currentline": 66,
         "what": "Lua",
-        "short_src": "...hyrule/.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
+        "short_src": ".../.local/share/nvim/lazy/nvim-nio/lua/nio/tests.lua"
       }
     }
   ]

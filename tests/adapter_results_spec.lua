@@ -185,6 +185,43 @@ describe("adapter.results", function()
         lib.files.read:revert()
     end)
 
+    async.it("creates neotest results for nio-style async tests", function()
+        config.configure({ parametric_test_discovery = true })
+
+        local path = "./test_files/nio_async_spec.lua"
+        local tree = discover_positions(path, "./test_files/json/nio_async_spec.json")
+        local neotest_results = adapter.results(spec, strategy_result, tree)
+
+        assert.are.same(neotest_results, {
+            [path .. "::nio async tests::async test 1"] = {
+                status = types.ResultStatus.passed,
+                short = "async test 1: passed",
+                output = strategy_result.output,
+            },
+            [path .. "::nio async tests::async test 2"] = {
+                status = types.ResultStatus.passed,
+                short = "async test 2: passed",
+                output = strategy_result.output,
+            },
+            [path .. "::nio async tests::async test 3"] = {
+                status = types.ResultStatus.passed,
+                short = "async test 3: passed",
+                output = strategy_result.output,
+            },
+        })
+
+        local expected_tree = require("./test_files/expected_trees/expected_nio_async_tree")
+
+        -- Tree remains unchanged
+        assert.are.same(tree:to_list(), expected_tree)
+
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was_not_called()
+
+        ---@diagnostic disable-next-line: undefined-field
+        lib.files.read:revert()
+    end)
+
     async.it(
         "creates neotest results for successful parametric tests and updates tree (test)",
         function()
@@ -246,7 +283,6 @@ describe("adapter.results", function()
                 "./test_files/json/parametric_test_output_success_namespace.json"
             )
 
-            -- Get the subtree rooted at the the first parametric namespace in the file
             local subtree = tree:children()[2]:children()[1]
 
             assert.is_not_nil(subtree)
@@ -255,11 +291,6 @@ describe("adapter.results", function()
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
-                [path .. '::namespace 2::"nested namespace 2 - " .. tostring(i)'] = {
-                    status = types.ResultStatus.passed,
-                    short = '"nested namespace 2 - " .. tostring(i): passed',
-                    output = strategy_result.output,
-                },
                 [path .. "::namespace 2::nested namespace 2 - 1::some test"] = {
                     output = strategy_result.output,
                     short = "some test: passed",
@@ -318,11 +349,6 @@ describe("adapter.results", function()
             local neotest_results = adapter.results(spec, strategy_result, tree)
 
             assert.are.same(neotest_results, {
-                [path] = {
-                    status = "passed",
-                    short = "parametric_tests_spec.lua: passed",
-                    output = strategy_result.output,
-                },
                 [path .. "::namespace 1::nested namespace 1::test 1"] = {
                     status = types.ResultStatus.passed,
                     short = "test 1: passed",
@@ -458,11 +484,6 @@ describe("adapter.results", function()
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
-                [path .. '::namespace 2::"nested namespace 2 - " .. tostring(i)'] = {
-                    status = types.ResultStatus.failed,
-                    short = '"nested namespace 2 - " .. tostring(i): failed',
-                    output = strategy_result.output,
-                },
                 [path .. "::namespace 2::nested namespace 2 - 1::some test"] = {
                     output = strategy_result.output,
                     short = "some test: failed",
@@ -555,11 +576,6 @@ describe("adapter.results", function()
             local neotest_results = adapter.results(spec, strategy_result, tree)
 
             assert.are.same(neotest_results, {
-                [path] = {
-                    status = types.ResultStatus.failed,
-                    short = "parametric_tests_fail_spec.lua: failed",
-                    output = strategy_result.output,
-                },
                 [path .. "::namespace 1::nested namespace 1::test 1"] = {
                     status = types.ResultStatus.failed,
                     short = "test 1: failed",
