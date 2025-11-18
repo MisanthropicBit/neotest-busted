@@ -55,7 +55,7 @@ describe("adapter.results", function()
 
     async.it("creates neotest results", function()
         local path = "./test_files/test1_spec.lua"
-        local tree = discover_positions(path, "./test_files/busted_test_output.json")
+        local tree = discover_positions(path, "./test_files/json/busted_test_output.json")
         local neotest_results = adapter.results(spec, strategy_result, tree)
 
         assert.are.same(neotest_results, {
@@ -93,7 +93,7 @@ describe("adapter.results", function()
             },
         })
 
-        local expected_tree = require("./test_files/expected_tree")
+        local expected_tree = require("./test_files/expected_trees/expected_tree")
 
         -- Tree remains unchanged
         assert.are.same(tree:to_list(), expected_tree)
@@ -107,7 +107,7 @@ describe("adapter.results", function()
 
     async.it("creates neotest results with single and literal quotes", function()
         local path = "./test_files/quotes_spec.lua"
-        local tree = discover_positions(path, "./test_files/quotes_spec.json")
+        local tree = discover_positions(path, "./test_files/json/quotes_spec.json")
         local neotest_results = adapter.results(spec, strategy_result, tree)
 
         assert.are.same(neotest_results, {
@@ -123,7 +123,7 @@ describe("adapter.results", function()
             },
         })
 
-        local expected_tree = require("./test_files/quotes_expected_tree")
+        local expected_tree = require("./test_files/expected_trees/expected_quotes_tree")
 
         -- Tree remains unchanged
         assert.are.same(tree:to_list(), expected_tree)
@@ -137,7 +137,7 @@ describe("adapter.results", function()
 
     async.it("creates neotest results for all aliases", function()
         local path = "./test_files/aliases_spec.lua"
-        local tree = discover_positions(path, "./test_files/aliases_spec.json")
+        local tree = discover_positions(path, "./test_files/json/aliases_spec.json")
         local neotest_results = adapter.results(spec, strategy_result, tree)
 
         assert.are.same(neotest_results, {
@@ -173,7 +173,44 @@ describe("adapter.results", function()
             },
         })
 
-        local expected_tree = require("./test_files/expected_aliases_tree")
+        local expected_tree = require("./test_files/expected_trees/expected_aliases_tree")
+
+        -- Tree remains unchanged
+        assert.are.same(tree:to_list(), expected_tree)
+
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was_not_called()
+
+        ---@diagnostic disable-next-line: undefined-field
+        lib.files.read:revert()
+    end)
+
+    async.it("creates neotest results for nio-style async tests", function()
+        config.configure({ parametric_test_discovery = true })
+
+        local path = "./test_files/nio_async_spec.lua"
+        local tree = discover_positions(path, "./test_files/json/nio_async_spec.json")
+        local neotest_results = adapter.results(spec, strategy_result, tree)
+
+        assert.are.same(neotest_results, {
+            [path .. "::nio async tests::async test 1"] = {
+                status = types.ResultStatus.passed,
+                short = "async test 1: passed",
+                output = strategy_result.output,
+            },
+            [path .. "::nio async tests::async test 2"] = {
+                status = types.ResultStatus.passed,
+                short = "async test 2: passed",
+                output = strategy_result.output,
+            },
+            [path .. "::nio async tests::async test 3"] = {
+                status = types.ResultStatus.passed,
+                short = "async test 3: passed",
+                output = strategy_result.output,
+            },
+        })
+
+        local expected_tree = require("./test_files/expected_trees/expected_nio_async_tree")
 
         -- Tree remains unchanged
         assert.are.same(tree:to_list(), expected_tree)
@@ -191,8 +228,10 @@ describe("adapter.results", function()
             config.configure({ parametric_test_discovery = true })
 
             local path = parametric_test_path
-            local tree =
-                discover_positions(path, "./test_files/parametric_test_output_success_test.json")
+            local tree = discover_positions(
+                path,
+                "./test_files/json/parametric_test_output_success_test.json"
+            )
 
             -- Get the subtree rooted at the the first parametric test in the file
             local subtree = tree:children()[1]:children()[1]:children()[1]
@@ -220,7 +259,8 @@ describe("adapter.results", function()
                 },
             })
 
-            local expected_tree = require("./test_files/expected_tree_parametric_test")(path)
+            local expected_tree =
+                require("./test_files/expected_trees/expected_tree_parametric_test")(path)
 
             assert.are.same(tree:to_list(), expected_tree)
 
@@ -240,10 +280,9 @@ describe("adapter.results", function()
             local path = parametric_test_path
             local tree = discover_positions(
                 path,
-                "./test_files/parametric_test_output_success_namespace.json"
+                "./test_files/json/parametric_test_output_success_namespace.json"
             )
 
-            -- Get the subtree rooted at the the first parametric namespace in the file
             local subtree = tree:children()[2]:children()[1]
 
             assert.is_not_nil(subtree)
@@ -252,11 +291,6 @@ describe("adapter.results", function()
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
-                [path .. '::namespace 2::"nested namespace 2 - " .. tostring(i)'] = {
-                    status = types.ResultStatus.passed,
-                    short = '"nested namespace 2 - " .. tostring(i): passed',
-                    output = strategy_result.output,
-                },
                 [path .. "::namespace 2::nested namespace 2 - 1::some test"] = {
                     output = strategy_result.output,
                     short = "some test: passed",
@@ -289,7 +323,8 @@ describe("adapter.results", function()
                 },
             })
 
-            local expected_tree = require("./test_files/expected_tree_parametric_namespace")(path)
+            local expected_tree =
+                require("./test_files/expected_trees/expected_tree_parametric_namespace")(path)
 
             assert.are.same(tree:to_list(), expected_tree)
 
@@ -307,16 +342,13 @@ describe("adapter.results", function()
             config.configure({ parametric_test_discovery = true })
 
             local path = parametric_test_path
-            local tree =
-                discover_positions(path, "./test_files/parametric_test_output_success_file.json")
+            local tree = discover_positions(
+                path,
+                "./test_files/json/parametric_test_output_success_file.json"
+            )
             local neotest_results = adapter.results(spec, strategy_result, tree)
 
             assert.are.same(neotest_results, {
-                [path] = {
-                    status = "passed",
-                    short = "parametric_tests_spec.lua: passed",
-                    output = strategy_result.output,
-                },
                 [path .. "::namespace 1::nested namespace 1::test 1"] = {
                     status = types.ResultStatus.passed,
                     short = "test 1: passed",
@@ -364,7 +396,8 @@ describe("adapter.results", function()
                 },
             })
 
-            local expected_tree = require("./test_files/expected_tree_parametric_file")(path)
+            local expected_tree =
+                require("./test_files/expected_trees/expected_tree_parametric_file")(path)
 
             assert.are.same(tree:to_list(), expected_tree)
 
@@ -383,7 +416,7 @@ describe("adapter.results", function()
 
             local path = "./test_files/parametric_tests_fail_spec.lua"
             local tree =
-                discover_positions(path, "./test_files/parametric_test_output_fail_test.json")
+                discover_positions(path, "./test_files/json/parametric_test_output_fail_test.json")
 
             -- Get the subtree rooted at the the first parametric test in the file
             local subtree = tree:children()[1]:children()[1]:children()[1]
@@ -421,7 +454,8 @@ describe("adapter.results", function()
                 },
             })
 
-            local expected_tree = require("./test_files/expected_tree_parametric_test")(path)
+            local expected_tree =
+                require("./test_files/expected_trees/expected_tree_parametric_test")(path)
 
             assert.are.same(tree:to_list(), expected_tree)
 
@@ -439,8 +473,10 @@ describe("adapter.results", function()
             config.configure({ parametric_test_discovery = true })
 
             local path = "./test_files/parametric_tests_fail_spec.lua"
-            local tree =
-                discover_positions(path, "./test_files/parametric_test_output_fail_namespace.json")
+            local tree = discover_positions(
+                path,
+                "./test_files/json/parametric_test_output_fail_namespace.json"
+            )
 
             -- Get the subtree rooted at the the first parametric namespace in the file
             local subtree = tree:children()[2]:children()[1]
@@ -448,11 +484,6 @@ describe("adapter.results", function()
             local neotest_results = adapter.results(spec, strategy_result, subtree)
 
             assert.are.same(neotest_results, {
-                [path .. '::namespace 2::"nested namespace 2 - " .. tostring(i)'] = {
-                    status = types.ResultStatus.failed,
-                    short = '"nested namespace 2 - " .. tostring(i): failed',
-                    output = strategy_result.output,
-                },
                 [path .. "::namespace 2::nested namespace 2 - 1::some test"] = {
                     output = strategy_result.output,
                     short = "some test: failed",
@@ -521,7 +552,8 @@ describe("adapter.results", function()
                 },
             })
 
-            local expected_tree = require("./test_files/expected_tree_parametric_namespace")(path)
+            local expected_tree =
+                require("./test_files/expected_trees/expected_tree_parametric_namespace")(path)
 
             assert.are.same(tree:to_list(), expected_tree)
 
@@ -540,15 +572,10 @@ describe("adapter.results", function()
 
             local path = "./test_files/parametric_tests_fail_spec.lua"
             local tree =
-                discover_positions(path, "./test_files/parametric_test_output_fail_file.json")
+                discover_positions(path, "./test_files/json/parametric_test_output_fail_file.json")
             local neotest_results = adapter.results(spec, strategy_result, tree)
 
             assert.are.same(neotest_results, {
-                [path] = {
-                    status = types.ResultStatus.failed,
-                    short = "parametric_tests_fail_spec.lua: failed",
-                    output = strategy_result.output,
-                },
                 [path .. "::namespace 1::nested namespace 1::test 1"] = {
                     status = types.ResultStatus.failed,
                     short = "test 1: failed",
@@ -650,7 +677,8 @@ describe("adapter.results", function()
                 },
             })
 
-            local expected_tree = require("./test_files/expected_tree_parametric_file")(path)
+            local expected_tree =
+                require("./test_files/expected_trees/expected_tree_parametric_file")(path)
 
             assert.are.same(tree:to_list(), expected_tree)
 
@@ -737,7 +765,7 @@ describe("adapter.results", function()
 
         stub(lib.files, "read", function()
             return table.concat(
-                vim.fn.readfile("./test_files/busted_test_output_missing_position_id.json"),
+                vim.fn.readfile("./test_files/json/busted_test_output_missing_position_id.json"),
                 "\n"
             )
         end)

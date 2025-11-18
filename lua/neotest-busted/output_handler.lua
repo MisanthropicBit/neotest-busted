@@ -25,7 +25,22 @@ local function position_id_from_busted_element(element)
         parent = busted.parent(parent)
     end
 
-    table.insert(names, 1, element.trace.source:sub(2))
+    local isThirdPartyAsync = element.trace.source:match("nio/tests.lua$") ~= nil
+    local path
+
+    if isThirdPartyAsync then
+        -- When the while loop above exits it might be because the parent descriptor
+        -- is 'file' in which case its name is the file containing the async test. If
+        -- we used element.trace.source below it would give the nio module's tests.lua
+        -- file which would not match any position ids in the neotest tree. We could
+        -- probably also do this for non-async tests
+        path = parent.name or parent.descriptor
+    else
+        -- Strip the leading '@' from the element's trace source
+        path = element.trace.source:sub(2)
+    end
+
+    table.insert(names, 1, path)
 
     -- TODO: Use another separator in case test name contains "::"?
     -- TODO: Output line number as well for finding matching source-level test

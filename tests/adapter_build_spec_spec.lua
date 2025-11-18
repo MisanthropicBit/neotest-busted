@@ -200,6 +200,51 @@ describe("adapter.build_spec", function()
         assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
 
+    async.it("builds command for async test", function()
+        package.loaded["neotest-busted"] = nil
+
+        local adapter = require("neotest-busted")({
+            busted_command = "./busted",
+            busted_args = {},
+            busted_paths = nil,
+            busted_cpaths = nil,
+            minimal_init = nil,
+        })
+        local path = "./test_files/nio_async_spec.lua"
+        local tree = create_tree(adapter, path)
+        local spec = adapter.build_spec({ tree = tree:children()[1] })
+
+        assert.is_not_nil(spec)
+
+        assert_spec_command(spec.command, {
+            vim.loop.exepath(),
+            "--headless",
+            "-i",
+            "NONE",
+            "-n",
+            "-u",
+            "tests/minimal_init.lua",
+            "-c",
+            "lua package.path = 'lua/?.lua;lua/?/init.lua;' .. package.path",
+            "-l",
+            "./busted",
+            "--output",
+            "./lua/neotest-busted/output_handler.lua",
+            "-Xoutput",
+            "test-output.json",
+            "--verbose",
+            "--filter",
+            "^nio async tests async test 1$",
+            "--filter",
+            "^nio async tests async test 2$",
+            "--filter",
+            "^nio async tests async test 3$",
+            path,
+        })
+
+        assert.are.same(spec.context, { results_path = "test-output.json" })
+    end)
+
     async.it("builds command for test file using aliases", function()
         package.loaded["neotest-busted"] = nil
 
@@ -249,6 +294,8 @@ describe("adapter.build_spec", function()
 
         assert.are.same(spec.context, { results_path = "test-output.json" })
     end)
+
+    -- TODO: Make test for neotest-busted async test
 
     async.it("builds command for test with extra arguments", function()
         package.loaded["neotest-busted"] = nil

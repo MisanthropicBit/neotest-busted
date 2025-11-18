@@ -37,9 +37,13 @@ neovim as the lua interpreter.
 - [Requirements](#requirements)
 - [Configuration](#configuration)
 - [Defining tests](#defining-tests)
-- [Parametric tests](#parametric-tests)
+  - [Async tests](#async-tests)
+  - [Parametric tests](#parametric-tests)
 - [Debugging tests](#debugging-tests)
 - [Luarocks and Busted](#luarocks-and-busted)
+  - [Directory-local install](#directory-local-install)
+  - [User home directory install](#user-home-directory-install)
+  - [Global install](#global-install)
 - [Contributing](#contributing)
 - [FAQ](#faq)
 
@@ -91,19 +95,20 @@ Please refer to the [official busted documentation](https://lunarmodules.github.
 
 ### Async tests
 
-Running an asynchronous test is done by wrapping the test function in a call to
-`async`. This also works for `before_each` and `after_each`.
+`neotest-busted` supports [`nvim-nio`](https://github.com/nvim-neotest/nvim-nio)
+asynchronous tests. You can set `PLENARY_TEST_TIMEOUT` to a numerical value to
+control async timeouts.
 
 ```lua
-local async = require("neotest-busted.async")
 local control = require("neotest.async").control
+local async = require("nio.tests")
 
 describe("async", function()
-    before_each(async(function()
-        vim.print("async before_each")
-    end))
+    before_each(function()
+        vim.print("before_each")
+    end)
 
-    it("async test", async(function()
+    async.it("async test", function()
         local timer = vim.loop.new_timer()
         local event = control.event()
 
@@ -117,6 +122,26 @@ describe("async", function()
 
         -- Wait for the timer to complete
         event.wait()
+    end)
+end)
+```
+
+If you are not using `nvim-nio`, `neotest-butsed` also comes with builtin
+support for async tests. Just use `require("neotest-busted.async")` instead of
+`require("nio.tests")` then wrap the test function in a call to `async`.
+This also works for `before_each` and `after_each`.
+
+```lua
+local async = require("neotest-busted.async")
+local control = require("neotest.async").control
+
+describe("async", function()
+    before_each(async(function()
+        vim.print("async before_each")
+    end))
+
+    it("async test", async(function()
+        -- Same as above
     end))
 end)
 ```
@@ -124,9 +149,9 @@ end)
 The `async` function takes an optional second timeout argument in milliseconds.
 If omitted, uses the numerical value of either the
 `NEOTEST_BUSTED_ASYNC_TEST_TIMEOUT` or `PLENARY_TEST_TIMEOUT` environment
-variables or a default timeout of 2000 milliseconds.
+variables (in that order) or a default timeout of 2000 milliseconds.
 
-## Parametric tests
+### Parametric tests
 
 > [!IMPORTANT]
 > Supporting parametric tests requires extra computation to discover them so
