@@ -2,7 +2,7 @@
   <br />
   <h1>neotest-busted</h1>
   <p>
-    <img src="https://img.shields.io/badge/version-1.2.1-blue?style=flat-square" />
+    <img src="https://img.shields.io/badge/version-1.3.1-blue?style=flat-square" />
     <a href="https://luarocks.org/modules/misanthropicbit/neotest-busted">
         <img src="https://img.shields.io/luarocks/v/misanthropicbit/neotest-busted?style=flat-square&logo=lua&logoColor=%2351a0cf&color=purple" />
     </a>
