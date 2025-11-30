@@ -2,6 +2,7 @@ local nio = require("nio")
 local a = require("nio.tests")
 local async = require("nio.tests")
 local control = require("neotest.async").control
+local compat = require("neotest-busted.compat")
 
 describe("nio async tests", function()
     before_each(function()
@@ -18,7 +19,7 @@ describe("nio async tests", function()
     end, 40)
 
     nio.tests.it("async test 2", function()
-        local timer = vim.loop.new_timer()
+        local timer = compat.uv.new_timer() ---@cast timer -nil
         local event = control.event()
 
         -- Print a message after 200 milliseconds

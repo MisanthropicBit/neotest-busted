@@ -55,12 +55,7 @@ function health.check()
     local busted = adapter.find_busted_command(true)
 
     if busted then
-        report_ok(
-            ("found `busted` (type: %s) at\n%s"):format(
-                busted.type,
-                vim.loop.fs_realpath(busted.command)
-            )
-        )
+        report_ok(("found `busted` (type: %s)"):format(busted.type))
     else
         report_warn(
             "could not find busted executable globally or in user home folder",

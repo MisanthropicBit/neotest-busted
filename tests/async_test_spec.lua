@@ -1,4 +1,5 @@
 local async = require("neotest-busted.async")
+local compat = require("neotest-busted.compat")
 local control = require("neotest.async").control
 
 describe("async tests", function()
@@ -16,7 +17,7 @@ describe("async tests", function()
     end, 40))
 
     it("async test 2", async(function()
-        local timer = vim.loop.new_timer()
+        local timer = compat.uv.new_timer()
         local event = control.event()
 
         -- Print a message after 200 milliseconds
