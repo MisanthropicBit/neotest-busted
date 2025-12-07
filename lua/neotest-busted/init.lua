@@ -658,13 +658,13 @@ local function create_error_info(test_result)
     end
 
     if final_match then
-         return {
-             {
-                 message = test_result.trace.message,
-                 line = tonumber(final_match) - 1,
-             },
-         }
-     end
+        return {
+            {
+                message = test_result.trace.message,
+                line = tonumber(final_match) - 1,
+            },
+        }
+    end
 
     return nil
 end
