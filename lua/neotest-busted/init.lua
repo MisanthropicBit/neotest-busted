@@ -13,6 +13,20 @@ local nb_types = require("neotest-busted.types")
 local ResultStatus = types.ResultStatus
 local BustedResultKey = nb_types.BustedResultKey
 
+---@type string[]
+local root_markers = {
+    ".busted",
+    ".luarocks",
+    "lua_modules",
+    "*.rockspec",
+    "lux.toml",
+    ".emmyrc.json",
+    ".luarc.json",
+    "selene.toml",
+    "stylua.toml",
+    ".git",
+}
+
 ---@type neotest.Adapter
 ---@diagnostic disable-next-line: missing-fields
 local BustedNeotestAdapter = { name = "neotest-busted" }
@@ -376,7 +390,7 @@ local function get_strategy_config(strategy, results_path, paths, filters)
 end
 
 BustedNeotestAdapter.root = function(path)
-    return lib.files.match_root_pattern(".busted", ".luarocks", "lua_modules", "*.rockspec")(path)
+    return lib.files.match_root_pattern(unpack(root_markers))(path)
 end
 
 ---@param file_path string
