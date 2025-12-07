@@ -646,45 +646,44 @@ function BustedNeotestAdapter.build_spec(args)
     }
 end
 
----@param test_result neotest-busted.BustedFailureResult | neotest-busted.BustedResult
+---@param test_result neotest-busted.BustedResultTypes
 ---@return neotest.Error?
 local function create_error_info(test_result)
-    -- We have to extract the line number that the error occurred on from the message
-    -- since that information is not part of the json output
-    local match = test_result.message:match("_spec.lua:(%d+):")
+    -- We have to extract the last line number that the error occurred on from
+    -- the message since that information is not part of the json output
+    local final_match
 
-    if match then
-        return {
-            {
-                message = test_result.trace.message,
-                line = tonumber(match) - 1,
-            },
-        }
+    for match in test_result.message:gmatch("_spec.lua:(%d+):") do
+        final_match = match
     end
+
+    if final_match then
+         return {
+             {
+                 message = test_result.trace.message,
+                 line = tonumber(final_match) - 1,
+             },
+         }
+     end
 
     return nil
 end
 
 ---@param status neotest.ResultStatus
----@param test_result neotest-busted.BustedResult | neotest-busted.BustedFailureResult | neotest-busted.BustedErrorResult
+---@param test_result neotest-busted.BustedResultTypes
 ---@param output string
 ---@return neotest.Result
 local function convert_test_result_to_neotest_result(status, test_result, output)
-    if test_result.isError == true then
-        -- This is an internal error in busted, not a test that threw
-        return {
-            message = test_result.message,
-            line = 0,
-        }
-    end
-
     local result = {
         status = status,
         short = ("%s: %s"):format(test_result.element.name, status),
         output = output,
     }
 
-    if status == ResultStatus.failed then
+    if test_result.isError == true then
+        -- This is usually because a test threw an error
+        result.errors = create_error_info(test_result)
+    elseif status == ResultStatus.failed then
         ---@cast test_result -neotest-busted.BustedErrorResult
         result.errors = create_error_info(test_result)
     end

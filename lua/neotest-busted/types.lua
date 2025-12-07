@@ -79,6 +79,11 @@ types.BustedResultKey = {
 ---@field message string
 ---@field name    string
 
+---@alias neotest-busted.BustedResultTypes
+---| neotest-busted.BustedResult
+---| neotest-busted.BustedFailureResult
+---| neotest-busted.BustedErrorResult
+
 ---@class neotest-busted.BustedResultObject
 ---@field errors    neotest-busted.BustedFailureResult[]
 ---@field pendings  neotest-busted.BustedResult[]
