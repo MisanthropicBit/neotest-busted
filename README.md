@@ -273,6 +273,6 @@ to the console in that file, those lines will appear in the output and
 
 ## Inspiration
 
-* [Using Neovim as Lua interpreter with Luarocks](https://zignar.net/2023/01/21/using-luarocks-as-lua-interpreter-with-luarocks/)
+* [Using Neovim as Lua interpreter with Luarocks](https://zignar.net/2023/01/21/using-Luarocks-as-lua-interpreter-with-luarocks/)
 * [nlua](https://github.com/mfussenegger/nlua)
 * [Test your Neovim plugins with luarocks & busted](https://mrcjkb.dev/posts/2023-06-06-luarocks-test.html)
