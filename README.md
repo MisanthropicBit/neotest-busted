@@ -109,7 +109,7 @@ describe("async", function()
     end)
 
     async.it("async test", function()
-        local timer = vim.loop.new_timer()
+        local timer = vim.uv.new_timer()
         local event = control.event()
 
         -- Print a message after 2 seconds

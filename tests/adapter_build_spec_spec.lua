@@ -2,6 +2,7 @@ local _async = require("neotest.async")
 -- local logger = require("neotest.logging")
 local Tree = require("neotest.types").Tree
 local stub = require("luassert.stub")
+local compat = require("neotest-busted.compat")
 local test_utils = require("neotest-busted.test_utils")
 
 test_utils.prepare_vim_treesitter()
@@ -87,7 +88,7 @@ describe("adapter.build_spec", function()
         }, ";")
 
         assert_spec_command(spec.command, {
-            vim.loop.exepath(),
+            compat.uv.exepath(),
             "--headless",
             "-i",
             "NONE",
@@ -132,7 +133,7 @@ describe("adapter.build_spec", function()
         assert.is_not_nil(spec)
 
         assert_spec_command(spec.command, {
-            vim.loop.exepath(),
+            compat.uv.exepath(),
             "--headless",
             "-i",
             "NONE",
@@ -176,7 +177,7 @@ describe("adapter.build_spec", function()
         assert.is_not_nil(spec)
 
         assert_spec_command(spec.command, {
-            vim.loop.exepath(),
+            compat.uv.exepath(),
             "--headless",
             "-i",
             "NONE",
@@ -217,7 +218,7 @@ describe("adapter.build_spec", function()
         assert.is_not_nil(spec)
 
         assert_spec_command(spec.command, {
-            vim.loop.exepath(),
+            compat.uv.exepath(),
             "--headless",
             "-i",
             "NONE",
@@ -261,7 +262,7 @@ describe("adapter.build_spec", function()
         assert.is_not_nil(spec)
 
         assert_spec_command(spec.command, {
-            vim.loop.exepath(),
+            compat.uv.exepath(),
             "--headless",
             "-i",
             "NONE",
@@ -316,7 +317,7 @@ describe("adapter.build_spec", function()
         assert.is_not_nil(spec)
 
         assert_spec_command(spec.command, {
-            vim.loop.exepath(),
+            compat.uv.exepath(),
             "--headless",
             "-i",
             "NONE",
@@ -412,7 +413,7 @@ describe("adapter.build_spec", function()
         assert.is_not_nil(spec)
 
         assert_spec_command(spec.command, {
-            vim.loop.exepath(),
+            compat.uv.exepath(),
             "--headless",
             "-i",
             "NONE",
@@ -484,7 +485,7 @@ describe("adapter.build_spec", function()
             "./test_files/test1_spec.lua",
         }
 
-        assert_spec_command(spec.command, vim.list_extend({ vim.loop.exepath() }, arguments))
+        assert_spec_command(spec.command, vim.list_extend({ compat.uv.exepath() }, arguments))
 
         assert.are.same(spec.context, { results_path = "test-output.json" })
 
@@ -519,7 +520,7 @@ describe("adapter.build_spec", function()
             LUA_CPATH = vim.fs.normalize(busted_cpaths[1]),
         })
         assert.are.same(spec.strategy.program, {
-            command = vim.loop.exepath(),
+            command = compat.uv.exepath(),
         })
 
         assert_spec_command(spec.strategy.args, debug_arguments)
