@@ -76,17 +76,11 @@ local function run_list_tests_command(tree)
         command_info.arguments
     )
 
-    local process, err = nio.process.run({
+    local process = nio.process.run({
         cmd = command_info.command,
         args = command_info.arguments,
     })
 
-    if err then
-        logging.error("Failed to list tests via busted: %s", nil, err)
-        return
-    end
-
-    ---@cast process nio.process.Process
     local stderr, read_stderr_err = process.stderr.read()
     local stdout, read_stdout_err = process.stdout.read()
 
@@ -110,10 +104,20 @@ local function run_list_tests_command(tree)
         return
     end
 
-    local code = process.result()
+    local code, errors = process.result()
+    process.close()
 
     if code ~= 0 then
-        logging.error("Failed to list tests via busted (code: %d)", nil, code)
+        local errors_string = vim.tbl_count(errors) == 0 and "no errors reported"
+            or vim.inspect(errors)
+
+        logging.error(
+            "Failed to list tests via busted at %s (code: %d): %s",
+            nil,
+            path,
+            code,
+            errors_string
+        )
         return
     end
 
