@@ -24,6 +24,7 @@ local root_markers = {
     ".luarc.json",
     "selene.toml",
     "stylua.toml",
+    ".stylua.toml",
     ".git",
 }
 
