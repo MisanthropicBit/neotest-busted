@@ -262,13 +262,13 @@ its own tests.
 This can happen if you have `parametric_test_discovery = true`. In order to
 discover parametric (runtime-only) tests, `neotest-busted` runs a `busted`
 command to list the tests in a test file. If you have a syntax error in that
-file, busted cannot correctly parse the test.
+file, busted cannot correctly parse the test and the command fails.
 
 #### Q: Why do I keep getting "Encountered output line that could not be parsed" errors?
 
 As explained above, `neotest-busted` runs a `busted` command to list the tests
-in a test file. If you have a print statement or a function that prints output
-to the console in that file, those lines will appear in the output and
+in a test file. If you have print statements in that file (not output from tests
+but e.g. bare `vim.print` statements), those lines will appear in the output and
 `neotest-busted` will try to parse it and fail.
 
 ## Inspiration
