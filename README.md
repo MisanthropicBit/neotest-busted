@@ -257,8 +257,22 @@ The test could be run via `neotest-busted` itself but I decided to use plenary
 instead to use another test runner so that bugs in `neotest-busted` won't affect
 its own tests.
 
+#### Q: Why do I keep getting "Failed to list tests via busted" errors?
+
+This can happen if you have `parametric_test_discovery = true`. In order to
+discover parametric (runtime-only) tests, `neotest-busted` runs a `busted`
+command to list the tests in a test file. If you have a syntax error in that
+file, busted cannot correctly parse the test and the command fails.
+
+#### Q: Why do I keep getting "Encountered output line that could not be parsed" errors?
+
+As explained above, `neotest-busted` runs a `busted` command to list the tests
+in a test file. If you have print statements in that file (not output from tests
+but e.g. bare `vim.print` statements), those lines will appear in the output and
+`neotest-busted` will try to parse it and fail.
+
 ## Inspiration
 
-* [Using Neovim as Lua interpreter with Luarocks](https://zignar.net/2023/01/21/using-luarocks-as-lua-interpreter-with-luarocks/)
+* [Using Neovim as Lua interpreter with Luarocks](https://zignar.net/2023/01/21/using-Luarocks-as-lua-interpreter-with-luarocks/)
 * [nlua](https://github.com/mfussenegger/nlua)
 * [Test your Neovim plugins with luarocks & busted](https://mrcjkb.dev/posts/2023-06-06-luarocks-test.html)
