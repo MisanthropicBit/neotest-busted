@@ -106,9 +106,10 @@ local function run_list_tests_command(tree)
 
     -- Passing true closes the process io handles
     local code, errors = process.result(true)
+    local error_count = vim.tbl_count(errors)
 
-    if code ~= 0 then
-        local errors_string = vim.tbl_count(errors) == 0 and "no errors reported"
+    if code ~= 0 or error_count > 0 then
+        local errors_string = error_count == 0 and "no errors reported"
             or vim.inspect(errors)
 
         logging.error(
