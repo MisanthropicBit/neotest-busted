@@ -674,6 +674,7 @@ end
 ---@param output string
 ---@return neotest.Result
 local function convert_test_result_to_neotest_result(status, test_result, output)
+    ---@type neotest.Result
     local result = {
         status = status,
         short = ("%s: %s"):format(test_result.element.name, status),
