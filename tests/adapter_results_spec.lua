@@ -222,6 +222,37 @@ describe("adapter.results", function()
         lib.files.read:revert()
     end)
 
+    async.it("creates neotest results for errors", function()
+        local path = "./test_files/error_spec.lua"
+        local tree = discover_positions(path, "./test_files/json/error_spec.json")
+        local neotest_results = adapter.results(spec, strategy_result, tree)
+
+        assert.are.same(neotest_results, {
+            [path .. "::describe::test"] = {
+                status = types.ResultStatus.failed,
+                short = "test: failed",
+                output = strategy_result.output,
+                errors = {
+                    {
+                        message = "./test_files/error_spec.lua:3: nope",
+                        line = 2,
+                    },
+                },
+            },
+        })
+
+        local expected_tree = require("./test_files/expected_trees/expected_tree_error")
+
+        -- Tree remains unchanged
+        assert.are.same(tree:to_list(), expected_tree)
+
+        assert.stub(lib.files.read).was.called_with(spec.context.results_path)
+        assert.stub(logger.error).was_not_called()
+
+        ---@diagnostic disable-next-line: undefined-field
+        lib.files.read:revert()
+    end)
+
     async.it(
         "creates neotest results for successful parametric tests and updates tree (test)",
         function()
