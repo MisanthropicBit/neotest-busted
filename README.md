@@ -7,7 +7,7 @@
         <img src="https://img.shields.io/github/actions/workflow/status/MisanthropicBit/neotest-busted/tests.yml?branch=master&style=flat-square" />
     </a>
     <a href="/LICENSE">
-        <img src="https://img.shields.io/github/license/MisanthropicBit/neotest-busted?style=flat-square" />
+        <img src="https://img.shields.io/github/license/MisanthropicBit/neotest-busted?style=flat-square&color=purple" />
     </a>
   </p>
   <br />
