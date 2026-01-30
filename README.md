@@ -2,16 +2,9 @@
   <br />
   <h1>neotest-busted</h1>
   <p>
-    <img src="https://img.shields.io/badge/version-1.3.1-blue?style=flat-square" />
-    <a href="https://luarocks.org/modules/misanthropicbit/neotest-busted">
-        <img src="https://img.shields.io/luarocks/v/misanthropicbit/neotest-busted?style=flat-square&logo=lua&logoColor=%2351a0cf&color=purple" />
-    </a>
-    <a href="/.github/workflows/tests.yml">
-        <img src="https://img.shields.io/github/actions/workflow/status/MisanthropicBit/neotest-busted/tests.yml?branch=master&style=flat-square" />
-    </a>
-    <a href="/LICENSE">
-        <img src="https://img.shields.io/github/license/MisanthropicBit/neotest-busted?style=flat-square" />
-    </a>
+    <img src="https://img.shields.io/github/v/release/MisanthropicBit/neotest-busted?style=flat-square" />
+    <a href="/.github/workflows/tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/MisanthropicBit/neotest-busted/tests.yml?branch=master&style=flat-square" /></a>
+    <a href="/LICENSE"><img src="https://img.shields.io/github/license/MisanthropicBit/neotest-busted?style=flat-square&color=purple" /></a>
   </p>
   <br />
 </div>
