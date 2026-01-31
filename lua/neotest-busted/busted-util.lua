@@ -79,6 +79,7 @@ local function run_list_tests_command(tree)
     local process = nio.process.run({
         cmd = command_info.command,
         args = command_info.arguments,
+        cwd = adapter.root(path),
     })
 
     local stderr, read_stderr_err = process.stderr.read()
