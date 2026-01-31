@@ -24,29 +24,32 @@ describe("adapter.build_spec", function()
 
     local function assert_spec_command(spec_command, items)
         assert.are.same(#spec_command, #items)
-
         local idx = 1
 
         while idx <= #items do
             local item = items[idx]
-            assert.are.same(spec_command[idx], item)
-            idx = idx + 1
 
             -- Handle a different path when running in github actions
             if item == "--output" then
+                assert.are.same(spec_command[idx], item)
+                idx = idx + 1
                 assert.is_true(
                     vim.endswith(spec_command[idx], "lua/neotest-busted/output_handler.lua")
                 )
-                idx = idx + 1
             elseif item == '"--helper"' then
+                assert.are.same(spec_command[idx], item)
+                idx = idx + 1
                 assert.is_true(
                     vim.endswith(
                         spec_command[idx],
                         'lua/neotest-busted/helper_scripts/start_debug.lua"'
                     )
                 )
-                idx = idx + 1
+            elseif item:match("minimal_init") then
+                assert.is_true(vim.endswith(item, "tests/minimal_init.lua"))
             end
+
+            idx = idx + 1
         end
     end
 
@@ -513,7 +516,7 @@ describe("adapter.build_spec", function()
 
         assert.are.same(spec.strategy.name, "Debug busted tests")
         assert.are.same(spec.strategy.type, "local-lua")
-        assert.are.same(spec.strategy.cwd, "${workspaceFolder}")
+        assert.are.same(spec.strategy.cwd, vim.fn.getcwd())
         assert.are.same(spec.strategy.request, "launch")
         assert.are.same(spec.strategy.env, {
             LUA_PATH = lua_paths,
