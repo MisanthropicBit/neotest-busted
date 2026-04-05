@@ -156,15 +156,17 @@ function BustedNeotestAdapter.find_busted_command(ignore_local)
     return nil
 end
 
+---@param paths string[]
 ---@return string?
-local function find_minimal_init()
+local function find_minimal_init(paths)
     local minimal_init = config.minimal_init
 
     if type(minimal_init) == "string" and #minimal_init > 0 then
         return minimal_init
     end
 
-    local pattern = util.create_path("**", "minimal_init.lua")
+    local project_root = BustedNeotestAdapter.root(paths[1])
+    local pattern = util.create_path(project_root, "**", "minimal_init.lua")
     local glob_matches = util.glob(pattern)
 
     if #glob_matches > 0 then
@@ -223,17 +225,18 @@ local function get_lua_paths(busted_config)
     return lua_paths, lua_cpaths
 end
 
+---@param paths string[]
 ---@param lua_paths string[]
 ---@param lua_cpaths string[]
 ---@return string[]
-local function get_nvim_arguments(lua_paths, lua_cpaths)
+local function get_nvim_arguments(paths, lua_paths, lua_cpaths)
     -- stylua: ignore start
     ---@type string[]
     local arguments = {
         "--headless",
         "-i", "NONE", -- no shada
         "-n", -- no swapfile, always in-memory
-        "-u", find_minimal_init() or "NONE",
+        "-u", find_minimal_init(paths) or "NONE",
     }
     -- stylua: ignore end
 
@@ -263,7 +266,7 @@ function BustedNeotestAdapter.create_test_command(paths, options)
 
     local lua_paths, lua_cpaths = get_lua_paths(busted_config)
     if not config.no_nvim then
-        arguments = get_nvim_arguments(lua_paths, lua_cpaths)
+        arguments = get_nvim_arguments(paths, lua_paths, lua_cpaths)
         vim.list_extend(arguments, {
             "-l",
             busted_command,
@@ -368,13 +371,14 @@ local function get_strategy_config(strategy, results_path, paths, filters)
             return nil
         end
 
+        local project_root = BustedNeotestAdapter.root(paths[1])
         local lua_paths = util.normalize_and_create_lua_path(unpack(test_command_info.paths))
         local lua_cpaths = util.normalize_and_create_lua_path(unpack(test_command_info.cpaths))
 
         return {
             name = "Debug busted tests",
             type = "local-lua",
-            cwd = "${workspaceFolder}",
+            cwd = project_root,
             request = "launch",
             env = {
                 LUA_PATH = lua_paths,
@@ -653,9 +657,12 @@ function BustedNeotestAdapter.build_spec(args)
         }
     end
 
+    local project_root = BustedNeotestAdapter.root(pos.path)
+
     return {
         command = command,
         env = env,
+        cwd = project_root,
         context = { results_path = results_path },
         strategy = get_strategy_config(args.strategy, results_path, paths, filters),
     }
