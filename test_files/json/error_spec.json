@@ -1,0 +1,41 @@
+{
+  "errors": [
+    {
+      "isError": true,
+      "name": "describe test",
+      "neotestPositionId": "./test_files/error_spec.lua::describe::test",
+      "element": {
+        "name": "test",
+        "starttick": 2857430.64218,
+        "starttime": 1766262934.8924,
+        "attributes": [],
+        "descriptor": "it",
+        "trace": {
+          "traceback": "\nstack traceback:\n\t./test_files/error_spec.lua:2: in function <./test_files/error_spec.lua:1>\n",
+          "message": "test",
+          "lastlinedefined": 5,
+          "linedefined": 1,
+          "currentline": 2,
+          "short_src": "./test_files/error_spec.lua",
+          "what": "Lua",
+          "source": "@./test_files/error_spec.lua"
+        }
+      },
+      "message": "./test_files/error_spec.lua:3: nope",
+      "trace": {
+        "traceback": "\nstack traceback:\n\t./test_files/error_spec.lua:3: in function <./test_files/error_spec.lua:2>\n",
+        "message": "./test_files/error_spec.lua:3: nope",
+        "lastlinedefined": 4,
+        "linedefined": 2,
+        "currentline": 3,
+        "short_src": "./test_files/error_spec.lua",
+        "what": "Lua",
+        "source": "@./test_files/error_spec.lua"
+      }
+    }
+  ],
+  "pendings": [],
+  "successes": [],
+  "failures": [],
+  "duration": 0.00067600002512336
+}

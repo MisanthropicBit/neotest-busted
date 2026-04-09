@@ -1,0 +1,5 @@
+describe("describe", function()
+    it("test", function()
+        error("nope")
+    end)
+end)
